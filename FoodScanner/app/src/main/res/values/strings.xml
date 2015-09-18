@@ -4,5 +4,15 @@
     <string name="app_name">FoodScanner</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    
+    
+    <string name="login_food_scanner">Login with FoodScanner account</string>
+    <string name="login_google_plus">Login with Google+</string>
+    <string name="login_facebook">Login with Facebook</string>
+
+    <string name="Email_prompt">Email</string>
+    <string name="password_prompt">Password</string>
+    <string name="new_account">Create account</string>
+    <string name="password_recovery">Forgot your password?</string>
 
 </resources>
