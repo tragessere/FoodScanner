@@ -1,4 +1,4 @@
-package SeniorProject.foodscanner.database;
+package senior_project.foodscanner.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

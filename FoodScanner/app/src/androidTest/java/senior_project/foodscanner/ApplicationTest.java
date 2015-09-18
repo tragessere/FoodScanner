@@ -1,4 +1,4 @@
-package SeniorProject.foodscanner;
+package senior_project.foodscanner;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
