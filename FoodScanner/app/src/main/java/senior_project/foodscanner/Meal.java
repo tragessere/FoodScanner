@@ -1,3 +1,5 @@
+package senior_project.foodscanner;
+
 /**
  * This class represents a meal.
  */
@@ -7,7 +9,7 @@ public class Meal {
         BREAKFAST, BRUNCH, LUNCH, DINNER, DESSERT, SNACK
     }
 
-    // Meal Details
+    // senior_project.foodscanner.Meal Details
     private MealType type;
     // TODO date/time
     // TODO food data

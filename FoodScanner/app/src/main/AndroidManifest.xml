@@ -10,7 +10,7 @@
         android:theme="@style/AppTheme" >
 
         <activity
-            android:name="senior_project.foodscanner.activities.LoginActivity"
+            android:name="senior_project.foodscanner.activities.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
 
@@ -21,10 +21,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="senior_project.foodscanner.MyActivity"
-            android:label="@string/app_name" >
-        </activity>
     </application>
 
 </manifest>
