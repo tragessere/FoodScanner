@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <color name="AppColor">#1133AA</color>
     <color name="Primary">#03A9F4</color>
     <color name="Primary.Dark">#0288D1</color>
     <color name="Primary.Light">#B3E5FC</color>
@@ -11,5 +11,7 @@
     <color name="Divider">#B6B6B6</color>
 
     <color name="White">#FFFFFF</color>
+
+    <color name="black_overlay">#66000000</color>
 
 </resources>
