@@ -19,16 +19,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.MealCalendar"
+            android:name=".activities.MealCalendarActivity"
             android:label="@string/title_activity_meal_calendar" >
         </activity>
         <activity
-            android:name=".activities.MealDetails"
+            android:name=".activities.MealDetailsActivity"
             android:label="@string/title_activity_meal_details" >
         </activity>
         <activity
-            android:name=".activities.FoodScanner"
+            android:name=".activities.FoodScannerActivity"
             android:label="@string/title_activity_food_scanner" >
+        </activity>
+        <activity
+            android:name=".activities.FoodItemActivity"
+            android:label="@string/title_activity_food_adder" >
         </activity>
     </application>
 

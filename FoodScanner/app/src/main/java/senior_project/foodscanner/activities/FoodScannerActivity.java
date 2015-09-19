@@ -7,7 +7,7 @@ import android.view.MenuItem;
 
 import senior_project.foodscanner.R;
 
-public class FoodScanner extends AppCompatActivity {
+public class FoodScannerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -1,5 +1,7 @@
 package senior_project.foodscanner;
 
+import java.util.Date;
+
 /**
  * This class represents a meal.
  */
@@ -9,13 +11,13 @@ public class Meal {
         BREAKFAST, BRUNCH, LUNCH, DINNER, DESSERT, SNACK
     }
 
-    // senior_project.foodscanner.Meal Details
+    // Meal Details
     private MealType type;
-    // TODO date/time
-    // TODO food data
+    private Date date;
+    // TODO list of food items
 
-    //TODO add date/time to constructor
-    public Meal(MealType type){
+    public Meal(Date date, MealType type){
+        this.date = date;
         this.type = type;
     }
 
@@ -27,7 +29,15 @@ public class Meal {
         return type;
     }
 
-    //TODO date/time get
+    public Date getDate(){
+        return date;
+    }
 
-    //TODO addFoodItem()
+    public void addFoodItem(FoodItem item){
+        //TODO
+    }
+
+    public void removeFoodItem(){
+        //TODO
+    }
 }

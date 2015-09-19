@@ -19,5 +19,6 @@
     <string name="title_activity_meal_calendar">Meal Calendar</string>
     <string name="title_activity_meal_details">Meal Details</string>
     <string name="title_activity_food_scanner">Food Scanner</string>
+    <string name="title_activity_food_adder">Food Adder</string>
 
 </resources>

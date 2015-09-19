@@ -7,7 +7,27 @@ import android.view.MenuItem;
 
 import senior_project.foodscanner.R;
 
-public class MealDetails extends AppCompatActivity {
+/**
+ * Shows details of the meal and allows editing.
+ *
+ * Details:
+ *  Date and time
+ *  Meal Type
+ *  Total nutrition
+ *  List of food items and each nutrition and volume
+ *
+ * Actions:
+ *  Add Food Button
+ *      - Pop up menu
+ *          - Scan Food - takes user to Food Scanner activity
+ *          - Manually add Food Item - takes user to Food Item activity
+ *  Delete Food
+ *  Edit Date and time
+ *  Edit Meal Type
+ *  Delete Meal
+ *  Back Button - return to Meal Calendar
+ */
+public class MealDetailsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

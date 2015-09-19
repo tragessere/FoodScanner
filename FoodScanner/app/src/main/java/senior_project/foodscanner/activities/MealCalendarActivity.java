@@ -1,10 +1,14 @@
 package senior_project.foodscanner.activities;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.Date;
+
+import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
 
 /**
@@ -22,7 +26,7 @@ import senior_project.foodscanner.R;
  *          - Maybe a drop down menu for account settings
  *
  */
-public class MealCalendar extends AppCompatActivity {
+public class MealCalendarActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +51,23 @@ public class MealCalendar extends AppCompatActivity {
             //TODO
             return true;
         }
+        else if (id == R.id.action_meal_add) {
+            Meal newMeal = new Meal(new Date(), Meal.MealType.LUNCH);
+            //TODO display meal in list
+            viewMeal(newMeal);
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
+
+    /**
+     * Navigates to Meal Details activity for the corresponding meal.
+     * @param meal
+     */
+    private void viewMeal(Meal meal){
+        //TODO
+        startActivity(new Intent(MealCalendarActivity.this, MealDetailsActivity.class));
+    }
+
 }
