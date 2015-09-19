@@ -12,7 +12,14 @@
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/Primary</item>
         <item name="colorPrimaryDark">@color/Primary.Dark</item>
-        <item name="colorAccent">@color/Accent</item>
+        <item name="colorAccent">@color/White</item>
+    </style>
+
+    <style name="EditText.White" parent="TextAppearance.AppCompat">
+        <item name="android:textColorHint">@color/White</item>
+        <item name="android:textSize">18sp</item>
+        <item name="colorAccent">@color/White</item>
+        <item name="colorControlNormal">@color/White.Transparent</item>
     </style>
 
 </resources>
