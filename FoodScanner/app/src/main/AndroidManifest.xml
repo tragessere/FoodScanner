@@ -18,6 +18,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activities.MealCalendar"
+            android:label="@string/title_activity_meal_calendar" >
+        </activity>
+        <activity
+            android:name=".activities.MealDetails"
+            android:label="@string/title_activity_meal_details" >
+        </activity>
+        <activity
+            android:name=".activities.FoodScanner"
+            android:label="@string/title_activity_food_scanner" >
+        </activity>
     </application>
 
 </manifest>
