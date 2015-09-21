@@ -8,6 +8,7 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Named;
@@ -15,6 +16,8 @@ import javax.inject.Named;
 import com.example.backend.Constants;
 import static com.example.backend.OfyService.ofy;
 import com.example.backend.model.FoodItem;
+import com.google.appengine.api.datastore.QueryResultIterator;
+import com.googlecode.objectify.cmd.Query;
 
 /**
  * An endpoint class we are exposing
@@ -42,4 +45,19 @@ public class FoodItemEndpoint {
     public FoodItem getFoodItem(@Named("name") String name) {
         return ofy().load().type(FoodItem.class).filter("name", name).list().get(0);
     }
+
+    @ApiMethod(httpMethod = "GET")
+    public List<FoodItem> getFoodItems() {
+
+        Query<FoodItem> query = ofy().load().type(FoodItem.class);
+        List<FoodItem> results = new ArrayList<FoodItem>();
+        QueryResultIterator<FoodItem> iterator = query.iterator();
+
+        while (iterator.hasNext()) {
+            results.add(iterator.next());
+        }
+
+        return results;
+    }
+
 }
