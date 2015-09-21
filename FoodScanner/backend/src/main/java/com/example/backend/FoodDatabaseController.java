@@ -45,7 +45,7 @@ public class FoodDatabaseController {
      * and returns a FoodItem from the query.
      */
     @ApiMethod(name = "getDensity")
-    public FoodItem getDensity(@Named("name") String name) {
+    public Entity getDensity(@Named("name") String name) {
         //TODO: look food item up in database
 
         Filter nameFilter = new FilterPredicate("name", Query.FilterOperator.EQUAL, name);
@@ -63,7 +63,8 @@ public class FoodDatabaseController {
             // Uh oh, bad developer, you need to fix the database.
         }
 
-        return results.get(0).;
+        //TODO: determine if we should return Entity or FoodItem
+        return results.get(0);
     }
 
 }
