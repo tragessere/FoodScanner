@@ -6,9 +6,6 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="senior_project.foodscanner.activities.MealDetailsActivity">
 
-    <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,5 +13,15 @@
         android:id="@+id/button_foodscanner"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"/>
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner_meal"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toRightOf="@+id/button_foodscanner"
+        android:layout_toEndOf="@+id/button_foodscanner" />
 
 </RelativeLayout>

@@ -21,4 +21,13 @@
     <string name="title_activity_food_scanner">Food Scanner</string>
     <string name="title_activity_food_adder">Food Adder</string>
 
+    <string-array name="meal_list">
+        <item>Breakfast</item>
+        <item>Brunch</item>
+        <item>Lunch</item>
+        <item>Snack</item>
+        <item>Dinner</item>
+        <item>Dessert</item>
+    </string-array>
+
 </resources>
