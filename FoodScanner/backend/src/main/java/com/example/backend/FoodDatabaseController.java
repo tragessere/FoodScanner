@@ -10,6 +10,18 @@ import com.google.api.server.spi.config.ApiNamespace;
 
 import javax.inject.Named;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Entity;
+
+import java.util.LinkedList;
+import java.util.List;
+
+
 /**
  * An endpoint class we are exposing
  */
@@ -25,6 +37,9 @@ import javax.inject.Named;
 
 public class FoodDatabaseController {
 
+    // Get the Datastore Service
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
     /**
      * Endpoint method that takes in a name, queries the database for that name,
      * and returns a FoodItem from the query.
@@ -33,12 +48,22 @@ public class FoodDatabaseController {
     public FoodItem getDensity(@Named("name") String name) {
         //TODO: look food item up in database
 
-        // Create mock food item
-        FoodItem item = new FoodItem();
-        item.setName(name);
-        item.setDensity(1212);
+        Filter nameFilter = new FilterPredicate("name", Query.FilterOperator.EQUAL, name);
+        Query q = new Query("FoodItem").setFilter(nameFilter);
+        PreparedQuery pq = datastore.prepare(q);
 
-        return item;
+        List<Entity> results = new LinkedList<Entity>();
+        for (Entity result : pq.asIterable()) {
+            results.add(result);
+        }
+
+        if (results.size() == 0) {
+            // throw exception
+        } else if (results.size() > 1) {
+            // Uh oh, bad developer, you need to fix the database.
+        }
+
+        return results.get(0).;
     }
 
 }
