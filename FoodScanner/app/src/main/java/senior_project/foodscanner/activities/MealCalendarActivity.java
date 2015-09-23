@@ -5,11 +5,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ExpandableListView;
+import android.widget.RelativeLayout;
+
+import com.unnamed.b.atv.model.TreeNode;
+import com.unnamed.b.atv.view.AndroidTreeView;
 
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
+import senior_project.foodscanner.ui.components.MealCalendar;
 
 /**
  * Displays list or calendar of meals.
@@ -27,11 +35,18 @@ import senior_project.foodscanner.R;
  *
  */
 public class MealCalendarActivity extends AppCompatActivity {
+    private MealCalendar calendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meal_calendar);
+
+        RelativeLayout container = (RelativeLayout)findViewById(R.id.container);
+
+        TreeNode root = TreeNode.root();
+        calendar = new MealCalendar(MealCalendarActivity.this, root);
+        container.addView(calendar.getView());
     }
 
     @Override
@@ -52,8 +67,8 @@ public class MealCalendarActivity extends AppCompatActivity {
             return true;
         }
         else if (id == R.id.action_meal_add) {
-            Meal newMeal = new Meal(new Date(), Meal.MealType.LUNCH);
-            //TODO display meal in list
+            Meal newMeal = new Meal(new GregorianCalendar(), Meal.MealType.LUNCH);
+            calendar.addMeal(newMeal);
             viewMeal(newMeal);
             return true;
         }
