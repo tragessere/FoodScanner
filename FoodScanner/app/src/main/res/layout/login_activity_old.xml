@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/Primary">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:layout_centerHorizontal="true"
+        android:textSize="30sp"
+        android:textColor="@color/White"
+        android:text="$FoodScannerLogo"
+        android:layout_above="@+id/login_button_layout"
+        />
+
+    <LinearLayout
+        android:id="@id/login_button_layout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="17dp"
+        android:layout_marginRight="17dp">
+
+        <Button
+            android:id="@+id/login_food_scanner_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:background="@color/Primary.Dark"
+            android:textAppearance="@style/TextAppearance.AppCompat.Button"
+            android:textColor="@color/White"
+            android:text="@string/login_food_scanner"/>
+
+        <Button
+            android:id="@+id/login_google_plus_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:background="@color/Primary.Dark"
+            android:textAppearance="@style/TextAppearance.AppCompat.Button"
+            android:textColor="@color/White"
+            android:text="@string/login_google_plus"/>
+
+        <Button
+            android:id="@+id/login_facebook_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:background="@color/Primary.Dark"
+            android:textAppearance="@style/TextAppearance.AppCompat.Button"
+            android:textColor="@color/White"
+            android:text="@string/login_facebook"/>
+
+        <!--<Button-->
+            <!--android:id="@+id/login_facebook_button"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:background="@color/Primary.Dark"-->
+            <!--android:textAppearance="@style/TextAppearance.AppCompat.Button"-->
+            <!--android:textColor="@color/White"-->
+            <!--android:text="@string/login_facebook"/>-->
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/login_layout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignTop="@id/login_button_layout"
+        android:layout_alignBottom="@id/login_button_layout"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp">
+
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/email_text_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="17dp"
+            android:theme="@style/EditText.White"
+            android:visibility="invisible">
+
+            <EditText
+                android:id="@+id/email_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:textColor="@color/White"
+                android:hint="@string/Email_prompt"
+                android:focusable="false"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/password_text_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:theme="@style/EditText.White"
+            android:visibility="invisible">
+
+            <EditText
+                android:id="@+id/password_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@color/White"
+                android:hint="@string/password_prompt"
+                android:focusable="false"/>
+        </android.support.design.widget.TextInputLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/login_button_layout"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp">
+
+        <Button
+            android:id="@+id/create_account_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/borderlessButtonStyle"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/White"
+            android:text="@string/new_account"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/recover_password_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/borderlessButtonStyle"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/White"
+            android:text="@string/password_recovery"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

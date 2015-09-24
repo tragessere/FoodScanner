@@ -1,8 +1,10 @@
 package senior_project.foodscanner.database;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 /**
@@ -60,6 +62,32 @@ public class SQLHelper extends SQLiteOpenHelper {
 			mDbHelper = new SQLHelper(context.getApplicationContext());
 
 		return mDbHelper;
+	}
+
+
+	/**
+	 * Convenience method for quickly inserting several rows into a single table
+	 *
+	 * @param tableName		Name of the table where the records will be inserted
+	 * @param vals			Array of ContentValues to be inserted
+	 */
+	public static void bulkInsert(@NonNull String tableName, @NonNull ContentValues[] vals) {
+		if(tableName == null)
+			throw new NullPointerException("SQLHelper:insert() - table name cannot be null");
+		if(vals == null)
+			throw new NullPointerException("SQLHelper:insert() - ContentValues cannot be null");
+
+
+		SQLiteDatabase mDb = mDbHelper.getWritableDatabase();
+		mDb.beginTransaction();
+		try {
+			for (ContentValues val : vals) {
+				mDb.insert(tableName, null, val);
+			}
+			mDb.setTransactionSuccessful();
+		} finally {
+			mDb.endTransaction();
+		}
 	}
 
 

@@ -1,34 +1,38 @@
 package senior_project.foodscanner.activities;
 
+import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.Interpolator;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+
+import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
 
 /**
  * Created by Evan on 9/16/2015.
  */
 public class LoginActivity extends AppCompatActivity {
+	private static final int REQUEST_ACCOUNT_PICKER = 2;
 
+	SharedPreferences prefs;
+	GoogleAccountCredential credential;
 
 	Button loginButton;
 	Button googleButton;
@@ -48,60 +52,97 @@ public class LoginActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login_activity);
 
-		loginButton = (Button) findViewById(R.id.login_food_scanner_button);
-		googleButton = (Button) findViewById(R.id.login_google_plus_button);
-		facebookButton = (Button) findViewById(R.id.login_facebook_button);
-		emailEdit = (EditText) findViewById(R.id.email_text);
-		emailHolder = (TextInputLayout) findViewById(R.id.email_text_holder);
-		passwordEdit = (EditText) findViewById(R.id.password_text);
-		passwordHolder = (TextInputLayout) findViewById(R.id.password_text_holder);
-		Button createAccountButton = (Button) findViewById(R.id.create_account_button);
-		Button recoverPasswordButton = (Button) findViewById(R.id.recover_password_button);
 
-//		facebookButton.setOnClickListener(new View.OnClickListener() {
+		prefs = getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE);
+		credential = GoogleAccountCredential.usingAudience(this, "server:client_id:web_address");
+		credential.setSelectedAccountName(prefs.getString(Constants.PREF_ACCOUNT_NAME, null));
+
+		if(credential.getSelectedAccountName() != null) {
+			//signed in. Finish activity and continue.
+//			finish();
+			return;
+		}
+
+
+//		loginButton = (Button) findViewById(R.id.login_food_scanner_button);
+		googleButton = (Button) findViewById(R.id.login_google_plus_button);
+//		facebookButton = (Button) findViewById(R.id.login_facebook_button);
+//		emailEdit = (EditText) findViewById(R.id.email_text);
+//		emailHolder = (TextInputLayout) findViewById(R.id.email_text_holder);
+//		passwordEdit = (EditText) findViewById(R.id.password_text);
+//		passwordHolder = (TextInputLayout) findViewById(R.id.password_text_holder);
+//		Button createAccountButton = (Button) findViewById(R.id.create_account_button);
+//		Button recoverPasswordButton = (Button) findViewById(R.id.recover_password_button);
+
+
+//		loginButton.setOnClickListener(new View.OnClickListener() {
 //			@Override
 //			public void onClick(View v) {
-//				Toast.makeText(LoginActivity.this, "test button", Toast.LENGTH_SHORT).show();
-//
+//				if(emailHolder.getVisibility() == View.VISIBLE) {
+//					//Do something
+//				} else {
+//					showLoginText();
+//				}
 //			}
 //		});
 
-		loginButton.setOnClickListener(new View.OnClickListener() {
+		googleButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if(emailHolder.getVisibility() == View.VISIBLE) {
-					//Do something
-				} else {
-					showLoginText();
-				}
+				startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
 			}
 		});
-
-		createAccountButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Rect temp = new Rect();
-				loginButton.getGlobalVisibleRect(temp);
-				Log.d("login button location", temp.toString());
-			}
-		});
-
 	}
 
 
 	@Override
 	public void onBackPressed() {
-		if(emailHolder.getVisibility() == View.VISIBLE)
-			hideLoginText();
-		else
+//		if(emailHolder.getVisibility() == View.VISIBLE)
+//			hideLoginText();
+//		else
 			super.onBackPressed();
 	}
 
+	private void setSelectedAccountName(String accountName) {
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putString(Constants.PREF_ACCOUNT_NAME, accountName);
+		editor.apply();
+		credential.setSelectedAccountName(accountName);
+//		this.accountName = accountName;
+	}
+
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+			case REQUEST_ACCOUNT_PICKER:
+				if (data != null && data.getExtras() != null) {
+					String accountName =
+							data.getExtras().getString(
+									AccountManager.KEY_ACCOUNT_NAME);
+					if (accountName != null) {
+						setSelectedAccountName(accountName);
+						SharedPreferences.Editor editor = prefs.edit();
+						editor.putString(Constants.PREF_ACCOUNT_NAME, accountName);
+						editor.apply();
+						// User is authorized.
+					}
+				}
+				break;
+		}
+	}
+
+
+	private void finishLogin() {
+
+	}
+
+
+
+
+
 	private void showLoginText() {
-//		Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-//		Point size = new Point();
-//		display.getSize(size);
-//		final int screenHeight = size.y;
 
 		Rect statusBarBorder = new Rect();
 		getWindow().getDecorView().getWindowVisibleDisplayFrame(statusBarBorder);
