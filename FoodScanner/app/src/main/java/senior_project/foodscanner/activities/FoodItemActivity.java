@@ -1,12 +1,22 @@
 package senior_project.foodscanner.activities;
 
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import senior_project.foodscanner.R;
 
+import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
+import com.example.backend.foodScannerBackendAPI.model.FoodItem;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
+import senior_project.foodscanner.backend_helpers.EndpointBuilderHelper;
 /**
  * Activity for manually adding a food item.
  *
@@ -21,10 +31,17 @@ import senior_project.foodscanner.R;
  */
 public class FoodItemActivity extends AppCompatActivity {
 
+    private FoodScannerBackendAPI foodScannerBackendAPI;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_item);
+
+        // Handle to the GAE endpoints in the backend
+        foodScannerBackendAPI = EndpointBuilderHelper.getEndpoints();
+
+        new FoodItemsTask().execute();
     }
 
     @Override
@@ -47,5 +64,32 @@ public class FoodItemActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * AsyncTask for calling Food Scanner Backend API for getting all food items
+     */
+    private class FoodItemsTask extends AsyncTask<Void, Void, List<FoodItem>> {
+
+        /**
+         * Calls appropriate CloudEndpoint to indicate that user checked into a
+         * place.
+         *
+         * @param params the place where the user is checking in.
+         */
+        @Override
+        protected List<FoodItem> doInBackground(Void... params) {
+            try {
+                return foodScannerBackendAPI.getAllFoodItems().execute().getItems();
+            } catch (IOException e) {
+                return Collections.emptyList();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(List<FoodItem> results) {
+            for (FoodItem f : results)
+                Toast.makeText(getApplicationContext(), f.getName(), Toast.LENGTH_LONG).show();
+        }
     }
 }

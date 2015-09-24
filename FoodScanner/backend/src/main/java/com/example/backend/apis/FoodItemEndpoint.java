@@ -16,6 +16,7 @@ import javax.inject.Named;
 import com.example.backend.Constants;
 import static com.example.backend.OfyService.ofy;
 import com.example.backend.model.FoodItem;
+import com.google.api.server.spi.response.CollectionResponse;
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.googlecode.objectify.cmd.Query;
 
@@ -46,8 +47,8 @@ public class FoodItemEndpoint {
         return ofy().load().type(FoodItem.class).filter("name", name).list().get(0);
     }
 
-    @ApiMethod(httpMethod = "GET")
-    public List<FoodItem> getFoodItems() {
+    @ApiMethod(name = "getAllFoodItems")
+    public CollectionResponse<FoodItem> getFoodItems() {
 
         Query<FoodItem> query = ofy().load().type(FoodItem.class);
         List<FoodItem> results = new ArrayList<FoodItem>();
@@ -57,7 +58,7 @@ public class FoodItemEndpoint {
             results.add(iterator.next());
         }
 
-        return results;
+        return CollectionResponse.<FoodItem>builder().setItems(results).build();
     }
 
 }
