@@ -88,6 +88,7 @@ public class FoodItemActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(List<FoodItem> results) {
+            Toast.makeText(getApplicationContext(), "PostExecute!", Toast.LENGTH_LONG).show();
             for (FoodItem f : results)
                 Toast.makeText(getApplicationContext(), f.getName(), Toast.LENGTH_LONG).show();
         }
