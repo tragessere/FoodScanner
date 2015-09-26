@@ -1,8 +1,5 @@
 package senior_project.foodscanner;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import java.io.Serializable;
 import java.util.GregorianCalendar;
 
@@ -10,6 +7,8 @@ import java.util.GregorianCalendar;
  * This class represents a meal.
  */
 public class Meal implements Serializable {
+
+    private static final long serialVersionUID = 418772005483570552L;
 
     public enum MealType{
         BREAKFAST ("Breakfast"),

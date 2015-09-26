@@ -39,7 +39,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        meal = (Meal) savedInstanceState.getSerializable("meal");
+        meal = (Meal) getIntent().getSerializableExtra("meal");
 
         setContentView(R.layout.activity_meal_details);
 

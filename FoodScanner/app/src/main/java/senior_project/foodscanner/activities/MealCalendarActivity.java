@@ -45,6 +45,14 @@ public class MealCalendarActivity extends AppCompatActivity implements MealClick
         calendar = new MealCalendar(MealCalendarActivity.this, root);
         calendar.setMealClickListener(this);
         container.addView(calendar.getView());
+
+        // TODO deletion of meals
+            // swipe left on a meal node to delete that meal
+            // swipe left on a date node to delete all meals beneath
+            // remove date nodes that don't lead to a meal node
+            // delete meal from device
+        // TODO load existing meals into calendar
+        // TODO make UI pretty
     }
 
     @Override
@@ -61,12 +69,14 @@ public class MealCalendarActivity extends AppCompatActivity implements MealClick
         int id = item.getItemId();
 
         if (id == R.id.action_login) {
-            //TODO
+            //TODO go to login screen here
+            //TODO upon returning from logging in, update UI here to indicate user is logged in and has the ability to log out
             return true;
         }
         else if (id == R.id.action_meal_add) {
             Meal newMeal = new Meal(new GregorianCalendar(), Meal.MealType.LUNCH);
             calendar.addMeal(newMeal);
+            //TODO save meal to device here
             viewMeal(newMeal);
             return true;
         }
