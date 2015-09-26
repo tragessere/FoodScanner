@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
 
 /**
@@ -32,9 +33,14 @@ import senior_project.foodscanner.R;
  */
 public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener{
 
+    private Meal meal;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        meal = (Meal) getIntent().getSerializableExtra("meal");
+
         setContentView(R.layout.activity_meal_details);
 
         Button button = (Button) findViewById(R.id.button_foodscanner);
