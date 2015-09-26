@@ -1,14 +1,15 @@
 package senior_project.foodscanner;
 
-import java.util.Date;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.io.Serializable;
 import java.util.GregorianCalendar;
 
 /**
  * This class represents a meal.
  */
-public class Meal {
-
-    private static final String[] am_pm = {"am", "pm"};
+public class Meal implements Serializable {
 
     public enum MealType{
         BREAKFAST ("Breakfast"),
@@ -21,6 +22,10 @@ public class Meal {
 
         MealType(String name){
             this.name = name;
+        }
+
+        public String getName(){
+            return name;
         }
     }
 
@@ -54,19 +59,4 @@ public class Meal {
         //TODO
     }
 
-    /**
-     * String in format: hh:mm am/pm type
-     * EX: 12:35pm Lunch
-     * @return
-     */
-    public String toString(){
-        int minute = date.get(GregorianCalendar.MINUTE);
-        String time = date.get(GregorianCalendar.HOUR) + ":";
-        if(minute < 10){
-            time += '0';
-        }
-        time += minute + am_pm[date.get(GregorianCalendar.AM_PM)];
-
-        return time+ " " + type.name;
-    }
 }

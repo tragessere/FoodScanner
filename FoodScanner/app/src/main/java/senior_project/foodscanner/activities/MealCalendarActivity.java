@@ -5,19 +5,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ExpandableListView;
 import android.widget.RelativeLayout;
 
 import com.unnamed.b.atv.model.TreeNode;
-import com.unnamed.b.atv.view.AndroidTreeView;
 
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.ui.components.MealCalendar;
+import senior_project.foodscanner.ui.components.mealcalendar.MealCalendar;
+import senior_project.foodscanner.ui.components.mealcalendar.MealClickListener;
 
 /**
  * Displays list or calendar of meals.
@@ -34,7 +31,7 @@ import senior_project.foodscanner.ui.components.MealCalendar;
  *          - Maybe a drop down menu for account settings
  *
  */
-public class MealCalendarActivity extends AppCompatActivity {
+public class MealCalendarActivity extends AppCompatActivity implements MealClickListener{
     private MealCalendar calendar;
 
     @Override
@@ -46,6 +43,7 @@ public class MealCalendarActivity extends AppCompatActivity {
 
         TreeNode root = TreeNode.root();
         calendar = new MealCalendar(MealCalendarActivity.this, root);
+        calendar.setMealClickListener(this);
         container.addView(calendar.getView());
     }
 
@@ -81,8 +79,14 @@ public class MealCalendarActivity extends AppCompatActivity {
      * @param meal
      */
     private void viewMeal(Meal meal){
-        //TODO
-        startActivity(new Intent(MealCalendarActivity.this, MealDetailsActivity.class));
+        //TODO Parcel or serial
+        Intent intent = new Intent(MealCalendarActivity.this, MealDetailsActivity.class);
+        intent.putExtra("meal", meal);
+        startActivity(intent);
     }
 
+    @Override
+    public void onClick(Meal meal) {
+        viewMeal(meal);
+    }
 }

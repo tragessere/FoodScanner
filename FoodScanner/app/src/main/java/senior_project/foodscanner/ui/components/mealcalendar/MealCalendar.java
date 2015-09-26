@@ -1,4 +1,4 @@
-package senior_project.foodscanner.ui.components;
+package senior_project.foodscanner.ui.components.mealcalendar;
 
 import android.content.Context;
 
@@ -14,23 +14,20 @@ import senior_project.foodscanner.Meal;
 /**
  * Tree view for Meals.
  */
-public class MealCalendar extends AndroidTreeView{
+public class MealCalendar extends AndroidTreeView implements TreeNode.TreeNodeClickListener{
     private ArrayList<Meal> meals = new ArrayList<Meal>();
     private TreeNode root;
+    private Context context;
+    private MealClickListener listener;
 
     private static DateFormatSymbols dateFormat = new DateFormatSymbols();
 
     public MealCalendar(Context c, TreeNode root){
         super(c, root);
         this.root = root;
+        context = c;
         setSelectionModeEnabled(true);
-
-       /* parent = new TreeNode("MyParentNode");
-        root.addChild(parent);
-
-        TreeNode child0 = new TreeNode("ChildNode0");
-        child1 = new TreeNode("ChildNode1");
-        parent.addChildren(child0, child1);*/
+        setDefaultViewHolder(DateNodeViewHolder.class);
     }
 
     public void addMeal(Meal meal){
@@ -42,6 +39,9 @@ public class MealCalendar extends AndroidTreeView{
         //TODO
     }
 
+    public void setMealClickListener(MealClickListener listener){
+        this.listener = listener;
+    }
 
     protected void addFromYear(Meal meal){
         int year = meal.getDate().get(GregorianCalendar.YEAR);
@@ -135,8 +135,15 @@ public class MealCalendar extends AndroidTreeView{
 
         if(child == null){
             child = new TreeNode(meal);
+            child.setClickListener(this);
+            child.setViewHolder(new MealNodeViewHolder(context));
             addNode(parent, child);
         }
 
+    }
+
+    @Override
+    public void onClick(TreeNode treeNode, Object o) {
+        listener.onClick((Meal)o);
     }
 }
