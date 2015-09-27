@@ -19,7 +19,10 @@
     <string name="title_activity_meal_calendar">Meal Calendar</string>
     <string name="title_activity_meal_details">Meal Details</string>
     <string name="title_activity_food_scanner">Food Scanner</string>
-    <string name="title_activity_food_adder">Food Adder</string>
+    <string name="title_activity_food_adder">Add Food</string>
+
+    <string name="network_error">Error: Network connection failed.</string>
+    <string name="generic_error">Error: Please try again.</string>
 
     <string-array name="meal_list">
         <item>Breakfast</item>

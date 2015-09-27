@@ -51,14 +51,18 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     public int dessertTime = 1260;  // 21:00 (9:00pm)
     // endregion
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meal_details);
 
-        Button button = (Button) findViewById(R.id.button_foodscanner);
-        button.setOnClickListener(this);
+        // Set up FoodScanner button
+        Button scan_button = (Button) findViewById(R.id.button_foodscanner);
+        scan_button.setOnClickListener(this);
+
+        // Set up Add Food button
+        Button add_button = (Button) findViewById(R.id.button_addfood);
+        add_button.setOnClickListener(this);
 
         // Set up meal selection spinner
         mealSpinner = (Spinner) findViewById(R.id.spinner_meal);
@@ -132,8 +136,10 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.button_foodscanner){
+        if (v.getId() == R.id.button_foodscanner) {
             startActivity(new Intent(MealDetailsActivity.this, FoodScannerActivity.class));
+        } else if (v.getId() == R.id.button_addfood) {
+            startActivity(new Intent(MealDetailsActivity.this, FoodItemActivity.class));
         }
     }
 
