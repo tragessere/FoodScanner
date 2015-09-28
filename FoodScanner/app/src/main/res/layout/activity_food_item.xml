@@ -16,7 +16,7 @@
         android:layout_toLeftOf="@+id/foodSearchButton"
         android:layout_toStartOf="@+id/foodSearchButton"
         android:singleLine="false"
-        android:hint="Name of food to be added" />
+        android:hint="Name of food" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -33,5 +33,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/resultList"
         android:layout_below="@+id/searchTerm"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:textFilterEnabled="false"
+        android:layout_alignParentBottom="true" />
+
 </RelativeLayout>

@@ -194,7 +194,8 @@ class FoodSearch extends AsyncTask<String, Void, Boolean> {
                     ListView lv = (ListView)act.findViewById(R.id.resultList);
                     ArrayAdapter<FoodResult> arrayAdapter = new ArrayAdapter<FoodResult>(
                             act.getApplicationContext(),
-                            android.R.layout.simple_list_item_1,
+                            R.layout.list_layout,
+                            R.id.foodListText,
                             results.list);
                     lv.setAdapter(arrayAdapter);
                 }
@@ -321,6 +322,6 @@ class FoodResult {
 
     @Override
     public String toString() {
-        return name;
+        return name + " (" + brand + ")";
     }
 }
