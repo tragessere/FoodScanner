@@ -2,15 +2,17 @@ package senior_project.foodscanner.activities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.JsonReader;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,26 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         // Set up Search button
         Button searchButton = (Button) findViewById(R.id.foodSearchButton);
         searchButton.setOnClickListener(this);
+
+        // Set up search field
+        final Activity thisAct = this;
+        EditText editText = (EditText) findViewById(R.id.searchTerm);
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    // Get search term(s)
+                    String searchTerm = ((EditText)findViewById(R.id.searchTerm)).getText().toString();
+
+                    //Create a new async task for searching
+                    new FoodSearch(thisAct, searchTerm).execute();
+
+                    handled = true;
+                }
+                return handled;
+            }
+        });
     }
 
     @Override
@@ -154,7 +175,7 @@ class FoodSearch extends AsyncTask<String, Void, Boolean> {
 
         } catch (Exception e) {
             e.printStackTrace();
-            displayToast("Error: Network connection failed.");
+            displayToast("Error: Please try again.");
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
@@ -187,7 +208,6 @@ class FoodSearch extends AsyncTask<String, Void, Boolean> {
             displayToast("No results found.");
         }
         else {
-            //TODO: Make a custom ListView layout, w/ better text color & brand in subtext.
             displayToast("Found " + results.count + " matches.");
             act.runOnUiThread(new Runnable() {
                 public void run() {
@@ -198,6 +218,16 @@ class FoodSearch extends AsyncTask<String, Void, Boolean> {
                             R.id.foodListText,
                             results.list);
                     lv.setAdapter(arrayAdapter);
+
+                    // set up happens when you click a list item
+                    lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
+                            // temporary; in the future, add this food and/or display more info
+                            FoodResult selectedFood = results.list.get(position);
+                            displayToast(selectedFood.name + " (" + selectedFood.brand + ")");
+                        }
+                    });
+
                 }
             });
         }
