@@ -1,21 +1,40 @@
 package senior_project.foodscanner;
 
+import java.io.Serializable;
+import java.util.GregorianCalendar;
+
 /**
  * This class represents a meal.
  */
-public class Meal {
+public class Meal implements Serializable {
+
+    private static final long serialVersionUID = 418772005483570552L;
 
     public enum MealType{
-        BREAKFAST, BRUNCH, LUNCH, DINNER, DESSERT, SNACK
+        BREAKFAST ("Breakfast"),
+        LUNCH ("Lunch"),
+        DINNER ("Dinner"),
+        DESSERT ("Dessert"),
+        SNACK ("Snack");
+
+        private final String name;
+
+        MealType(String name){
+            this.name = name;
+        }
+
+        public String getName(){
+            return name;
+        }
     }
 
-    // senior_project.foodscanner.Meal Details
+    // Meal Details
     private MealType type;
-    // TODO date/time
-    // TODO food data
+    private GregorianCalendar date;
+    // TODO list of food items
 
-    //TODO add date/time to constructor
-    public Meal(MealType type){
+    public Meal(GregorianCalendar date, MealType type){
+        this.date = date;
         this.type = type;
     }
 
@@ -27,7 +46,16 @@ public class Meal {
         return type;
     }
 
-    //TODO date/time get
+    public GregorianCalendar getDate(){
+        return date;
+    }
 
-    //TODO addFoodItem()
+    public void addFoodItem(FoodItem item){
+        //TODO
+    }
+
+    public void removeFoodItem(){
+        //TODO
+    }
+
 }

@@ -4,8 +4,10 @@
     <string name="app_name">FoodScanner</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    
-    
+
+    <string name="action_meal_add">Add Meal</string>
+    <string name="action_login">Log In</string>
+
     <string name="login_food_scanner">Login with FoodScanner account</string>
     <string name="login_google_plus">Login with Google+</string>
     <string name="login_facebook">Login with Facebook</string>
@@ -15,5 +17,9 @@
     <string name="password_prompt">Password</string>
     <string name="new_account">Create account</string>
     <string name="password_recovery">Forgot your password?</string>
+    <string name="title_activity_meal_calendar">Meal Calendar</string>
+    <string name="title_activity_meal_details">Meal Details</string>
+    <string name="title_activity_food_scanner">Food Scanner</string>
+    <string name="title_activity_food_adder">Food Adder</string>
 
 </resources>

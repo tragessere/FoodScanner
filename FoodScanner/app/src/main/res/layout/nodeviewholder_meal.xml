@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView
+        android:layout_centerVertical="true"
+        android:textSize="16sp"
+        android:id="@+id/node_value"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Meal Data Here"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="0dp"/>
+</RelativeLayout>

@@ -1,39 +1,39 @@
 package senior_project.foodscanner.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-
+import android.os.Handler;
 import senior_project.foodscanner.R;
 
-
-//TEST
+/**
+ * Arbitrary first activity to be seen by the user.
+ * Currently a splash screen that takes user to the calendar.
+ *
+ * Possible changes:
+ * -tutorial
+ * -login
+ * -delete this activity
+ *
+ * Ideas:
+ *  Allow user to save Meal and Food Item presets so they don't have to input all the details if they eat the same stuff often.
+ */
 public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        int wait = 1000;// wait this many milliseconds before moving on to next activity
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startActivity(new Intent(MainActivity.this, MealCalendarActivity.class));
+                finish();
+            }
+        }, wait);
+
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 }
