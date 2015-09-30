@@ -5,11 +5,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.RelativeLayout;
 
-import java.util.Date;
+import com.unnamed.b.atv.model.TreeNode;
+
+import java.util.GregorianCalendar;
 
 import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
+import senior_project.foodscanner.ui.components.mealcalendar.MealCalendar;
+import senior_project.foodscanner.ui.components.mealcalendar.MealClickListener;
 
 /**
  * Displays list or calendar of meals.
@@ -26,12 +31,28 @@ import senior_project.foodscanner.R;
  *          - Maybe a drop down menu for account settings
  *
  */
-public class MealCalendarActivity extends AppCompatActivity {
+public class MealCalendarActivity extends AppCompatActivity implements MealClickListener{
+    private MealCalendar calendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meal_calendar);
+
+        RelativeLayout container = (RelativeLayout)findViewById(R.id.container);
+
+        TreeNode root = TreeNode.root();
+        calendar = new MealCalendar(MealCalendarActivity.this, root);
+        calendar.setMealClickListener(this);
+        container.addView(calendar.getView());
+
+        // TODO deletion of meals
+            // swipe left on a meal node to delete that meal
+            // swipe left on a date node to delete all meals beneath
+            // remove date nodes that don't lead to a meal node
+            // delete meal from device
+        // TODO load existing meals into calendar
+        // TODO make UI pretty
     }
 
     @Override
@@ -48,12 +69,14 @@ public class MealCalendarActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_login) {
-            //TODO
+            //TODO go to login screen here
+            //TODO upon returning from logging in, update UI here to indicate user is logged in and has the ability to log out
             return true;
         }
         else if (id == R.id.action_meal_add) {
-            Meal newMeal = new Meal(new Date(), Meal.MealType.LUNCH);
-            //TODO display meal in list
+            Meal newMeal = new Meal(new GregorianCalendar(), Meal.MealType.LUNCH);
+            calendar.addMeal(newMeal);
+            //TODO save meal to device here
             viewMeal(newMeal);
             return true;
         }
@@ -66,8 +89,14 @@ public class MealCalendarActivity extends AppCompatActivity {
      * @param meal
      */
     private void viewMeal(Meal meal){
-        //TODO
-        startActivity(new Intent(MealCalendarActivity.this, MealDetailsActivity.class));
+        //TODO Parcel or serial
+        Intent intent = new Intent(MealCalendarActivity.this, MealDetailsActivity.class);
+        intent.putExtra("meal", meal);
+        startActivity(intent);
     }
 
+    @Override
+    public void onClick(Meal meal) {
+        viewMeal(meal);
+    }
 }

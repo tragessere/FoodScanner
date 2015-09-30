@@ -31,6 +31,12 @@ import java.util.List;
 
 import senior_project.foodscanner.R;
 
+import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
+import com.example.backend.foodScannerBackendAPI.model.FoodItem;
+
+import java.util.Collections;
+
+import senior_project.foodscanner.backend_helpers.EndpointBuilderHelper;
 /**
  * Activity for manually adding a food item.
  *

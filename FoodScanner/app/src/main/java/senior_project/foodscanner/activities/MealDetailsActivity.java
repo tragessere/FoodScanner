@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import senior_project.foodscanner.Meal;
 import java.util.Calendar;
 
 import senior_project.foodscanner.R;
@@ -37,6 +38,8 @@ import senior_project.foodscanner.R;
  */
 public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener{
 
+    private Meal meal;
+
     private String[] meals;
     private Spinner mealSpinner;
 
@@ -53,6 +56,9 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        meal = (Meal) getIntent().getSerializableExtra("meal");
+
         setContentView(R.layout.activity_meal_details);
 
         // Set up FoodScanner button
