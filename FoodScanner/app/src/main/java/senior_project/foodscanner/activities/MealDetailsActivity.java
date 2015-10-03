@@ -6,9 +6,14 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 
 import senior_project.foodscanner.Meal;
+import java.util.Calendar;
+
 import senior_project.foodscanner.R;
 
 /**
@@ -35,6 +40,19 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     private Meal meal;
 
+    private String[] meals;
+    private Spinner mealSpinner;
+
+    // region Times that meal spinner will start defaulting to each meal (in min, 24-hour format)
+    // TODO: Allow user to set these times
+    public int breakfastTime = 240; // 3:00 (am)
+    public int brunchTime = 600;    // 10:00 (am)
+    public int lunchTime = 720;     // 12:00 (am)
+    public int snackTime = 900;     // 15:00 (3:00pm)
+    public int dinnerTime = 1080;   // 18:00 (6:00pm)
+    public int dessertTime = 1260;  // 21:00 (9:00pm)
+    // endregion
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,8 +61,60 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
         setContentView(R.layout.activity_meal_details);
 
-        Button button = (Button) findViewById(R.id.button_foodscanner);
-        button.setOnClickListener(this);
+        // Set up FoodScanner button
+        Button scan_button = (Button) findViewById(R.id.button_foodscanner);
+        scan_button.setOnClickListener(this);
+
+        // Set up Add Food button
+        Button add_button = (Button) findViewById(R.id.button_addfood);
+        add_button.setOnClickListener(this);
+
+        // Set up meal selection spinner
+        mealSpinner = (Spinner) findViewById(R.id.spinner_meal);
+        meals = getResources().getStringArray(R.array.meal_list);
+        ArrayAdapter<String> mealAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, meals);
+        mealAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mealSpinner.setAdapter(mealAdapter);
+
+        // Set default meal, based on time of day
+        Calendar cal = Calendar.getInstance();
+        int minute = cal.get(Calendar.MINUTE);
+        int hour = cal.get(Calendar.HOUR_OF_DAY); //24-hour format
+        int time = minute + (hour * 60);
+        String defaultMeal;
+
+        if (time >= breakfastTime && time < brunchTime) {
+            defaultMeal = "Breakfast";
+        } else if (time >= brunchTime && time < lunchTime) {
+            defaultMeal = "Brunch";
+        } else if (time >= lunchTime && time < snackTime) {
+            defaultMeal = "Lunch";
+        } else if (time >= snackTime && time < dinnerTime) {
+            defaultMeal = "Snack";
+        } else if (time >= dinnerTime && time < dessertTime) {
+            defaultMeal = "Dinner";
+        } else {
+            defaultMeal = "Dessert";
+        }
+
+        mealSpinner.setSelection(mealAdapter.getPosition(defaultMeal));
+
+        // Set up what meal selection does
+        mealSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Currently, do nothing. Below was for testing.
+                //String text = mealSpinner.getSelectedItem().toString();
+                //(Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT)).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+                // Do nothing
+            }
+        });
     }
 
     @Override
@@ -71,8 +141,11 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.button_foodscanner){
+        if (v.getId() == R.id.button_foodscanner) {
             startActivity(new Intent(MealDetailsActivity.this, FoodScannerActivity.class));
+        } else if (v.getId() == R.id.button_addfood) {
+            startActivity(new Intent(MealDetailsActivity.this, FoodItemActivity.class));
         }
     }
+
 }
