@@ -4,3 +4,5 @@
 .DS_Store
 /build
 /backend/build
+/backend/backend.iml
+/app/app.iml
