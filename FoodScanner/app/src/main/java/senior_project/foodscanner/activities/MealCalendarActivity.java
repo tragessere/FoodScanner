@@ -51,8 +51,12 @@ public class MealCalendarActivity extends AppCompatActivity implements MealClick
             // swipe left on a date node to delete all meals beneath
             // remove date nodes that don't lead to a meal node
             // delete meal from device
+        // TODO check CalendarView
         // TODO load existing meals into calendar
         // TODO make UI pretty
+        // TODO determine when to upload meals to server
+        // TODO max history to display/retrieve from server?
+            // maybe have the option to load older history
     }
 
     @Override
@@ -74,9 +78,7 @@ public class MealCalendarActivity extends AppCompatActivity implements MealClick
             return true;
         }
         else if (id == R.id.action_meal_add) {
-            Meal newMeal = new Meal(new GregorianCalendar(), Meal.MealType.LUNCH);
-            calendar.addMeal(newMeal);
-            //TODO save meal to device here
+            Meal newMeal = createMeal();
             viewMeal(newMeal);
             return true;
         }
@@ -84,12 +86,19 @@ public class MealCalendarActivity extends AppCompatActivity implements MealClick
         return super.onOptionsItemSelected(item);
     }
 
+    private Meal createMeal(){
+        Meal newMeal = new Meal(new GregorianCalendar(), Meal.MealType.LUNCH);
+        calendar.addMeal(newMeal);
+        //TODO save meal to device here
+        return newMeal;
+    }
+
     /**
      * Navigates to Meal Details activity for the corresponding meal.
      * @param meal
      */
     private void viewMeal(Meal meal){
-        //TODO Parcel or serial
+        // Note: uses Serializable to pass the meal which may have high overhead. Consider Parcelable as alternative.
         Intent intent = new Intent(MealCalendarActivity.this, MealDetailsActivity.class);
         intent.putExtra("meal", meal);
         startActivity(intent);
