@@ -24,6 +24,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
+import senior_project.foodscanner.backend_helpers.EndpointsTasks;
 
 /**
  * Created by Evan on 9/16/2015.
@@ -34,8 +35,10 @@ public class LoginActivity extends AppCompatActivity {
 	SharedPreferences prefs;
 	GoogleAccountCredential credential;
 
-	Button loginButton;
 	Button googleButton;
+	View progressBar;
+
+	Button loginButton;
 	Button facebookButton;
 	EditText emailEdit;
 	TextInputLayout emailHolder;
@@ -73,7 +76,7 @@ public class LoginActivity extends AppCompatActivity {
 //		passwordHolder = (TextInputLayout) findViewById(R.id.password_text_holder);
 //		Button createAccountButton = (Button) findViewById(R.id.create_account_button);
 //		Button recoverPasswordButton = (Button) findViewById(R.id.recover_password_button);
-
+		progressBar = findViewById(R.id.loading);
 
 //		loginButton.setOnClickListener(new View.OnClickListener() {
 //			@Override
@@ -90,6 +93,13 @@ public class LoginActivity extends AppCompatActivity {
 			@Override
 			public void onClick(View v) {
 				startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+			}
+		});
+
+		progressBar.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				//consumes touches
 			}
 		});
 	}
@@ -122,6 +132,7 @@ public class LoginActivity extends AppCompatActivity {
 							data.getExtras().getString(
 									AccountManager.KEY_ACCOUNT_NAME);
 					if (accountName != null) {
+						progressBar.setVisibility(View.VISIBLE);
 						setSelectedAccountName(accountName);
 						SharedPreferences.Editor editor = prefs.edit();
 						editor.putString(Constants.PREF_ACCOUNT_NAME, accountName);
