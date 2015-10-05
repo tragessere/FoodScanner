@@ -4,7 +4,7 @@
     tools:context="senior_project.foodscanner.activities.MealCalendarActivity"
                 android:id="@+id/container">
 
-    <LinearLayout
+    <RelativeLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -72,6 +72,28 @@
         <ListView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/listView_meals"/>
-    </LinearLayout>
+            android:id="@+id/listView_meals"
+            android:layout_below="@+id/container_date"
+            android:layout_above="@+id/container_total"/>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/container_total"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            >
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Day Total: 0 cal"
+                android:id="@+id/button_total_day"
+                />
+        </LinearLayout>
+    </RelativeLayout>
 </RelativeLayout>

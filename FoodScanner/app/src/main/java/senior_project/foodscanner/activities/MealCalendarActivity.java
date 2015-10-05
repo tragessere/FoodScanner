@@ -33,8 +33,9 @@ import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
  *          - Maybe a drop down menu for account settings
  *
  */
-public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, CalendarView.OnDateChangeListener, AdapterView.OnItemClickListener{
+public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, CalendarView.OnDateChangeListener, AdapterView.OnItemClickListener, MealArrayAdapter.OnDeleteListener{
     private Button button_calendar;
+    private Button button_total;
     private CalendarView calendar;
     private ListView mealListView;
     private MealArrayAdapter adapter;
@@ -47,14 +48,17 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_meal_calendar);
 
         button_calendar = (Button)findViewById(R.id.button_calendar);
+        button_total = (Button)findViewById(R.id.button_total_day);
         calendar = (CalendarView)findViewById(R.id.calendarView);
         mealListView = (ListView)findViewById(R.id.listView_meals);
 
         button_calendar.setOnClickListener(this);
+        button_total.setOnClickListener(this);
         calendar.setOnDateChangeListener(this);
         findViewById(R.id.imageButton_prev).setOnClickListener(this);
         findViewById(R.id.imageButton_next).setOnClickListener(this);
         adapter = new MealArrayAdapter(MealCalendarActivity.this);
+        adapter.setOnDeleteListener(this);
         mealListView.setAdapter(adapter);
         mealListView.setOnItemClickListener(this);
 
@@ -62,11 +66,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
         // TODO load existing meals into calendar
 
-        // TODO deletion of meals
-            // swipe left on a meal to reveal delete button
-            // delete meal from listview
-            // delete meal from device
-        // TODO display total for day, week, month
         // TODO determine when to upload meals to server
         // TODO max history to display/retrieve from server?
             // maybe have the option to load older history
@@ -143,6 +142,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                     calendar.setDate(calendar.getDate());
                 }
                 break;
+            case R.id.button_total_day:
+                // TODO display total
+                // TODO display week and month totals
+                break;
             case R.id.imageButton_prev:
                 changeSelectedDay(calendar.getDate() - msInDay);
                 break;
@@ -162,13 +165,17 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if(position == parent.getCount()-1){
-            Meal newMeal = createMeal();
-            viewMeal(newMeal);
-            return;
+        Meal meal = (Meal)parent.getItemAtPosition(position);
+        if(meal == null){
+            meal = createMeal();
         }
-        else {
-            viewMeal((Meal) parent.getItemAtPosition(position));
-        }
+        viewMeal(meal);
+    }
+
+
+    @Override
+    public void onDelete(MealArrayAdapter adapter, int position) {
+        //TODO delete from device
+        adapter.remove(adapter.getItem(position));
     }
 }

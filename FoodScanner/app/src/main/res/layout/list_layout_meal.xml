@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+                android:descendantFocusability="blocksDescendants">
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/meal_text"
@@ -13,5 +14,18 @@
               android:gravity="center_vertical"
               android:paddingLeft="6dip"
               android:paddingRight="6dip"
-              android:minHeight="?android:attr/listPreferredItemHeightSmall" />
+              android:minHeight="?android:attr/listPreferredItemHeightSmall"
+              android:layout_toLeftOf="@+id/button_delete"
+              android:layout_toStartOf="@+id/button_delete"
+              android:text="Meal Item"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete"
+        android:id="@+id/button_delete"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignBottom="@+id/meal_text"/>
 </RelativeLayout>
