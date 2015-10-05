@@ -2,10 +2,12 @@ package senior_project.foodscanner.ui.components.mealcalendar;
 
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import senior_project.foodscanner.Meal;
@@ -27,12 +29,14 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
     public View getView(final int position, View convertView, ViewGroup parent) {
         final Meal meal = getItem(position);
 
+        // view inflation
         if(convertView == null) {
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(layoutId, parent, false);
         }
 
-        TextView text = (TextView) convertView.findViewById(textViewId);
+        // text
+        final TextView text = (TextView) convertView.findViewById(textViewId);
         if(meal != null) {
             text.setText(mealString(meal));
             //convertView.setOnTouchListener(this);
@@ -40,15 +44,44 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         } else {
             text.setText("     (Add Meal)");
         }
-            Button button = (Button) convertView.findViewById(deleteButtonId);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(meal != null && odl != null) {
-                        odl.onDelete(MealArrayAdapter.this, position);
-                    }
+
+        // delete button handling
+        final ImageButton button = (ImageButton) convertView.findViewById(deleteButtonId);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(meal != null && odl != null) {
+                    odl.onDelete(MealArrayAdapter.this, position);
                 }
-            });
+            }
+        });
+
+    /*    // swipe handling
+        convertView.setOnTouchListener(new View.OnTouchListener() {
+            private float x1 = -1;
+            private float x2 = -1;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getPointerCount() == 1) {
+                    if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                        x1 = event.getX();
+                    } else if(x1 > -1 && event.getAction() == MotionEvent.ACTION_MOVE) {
+                        x2 = event.getX();
+                        if(x2 - x1 <= -20) {
+                            button.setVisibility(View.VISIBLE);
+                        } else {
+                            button.setVisibility(View.GONE);
+                        }
+                        return true;
+                    }
+                } else {
+                    x1 = -1;
+                }
+                return false;
+            }
+        });
+        button.setVisibility(View.GONE);*/
 
         return convertView;
     }
@@ -70,7 +103,7 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         addAddItem();
     }
 
-    public void setOnDeleteListener(OnDeleteListener l){
+    public void setOnDeleteListener(OnDeleteListener l) {
         odl = l;
     }
 
@@ -82,7 +115,7 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         super.remove(null);
     }
 
-    public interface OnDeleteListener{
+    public interface OnDeleteListener {
         void onDelete(MealArrayAdapter adapter, int position);
     }
 

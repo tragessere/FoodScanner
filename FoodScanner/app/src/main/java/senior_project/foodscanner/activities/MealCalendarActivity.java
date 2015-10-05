@@ -67,9 +67,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         // TODO load existing meals into calendar
 
         // TODO determine when to upload meals to server
-        // TODO max history to display/retrieve from server?
-            // maybe have the option to load older history
+            // indicator on meals that aren't uploaded
         // TODO make UI pretty
+
+        // TODO max local storage?
     }
 
     @Override
