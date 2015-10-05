@@ -1,12 +1,11 @@
 package senior_project.foodscanner.ui.components.mealcalendar;
 
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -38,11 +37,11 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         // text
         final TextView text = (TextView) convertView.findViewById(textViewId);
         if(meal != null) {
+            text.setGravity(Gravity.CENTER_VERTICAL);
             text.setText(mealString(meal));
-            //convertView.setOnTouchListener(this);
-            //convertView.setOnGenericMotionListener(this);
         } else {
-            text.setText("     (Add Meal)");
+            text.setGravity(Gravity.CENTER);
+            text.setText("+");
         }
 
         // delete button handling
@@ -55,6 +54,12 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
                 }
             }
         });
+        if(meal == null) {
+            button.setVisibility(View.GONE);
+        }
+        else{
+            button.setVisibility(View.VISIBLE);
+        }
 
     /*    // swipe handling
         convertView.setOnTouchListener(new View.OnTouchListener() {
@@ -81,7 +86,7 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
                 return false;
             }
         });
-        button.setVisibility(View.GONE);*/
+        */
 
         return convertView;
     }
