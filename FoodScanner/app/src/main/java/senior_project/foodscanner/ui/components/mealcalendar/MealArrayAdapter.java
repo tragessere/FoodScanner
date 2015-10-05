@@ -30,6 +30,8 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         TextView text = (TextView)convertView.findViewById(textViewId);
         if(meal != null){
             text.setText(mealString(meal));
+            //convertView.setOnTouchListener(this);
+            //convertView.setOnGenericMotionListener(this);
         }
         else{
             text.setText("     (Add Meal)");
