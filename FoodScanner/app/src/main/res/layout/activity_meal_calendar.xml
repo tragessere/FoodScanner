@@ -3,4 +3,75 @@
     android:layout_height="match_parent"
     tools:context="senior_project.foodscanner.activities.MealCalendarActivity"
                 android:id="@+id/container">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/container_calendar">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/container_date">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible"
+                android:id="@+id/container_buttons">
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/imageButton_prev"
+                    android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignBottom="@+id/button_calendar"/>
+
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Today"
+                    android:id="@+id/button_calendar"
+                    android:layout_alignParentTop="true"
+                    android:layout_toRightOf="@+id/imageButton_prev"
+                    android:layout_toLeftOf="@+id/imageButton_next"
+                    android:layout_toStartOf="@+id/imageButton_next"/>
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/imageButton_next"
+                    android:focusableInTouchMode="false"
+                    android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignBottom="@+id/button_calendar"/>
+
+            </RelativeLayout>
+
+
+            <CalendarView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/calendarView"
+                android:visibility="visible"
+                android:background="#e8e8e8"/>
+
+        </LinearLayout>
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/listView_meals"/>
+    </LinearLayout>
 </RelativeLayout>
