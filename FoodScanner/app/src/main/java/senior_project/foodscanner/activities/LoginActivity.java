@@ -14,7 +14,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
@@ -24,7 +23,8 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.backend_helpers.EndpointsTasks;
+import senior_project.foodscanner.backend_helpers.EndpointsHelper;
+import senior_project.foodscanner.database.SQLHelper;
 
 /**
  * Created by Evan on 9/16/2015.
@@ -47,9 +47,6 @@ public class LoginActivity extends AppCompatActivity {
 
 	Rect loginButtonStartBounds;
 
-	//Disable actions when this is true;
-	boolean isProcessing = false;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -57,12 +54,12 @@ public class LoginActivity extends AppCompatActivity {
 
 
 		prefs = getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE);
-		credential = GoogleAccountCredential.usingAudience(this, "server:client_id:web_address");
+		credential = GoogleAccountCredential.usingAudience(this, "server:client_id:" + Constants.ANDROID_CLIENT_ID);
 		credential.setSelectedAccountName(prefs.getString(Constants.PREF_ACCOUNT_NAME, null));
 
 		if(credential.getSelectedAccountName() != null) {
 			//signed in. Finish activity and continue.
-//			finish();
+			finishLogin();
 			return;
 		}
 
@@ -74,20 +71,7 @@ public class LoginActivity extends AppCompatActivity {
 //		emailHolder = (TextInputLayout) findViewById(R.id.email_text_holder);
 //		passwordEdit = (EditText) findViewById(R.id.password_text);
 //		passwordHolder = (TextInputLayout) findViewById(R.id.password_text_holder);
-//		Button createAccountButton = (Button) findViewById(R.id.create_account_button);
-//		Button recoverPasswordButton = (Button) findViewById(R.id.recover_password_button);
 		progressBar = findViewById(R.id.loading);
-
-//		loginButton.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				if(emailHolder.getVisibility() == View.VISIBLE) {
-//					//Do something
-//				} else {
-//					showLoginText();
-//				}
-//			}
-//		});
 
 		googleButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -104,21 +88,14 @@ public class LoginActivity extends AppCompatActivity {
 		});
 	}
 
-
-	@Override
-	public void onBackPressed() {
-//		if(emailHolder.getVisibility() == View.VISIBLE)
-//			hideLoginText();
-//		else
-			super.onBackPressed();
-	}
-
 	private void setSelectedAccountName(String accountName) {
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putString(Constants.PREF_ACCOUNT_NAME, accountName);
 		editor.apply();
 		credential.setSelectedAccountName(accountName);
-//		this.accountName = accountName;
+		String test = credential.getSelectedAccountName();
+		//TODO: add API call to create account in backend database
+		finishLogin();
 	}
 
 
@@ -134,9 +111,6 @@ public class LoginActivity extends AppCompatActivity {
 					if (accountName != null) {
 						progressBar.setVisibility(View.VISIBLE);
 						setSelectedAccountName(accountName);
-						SharedPreferences.Editor editor = prefs.edit();
-						editor.putString(Constants.PREF_ACCOUNT_NAME, accountName);
-						editor.apply();
 						// User is authorized.
 					}
 				}
@@ -146,7 +120,20 @@ public class LoginActivity extends AppCompatActivity {
 
 
 	private void finishLogin() {
+		//Create endpoints helper singleton on login to set the user's credentials
+		EndpointsHelper helper = EndpointsHelper.getInstance(credential);
 
+		//Example usage of an API call
+		helper.startExampleTask(this);
+
+
+		//Setup database object with version number. The database will not actually be created
+		//until accessed later. This can be changed if need be.
+		SQLHelper.getInstance(this);
+
+		Intent intent = new Intent(this, MainActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
 	}
 
 
