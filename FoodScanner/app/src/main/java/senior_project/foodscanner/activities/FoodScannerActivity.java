@@ -1,5 +1,9 @@
 package senior_project.foodscanner.activities;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.hardware.Camera;
+import android.hardware.camera2.CameraManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -13,6 +17,9 @@ public class FoodScannerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_scanner);
+
+        boolean hasCam = checkCameraHardware();
+        Camera.open();// either use deprecated or api 21
     }
 
     @Override
@@ -35,5 +42,16 @@ public class FoodScannerActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /** Check if this device has a camera */
+    private boolean checkCameraHardware() {
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+            // this device has a camera
+            return true;
+        } else {
+            // no camera on this device
+            return false;
+        }
     }
 }
