@@ -18,13 +18,14 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
-import senior_project.foodscanner.database.SQLHelper;
+import senior_project.foodscanner.ui.components.mealcalendar.MealCalendar;
 
 /**
  * Created by Evan on 9/16/2015.
@@ -54,8 +55,8 @@ public class LoginActivity extends AppCompatActivity {
 
 
 		prefs = getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE);
-		credential = GoogleAccountCredential.usingAudience(this, "server:client_id:" + Constants.ANDROID_CLIENT_ID);
-		credential.setSelectedAccountName(prefs.getString(Constants.PREF_ACCOUNT_NAME, null));
+		credential = GoogleAccountCredential.usingAudience(this, "server:client_id:" + Constants.WEB_CLIENT_ID);
+//		credential.setSelectedAccountName(prefs.getString(Constants.PREF_ACCOUNT_NAME, null));
 
 		if(credential.getSelectedAccountName() != null) {
 			//signed in. Finish activity and continue.
@@ -124,16 +125,19 @@ public class LoginActivity extends AppCompatActivity {
 		EndpointsHelper helper = EndpointsHelper.getInstance(credential);
 
 		//Example usage of an API call
-		helper.startExampleTask(this);
+		helper.new ExampleTask(new EndpointsHelper.TaskCompletionListener() {
+			@Override
+			public void onTaskCompleted(Bundle b) {
+				progressBar.setVisibility(View.GONE);
+				Toast.makeText(LoginActivity.this, b.getString("test", "failure"), Toast.LENGTH_SHORT).show();
 
+				Intent intent = new Intent(LoginActivity.this, MealCalendarActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+				finish();
+			}
+		}).execute();
 
-		//Setup database object with version number. The database will not actually be created
-		//until accessed later. This can be changed if need be.
-		SQLHelper.getInstance(this);
-
-		Intent intent = new Intent(this, MainActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		startActivity(intent);
 	}
 
 

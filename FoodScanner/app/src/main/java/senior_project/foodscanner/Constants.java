@@ -6,5 +6,5 @@ package senior_project.foodscanner;
 public class Constants {
 	public static final String APP_PREFERENCES = "senior_project.foodscanner";
 	public static final String PREF_ACCOUNT_NAME = "senior_project.foodscanner.account_name";
-	public static final String ANDROID_CLIENT_ID = "419943060428-dn63ppgblk45e7eijjamb5ffddiclafp.apps.googleusercontent.com";
+	public static final String WEB_CLIENT_ID = "419943060428-q8lotlqd42hdl3je6n8ca2oirgc9cnru.apps.googleusercontent.com";
 }

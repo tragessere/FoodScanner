@@ -1,8 +1,8 @@
 package senior_project.foodscanner.backend_helpers;
 
-import android.content.Context;
 import android.os.AsyncTask;
-import android.widget.Toast;
+import android.os.Bundle;
+import android.util.Log;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
@@ -43,19 +43,16 @@ public class EndpointsHelper {
 		mEndpoints = null;
 	}
 
-	public void startExampleTask(Context context) {
-		new ExampleTask(context).execute();
-	}
 
 
 	/**
 	 * Google Endpoints uses <code>AsyncTask</code> to make network calls to the backend server
 	 */
 	public class ExampleTask extends AsyncTask<Void, Void, MyBean> {
-		private Context mContext;
+		private TaskCompletionListener mListener;
 
-		public ExampleTask(Context context) {
-			mContext = context;
+		public ExampleTask(TaskCompletionListener listener) {
+			mListener = listener;
 		}
 
 		@Override
@@ -63,16 +60,28 @@ public class EndpointsHelper {
 			try {
 				return mAPI.sayHi("example!").execute();
 			} catch (IOException e) {
+				e.printStackTrace();
 				return null;
 			}
 		}
 
 		@Override
-		protected void onPostExecute(MyBean foodItems) {
-			if(!isCancelled())
-				Toast.makeText(mContext, foodItems.getData(), Toast.LENGTH_SHORT).show();
+		protected void onPostExecute(MyBean testBean) {
+			if(!isCancelled()) {
+				Bundle b = new Bundle();
+				if(testBean != null)
+					b.putString("test", testBean.getData());
+				mListener.onTaskCompleted(b);
+			}
 		}
 	}
 
-
+	/**
+	 * Callback for API calls finishing.
+	 *
+	 * Bundle is optional and can hold any primitive making the callback flexible.
+	 */
+	public interface TaskCompletionListener {
+		void onTaskCompleted(Bundle b);
+	}
 }
