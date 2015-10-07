@@ -1,5 +1,6 @@
 package senior_project.foodscanner.activities;
 
+import android.Manifest;
 import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -9,10 +10,13 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -22,16 +26,17 @@ import android.widget.Toast;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
+
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
-import senior_project.foodscanner.ui.components.mealcalendar.MealCalendar;
 
 /**
  * Created by Evan on 9/16/2015.
  */
 public class LoginActivity extends AppCompatActivity {
 	private static final int REQUEST_ACCOUNT_PICKER = 2;
+	private static final int REQUEST_READ_CONTACTS = 3;
 
 	SharedPreferences prefs;
 	GoogleAccountCredential credential;
@@ -52,6 +57,14 @@ public class LoginActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login_activity);
+
+
+		//Get permission to get user account for login on Android M
+		if(ContextCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS)
+				!= PackageManager.PERMISSION_GRANTED) {
+			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.GET_ACCOUNTS},
+					REQUEST_READ_CONTACTS);
+		}
 
 
 		prefs = getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE);
@@ -94,7 +107,6 @@ public class LoginActivity extends AppCompatActivity {
 		editor.putString(Constants.PREF_ACCOUNT_NAME, accountName);
 		editor.apply();
 		credential.setSelectedAccountName(accountName);
-		String test = credential.getSelectedAccountName();
 		//TODO: add API call to create account in backend database
 		finishLogin();
 	}
@@ -141,8 +153,15 @@ public class LoginActivity extends AppCompatActivity {
 	}
 
 
-
-
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+		if(requestCode == REQUEST_READ_CONTACTS) {
+			if(grantResults.length > 0
+					&& grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+				//TODO: SHOW ERROR
+			}
+		}
+	}
 
 	private void showLoginText() {
 
