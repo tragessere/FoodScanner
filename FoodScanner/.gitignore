@@ -6,3 +6,4 @@
 /backend/build
 /backend/backend.iml
 /app/app.iml
+*.iml

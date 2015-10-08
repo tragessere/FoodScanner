@@ -25,12 +25,5 @@ dependencies {
 
     compile 'com.android.support:design:23.0.1'
     compile 'com.android.support:support-v4:23.0.1'
-
-    compile 'com.github.bmelnychuk:AndroidTreeView:9d1bac5753'
 }
 
-repositories {
-    maven {
-        url "https://jitpack.io"
-    }
-}
