@@ -2,7 +2,6 @@ package senior_project.foodscanner.backend_helpers;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
@@ -26,7 +25,7 @@ public class EndpointsHelper {
 	 * @param credential	Google account returned when logging in
 	 * @return				Instance of the requests helper
 	 */
-	public static EndpointsHelper getInstance(GoogleAccountCredential credential) {
+	public static EndpointsHelper initEndpoints(GoogleAccountCredential credential) {
 		if(mEndpoints == null) {
 			mEndpoints = new EndpointsHelper();
 			mEndpoints.mAPI = EndpointBuilderHelper.getEndpoints(credential);

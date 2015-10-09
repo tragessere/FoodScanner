@@ -134,7 +134,7 @@ public class LoginActivity extends AppCompatActivity {
 
 	private void finishLogin() {
 		//Create endpoints helper singleton on login to set the user's credentials
-		EndpointsHelper helper = EndpointsHelper.getInstance(credential);
+		EndpointsHelper helper = EndpointsHelper.initEndpoints(credential);
 
 		//Example usage of an API call
 		helper.new ExampleTask(new EndpointsHelper.TaskCompletionListener() {
@@ -150,6 +150,13 @@ public class LoginActivity extends AppCompatActivity {
 			}
 		}).execute();
 
+	}
+
+	public static void logout(Context activity) {
+		EndpointsHelper.clearInstance();
+		SharedPreferences.Editor editor = activity.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
+		editor.remove(Constants.PREF_ACCOUNT_NAME);
+		editor.apply();
 	}
 
 

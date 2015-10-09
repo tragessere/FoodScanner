@@ -32,7 +32,9 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="3dp"
             android:layout_marginRight="3dp"
-            app:backgroundTint="@color/Primary.Dark"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:backgroundTint="@color/Primary.Dark"
             android:textAppearance="@style/TextAppearance.AppCompat.Button"
             android:textColor="@color/White"
             android:text="@string/login_google_plus"/>
