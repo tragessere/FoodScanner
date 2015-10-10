@@ -68,8 +68,8 @@ public class LoginActivity extends AppCompatActivity {
 
 
 		prefs = getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE);
-		credential = GoogleAccountCredential.usingAudience(this, "server:client_id:" + Constants.WEB_CLIENT_ID);
-//		credential.setSelectedAccountName(prefs.getString(Constants.PREF_ACCOUNT_NAME, null));
+		credential = GoogleAccountCredential.usingAudience(this.getApplicationContext(), "server:client_id:" + Constants.WEB_CLIENT_ID);
+		credential.setSelectedAccountName(prefs.getString(Constants.PREF_ACCOUNT_NAME, null));
 
 		if(credential.getSelectedAccountName() != null) {
 			//signed in. Finish activity and continue.
