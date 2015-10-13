@@ -33,4 +33,9 @@
         <item name="colorControlNormal">@color/White.Transparent</item>
     </style>
 
+    <style name="Button.Primary.Dark" parent="Widget.AppCompat.Button.Colored">
+        <item name="colorButtonNormal">@color/Primary.Dark</item>
+        <item name="android:textColor">@color/White</item>
+    </style>
+
 </resources>
