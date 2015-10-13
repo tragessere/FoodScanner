@@ -1,13 +1,8 @@
 package senior_project.foodscanner.activities;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,7 +14,6 @@ import android.widget.FrameLayout;
 import java.io.IOException;
 
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.ui.components.foodscanner.CameraStateCallback;
 import senior_project.foodscanner.ui.components.foodscanner.CameraView;
 
 /**
@@ -35,27 +29,12 @@ public class FoodScannerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_scanner);
 
-
         //TODO loading indicator for camera loading
 
+        //TODO prompt for camera permission
 
 
-        CameraManager manager = (CameraManager)getSystemService(Context.CAMERA_SERVICE);
-        try {
-            String[] camIds = manager.getCameraIdList();
-            for(String id:camIds){
-                Log.d("FoodScanner", "CAM  = "+id);
-                CameraCharacteristics chars = manager.getCameraCharacteristics(id);
-            }
-        } catch(CameraAccessException e) {
-            Log.e("FoodScanner", "Cam error", e);
-        }
-        try {
-            manager.openCamera("0", new CameraStateCallback(this), null);
-        } catch(CameraAccessException e) {
-            Log.e("FoodScanner", "Cam error", e);
-        }
-/*
+
         //TODO do on new thread
         camera = getCamera();
         cameraView = new CameraView(this, camera);
@@ -66,7 +45,7 @@ public class FoodScannerActivity extends AppCompatActivity {
             //TODO dialog
             finish();
             return;
-        }*/
+        }
 
         // getParameters
         // getCamerainfo
@@ -75,22 +54,22 @@ public class FoodScannerActivity extends AppCompatActivity {
     @Override
     protected void onStart(){
         super.onStart();
-       /* if(camera != null){
+        if(camera != null){
             try {
                 camera.reconnect();
             } catch(IOException e) {
                 // TODO dialog
             }
-        }*/
+        }
         Log.d("FoodScanner","ONSTART");
     }
 
     @Override
     protected void onPause(){
         super.onPause();
-       /* if(camera != null){
+        if(camera != null){
             camera.release();
-        }*/
+        }
         Log.d("FoodScanner", "ONPAUSE");
     }
 
