@@ -1,5 +1,6 @@
 package senior_project.foodscanner.fragments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -11,7 +12,9 @@ import android.text.Spanned;
 import java.util.Map;
 
 import senior_project.foodscanner.FoodItem;
+import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
+import senior_project.foodscanner.activities.FoodItemActivity;
 
 /**
  * Created by Tyler on 10/12/2015.
@@ -20,12 +23,35 @@ import senior_project.foodscanner.R;
  */
 public class FoodInfoFragment extends DialogFragment {
 
-    FoodItem food;
+    public FoodItem food;
 
-    public static FoodInfoFragment newInstance(FoodItem newFood) {
+    public static FoodInfoFragment newInstance(FoodItem newFood, Meal newMeal) {
         FoodInfoFragment frag = new FoodInfoFragment();
         frag.food = newFood;
         return frag;
+    }
+
+    public interface FoodInfoDialogListener {
+        public void onDialogPositiveClick(DialogFragment dialog);
+        public void onDialogNegativeClick(DialogFragment dialog);
+    }
+
+    // Use this instance of the interface to deliver action events
+    FoodInfoDialogListener mListener;
+
+    // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        // Verify that the host activity implements the callback interface
+        try {
+            // Instantiate the NoticeDialogListener so we can send events to the host
+            mListener = (FoodInfoDialogListener) activity;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(activity.toString()
+                    + " must implement NoticeDialogListener");
+        }
     }
 
     @Override
@@ -59,12 +85,12 @@ public class FoodInfoFragment extends DialogFragment {
                 .setMessage(nutritionInfo)
                 .setPositiveButton("Add to Meal", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        //TODO: Add food item to meal
+                        mListener.onDialogPositiveClick(FoodInfoFragment.this);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog, do nothing
+                        mListener.onDialogNegativeClick(FoodInfoFragment.this);
                     }
                 });
 

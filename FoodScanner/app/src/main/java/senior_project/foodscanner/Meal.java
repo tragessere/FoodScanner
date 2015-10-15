@@ -1,7 +1,9 @@
 package senior_project.foodscanner;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 /**
  * This class represents a meal.
@@ -31,11 +33,12 @@ public class Meal implements Serializable {
     // Meal Details
     private MealType type;
     private GregorianCalendar date;
-    // TODO list of food items
+    public List<FoodItem> food;  //made public for now, for ease of use in ListView
 
     public Meal(GregorianCalendar date, MealType type){
         this.date = date;
         this.type = type;
+        food = new ArrayList<FoodItem>();
     }
 
     public void setType(MealType type){
@@ -51,11 +54,11 @@ public class Meal implements Serializable {
     }
 
     public void addFoodItem(FoodItem item){
-        //TODO
+        food.add(item);
     }
 
-    public void removeFoodItem(){
-        //TODO
+    public void removeFoodItem(FoodItem item){
+        food.remove(item);
     }
 
 }

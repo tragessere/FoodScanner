@@ -3,6 +3,7 @@ package senior_project.foodscanner.activities;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import senior_project.foodscanner.FoodItem;
+import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
@@ -54,11 +56,15 @@ import senior_project.foodscanner.fragments.FoodInfoFragment;
  *  Cancel - return to Meal Details
  *  Ok - return to Meal Details with new food item added
  */
-public class FoodItemActivity extends AppCompatActivity implements View.OnClickListener {
+public class FoodItemActivity extends AppCompatActivity implements View.OnClickListener, FoodInfoFragment.FoodInfoDialogListener {
+
+    private Meal meal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        meal = (Meal) getIntent().getSerializableExtra("meal");
+
         setContentView(R.layout.activity_food_item);
 
         // Set up Search button
@@ -120,7 +126,28 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    public void displayToast(final String message, Activity actArg) {
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        // User touched the dialog's positive button
+        // Add food item to meal
+        FoodInfoFragment frag = (FoodInfoFragment)dialog;
+        meal.addFoodItem(frag.food);
+        displayToast("Added to meal!", this);
+
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("meal", meal);
+        setResult(Activity.RESULT_OK, resultIntent);
+
+        finish();
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        // User touched the dialog's negative button
+        // Do nothing at this time
+    }
+
+    public static void displayToast(final String message, Activity actArg) {
         final Activity act = actArg;
         act.runOnUiThread(new Runnable() {
             public void run() {
@@ -400,7 +427,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
 
             if (food != null) {
                 // display confirmation prompt containing nutrition info
-                DialogFragment dialog = FoodInfoFragment.newInstance(food);
+                DialogFragment dialog = FoodInfoFragment.newInstance(food, meal);
                 dialog.show(getFragmentManager(), "FoodInfoFragment");
             }
         }

@@ -1,5 +1,6 @@
 package senior_project.foodscanner;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -7,7 +8,7 @@ import java.util.Set;
 /**
  * Represents a single item of food.
  */
-public class FoodItem {
+public class FoodItem implements Serializable {
 
     private Map<String, Double> fields;  //holds all nutrition info
 
@@ -77,5 +78,10 @@ public class FoodItem {
     }
 
     //endregion
+
+    @Override
+    public String toString() {
+        return name + " (" + brand + ")";
+    }
 
 }

@@ -9,8 +9,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
 import java.util.Calendar;
 
@@ -125,6 +128,28 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
+    public void onResume(){
+        super.onResume();
+
+        // Set up list of food items
+        ListView lv = (ListView) findViewById(R.id.food_list);
+        ArrayAdapter<FoodItem> arrayAdapter = new ArrayAdapter<>(
+                getApplicationContext(),
+                R.layout.list_layout,
+                R.id.foodListText,
+                meal.food);
+        lv.setAdapter(arrayAdapter);
+
+        // set up happens when you click a list item
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //TODO: View nutrition info
+            }
+        });
+
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -139,12 +164,27 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         return super.onOptionsItemSelected(item);
     }
 
+    private static int BRANDON_IS_A_HACKER = 1;  //TODO: add to constants.java
+
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.button_foodscanner) {
             startActivity(new Intent(MealDetailsActivity.this, FoodScannerActivity.class));
         } else if (v.getId() == R.id.button_addfood) {
-            startActivity(new Intent(MealDetailsActivity.this, FoodItemActivity.class));
+            Intent intent = new Intent(MealDetailsActivity.this, FoodItemActivity.class);
+            intent.putExtra("meal", meal);
+            startActivityForResult(intent, BRANDON_IS_A_HACKER);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == BRANDON_IS_A_HACKER) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                meal = (Meal) data.getSerializableExtra("meal");
+            }
         }
     }
 
