@@ -56,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.login_activity);
+		setContentView(R.layout.activity_login);
 
 		googleButton = (Button) findViewById(R.id.login_google_plus_button);
 		progressBar = findViewById(R.id.loading);
