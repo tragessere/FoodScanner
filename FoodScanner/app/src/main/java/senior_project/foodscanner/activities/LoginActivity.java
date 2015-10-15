@@ -58,6 +58,8 @@ public class LoginActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login_activity);
 
+		googleButton = (Button) findViewById(R.id.login_google_plus_button);
+		progressBar = findViewById(R.id.loading);
 
 		//Get permission to get user account for login on Android M
 		if(ContextCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS)
@@ -70,22 +72,6 @@ public class LoginActivity extends AppCompatActivity {
 		prefs = getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE);
 		credential = GoogleAccountCredential.usingAudience(this.getApplicationContext(), "server:client_id:" + Constants.WEB_CLIENT_ID);
 		credential.setSelectedAccountName(prefs.getString(Constants.PREF_ACCOUNT_NAME, null));
-
-		if(credential.getSelectedAccountName() != null) {
-			//signed in. Finish activity and continue.
-			finishLogin();
-			return;
-		}
-
-
-//		loginButton = (Button) findViewById(R.id.login_food_scanner_button);
-		googleButton = (Button) findViewById(R.id.login_google_plus_button);
-//		facebookButton = (Button) findViewById(R.id.login_facebook_button);
-//		emailEdit = (EditText) findViewById(R.id.email_text);
-//		emailHolder = (TextInputLayout) findViewById(R.id.email_text_holder);
-//		passwordEdit = (EditText) findViewById(R.id.password_text);
-//		passwordHolder = (TextInputLayout) findViewById(R.id.password_text_holder);
-		progressBar = findViewById(R.id.loading);
 
 		googleButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -108,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
 		editor.apply();
 		credential.setSelectedAccountName(accountName);
 		//TODO: add API call to create account in backend database
-		finishLogin();
+		finishLogin(this, credential, progressBar);
 	}
 
 
@@ -132,7 +118,9 @@ public class LoginActivity extends AppCompatActivity {
 	}
 
 
-	private void finishLogin() {
+	public static void finishLogin(final AppCompatActivity activity, final GoogleAccountCredential credential, final View progressBar) {
+		progressBar.setVisibility(View.VISIBLE);
+
 		//Create endpoints helper singleton on login to set the user's credentials
 		EndpointsHelper helper = EndpointsHelper.initEndpoints(credential);
 
@@ -141,22 +129,27 @@ public class LoginActivity extends AppCompatActivity {
 			@Override
 			public void onTaskCompleted(Bundle b) {
 				progressBar.setVisibility(View.GONE);
-				Toast.makeText(LoginActivity.this, b.getString("test", "failure"), Toast.LENGTH_SHORT).show();
+				Toast.makeText(activity, b.getString("test", "failure"), Toast.LENGTH_SHORT).show();
 
-				Intent intent = new Intent(LoginActivity.this, MealCalendarActivity.class);
+				Intent intent = new Intent(activity, MealCalendarActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-				finish();
+				activity.startActivity(intent);
+				activity.finish();
 			}
 		}).execute();
 
 	}
 
-	public static void logout(Context activity) {
+	public static void logout(AppCompatActivity activity) {
 		EndpointsHelper.clearInstance();
 		SharedPreferences.Editor editor = activity.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
 		editor.remove(Constants.PREF_ACCOUNT_NAME);
 		editor.apply();
+
+		Intent intent = new Intent(activity, LoginActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		activity.startActivity(intent);
+		activity.finish();
 	}
 
 
