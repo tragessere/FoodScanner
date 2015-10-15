@@ -24,6 +24,9 @@
     <string name="network_error">Error: Network connection failed.</string>
     <string name="generic_error">Error: Please try again.</string>
 
+    <string name="nutritionix_api_id">4d784f94</string>
+    <string name="nutritionix_api_key">a3e15aa81cdbe791ad05625dcc3d417a</string>
+
     <string-array name="meal_list">
         <item>Breakfast</item>
         <item>Brunch</item>
