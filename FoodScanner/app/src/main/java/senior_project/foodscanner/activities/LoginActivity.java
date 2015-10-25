@@ -30,6 +30,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
+import senior_project.foodscanner.database.SQLHelper;
 
 /**
  * Created by Evan on 9/16/2015.
@@ -114,6 +115,7 @@ public class LoginActivity extends AppCompatActivity {
 
 		//Create endpoints helper singleton on login to set the user's credentials
 		EndpointsHelper helper = EndpointsHelper.initEndpoints(credential);
+		SQLHelper.initialize(activity);
 
 		//Example usage of an API call
 		helper.new ExampleTask(new EndpointsHelper.TaskCompletionListener() {
@@ -132,6 +134,7 @@ public class LoginActivity extends AppCompatActivity {
 	}
 
 	public static void logout(AppCompatActivity activity) {
+		SQLHelper.clear();
 		EndpointsHelper.clearInstance();
 		SharedPreferences.Editor editor = activity.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
 		editor.remove(Constants.PREF_ACCOUNT_NAME);
