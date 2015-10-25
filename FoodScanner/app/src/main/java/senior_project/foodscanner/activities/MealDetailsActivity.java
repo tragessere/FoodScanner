@@ -147,7 +147,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.button_foodscanner) {
-            Intent intent = new Intent(MealDetailsActivity.this, CameraActivity.class);
+            Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
             intent.putExtra("pic_names", new String[]{"Top", "Side"});
             startActivityForResult(intent, REQUEST_FOODSCANNER);
         } else if(v.getId() == R.id.button_addfood) {
@@ -160,10 +160,10 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         switch(requestCode) {
             case REQUEST_FOODSCANNER:
                 if(resultCode == Activity.RESULT_OK) {
-                    if(data.hasExtra(CameraActivity.EXTRA_IMAGE_DIR)) {
-                        File dir = (File) data.getSerializableExtra(CameraActivity.EXTRA_IMAGE_DIR);
-                        Log.d("Meal Details Activity", "Got image directory: " + dir.getPath());
-                        //TODO go to food drawing activity with a reference to the file
+                    if(data.hasExtra(PhotoTakerActivity.RESULT_IMAGE_FILES)) {
+                        File[] imgFiles = (File[]) data.getSerializableExtra(PhotoTakerActivity.RESULT_IMAGE_FILES);
+                        //TODO go to food drawing activity with these file, or you can find them with ImageDirectoryManager.getImageDirectory().list()
+                        //TODO delete files after they are not needed anymore. To do this use ImageDirectoryManager.clearImageDirectory()
                     }
                 }
                 break;

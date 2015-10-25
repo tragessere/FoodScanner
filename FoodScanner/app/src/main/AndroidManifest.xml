@@ -2,10 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="senior_project.foodscanner" >
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
@@ -33,12 +35,16 @@
             android:label="@string/title_activity_meal_details" >
         </activity>
         <activity
-            android:name=".activities.CameraActivity"
+            android:name=".activities.PhotoTakerActivity"
             android:label="@string/title_activity_food_scanner" >
         </activity>
         <activity
             android:name=".activities.FoodItemActivity"
             android:label="@string/title_activity_food_adder" >
+        </activity>
+        <activity
+            android:name=".activities.CameraActivity"
+            android:label="@string/title_activity_camera" >
         </activity>
     </application>
 

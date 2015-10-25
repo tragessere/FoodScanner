@@ -1,32 +1,30 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="senior_project.foodscanner.activities.CameraActivity">
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/container_camera"
-        android:background="#000000"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
-
-        <ViewFlipper
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/viewFlipper_camera"
-            android:layout_gravity="center">
-
-            <include
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                layout="@layout/camera_layout"/>
+                android:id="@+id/container_camera"
+                android:background="#000000"
+                tools:context="senior_project.foodscanner.activities.CameraActivity">
 
-        </ViewFlipper>
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButton_takePicture"
+            android:layout_gravity="center_horizontal|bottom"
+            android:src="@drawable/abc_btn_radio_to_on_mtrl_015"/>
 
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButton_cancel"
+            android:layout_gravity="right|bottom"
+            android:src="@drawable/abc_ic_clear_mtrl_alpha"/>
 
-    </FrameLayout>
-</RelativeLayout>
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButton_flashMode"
+            android:layout_gravity="left|bottom"
+            android:src="@drawable/abc_ic_menu_share_mtrl_alpha"/>
+
+</FrameLayout>

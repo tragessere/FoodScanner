@@ -1,14 +1,22 @@
-package senior_project.foodscanner.ui.components.foodscanner;
+package senior_project.foodscanner.ui.components;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
-import senior_project.foodscanner.activities.CameraActivity;
-
+/**
+ * Pops up an error dialog.
+ * Implement interface ErrorDialogListener to listen for when the dialog is closed.
+ */
 public class ErrorDialogFragment extends DialogFragment {
+
+    public static void showErrorDialog(Activity act, String message){
+        ErrorDialogFragment newFragment = ErrorDialogFragment.newInstance(message);
+        newFragment.show(act.getFragmentManager(), "dialog");
+    }
 
     public static ErrorDialogFragment newInstance(String message) {
         Bundle args = new Bundle();
@@ -24,11 +32,18 @@ public class ErrorDialogFragment extends DialogFragment {
         builder = builder.setTitle("Error").setMessage(getArguments().getString("message")).setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ((CameraActivity)getActivity()).onErrorDialogOk();
+                Activity act = getActivity();
+                if(act instanceof  ErrorDialogListener){
+                    ((ErrorDialogListener) act).onErrorDialogClose();
+                }
             }
         });
         return builder.create();
 
+    }
+
+    public interface ErrorDialogListener {
+        void onErrorDialogClose();
     }
 
 }

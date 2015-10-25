@@ -1,4 +1,4 @@
-package senior_project.foodscanner.ui.components.foodscanner;
+package senior_project.foodscanner.ui.components.camera;
 
 import android.content.Context;
 import android.hardware.Camera;
