@@ -33,7 +33,7 @@
             android:label="@string/title_activity_meal_details" >
         </activity>
         <activity
-            android:name=".activities.FoodScannerActivity"
+            android:name=".activities.CameraActivity"
             android:label="@string/title_activity_food_scanner" >
         </activity>
         <activity

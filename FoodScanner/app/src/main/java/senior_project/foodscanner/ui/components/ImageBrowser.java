@@ -214,12 +214,12 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
                 break;
             case R.id.button_finish:
                 if(fbl != null) {
-                    fbl.OnFinishButton();
+                    fbl.onFinishButton();
                 }
                 break;
             case R.id.button_action:
                 if(abl != null) {
-                    abl.OnActionButton();
+                    abl.onActionButton();
                 }
                 break;
             default:
@@ -236,10 +236,10 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
     }
 
     public interface FinishButtonListener {
-        void OnFinishButton();
+        void onFinishButton();
     }
 
     public interface ActionButtonListener {
-        void OnActionButton();
+        void onActionButton();
     }
 }

@@ -1,7 +1,9 @@
 package senior_project.foodscanner.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,10 +12,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,19 +24,23 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ViewFlipper;
 
+import java.io.File;
+import java.io.FileOutputStream;
+
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.ui.components.ImageBrowser;
-import senior_project.foodscanner.ui.components.foodscanner.ErrorDialogFragment;
 import senior_project.foodscanner.ui.components.foodscanner.CameraView;
+import senior_project.foodscanner.ui.components.foodscanner.ErrorDialogFragment;
 
 /**
  * Activity for taking an X number of pictures.
  * <p/>
- * When starting this activity there are several extras you can put in the Intent to alter this activity's behavior:
+ * * When starting this activity there are several extras you can put in the Intent to alter this activity's behavior:
  * -"pic_names" - String[] - specify the number of pictures to take and their names. (Defaults to taking one picture named "1")
- * -"next_act" - //TODO
  * <p/>
- * To get the pictures that were taken //TODO.
+ * To get the pictures that were taken you need to start this activity with startActivityForResult().
+ * The result data Intent has the extra named CameraActivity.EXTRA_IMAGE_DIR, which contains a File object to the directory where the image files are stored.
+ * It is recommended to delete these files after you are done with them.
  * <p/>
  * <p/>
  * This class uses the old Camera api instead of Camera2 api, because Camera2 is for API level 21+.
@@ -59,31 +65,33 @@ import senior_project.foodscanner.ui.components.foodscanner.CameraView;
  * -Cycle through
  */
 //TODO adjust for orientation and aspect ratio
-public class FoodScannerActivity extends AppCompatActivity implements View.OnClickListener, Camera.PictureCallback, ImageBrowser.ActionButtonListener, ImageBrowser.FinishButtonListener {
+//TODO check reloading
+public class CameraActivity extends AppCompatActivity implements View.OnClickListener, Camera.ShutterCallback, Camera.PictureCallback, ImageBrowser.ActionButtonListener, ImageBrowser.FinishButtonListener {
+    public static final String EXTRA_IMAGE_DIR = "image_directory";
+    public static final String FILE_FORMAT_EXTENSION = ".jpg";
+
     private Camera camera;
     private int cameraId;
     private CameraView cameraView;
     private FrameLayout cameraContainer;
     private static final int requestCode_Camera = 0;
     private String[] picNames = {"1"};
-    private Bitmap[] pics = new Bitmap[picNames.length];
     private ViewFlipper camFlipper;
     private ImageBrowser picBrowser;
-    //private ActivityClass nextAct;
+    private static final String dirName = "CameraImageCache";
+    private File cacheDir;
+    private ProgressDialog picDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("FoodScanner", "ONCREATE");
+        Log.d("CameraActivity", "ONCREATE");
 
         if(getIntent().hasExtra("pic_names")) {
             picNames = getIntent().getStringArrayExtra("pic_names");
         }
-        if(getIntent().hasExtra("next_act")) {
-            //nextAct = getIntent().getStringArrayExtra("next_act");
-        }
 
-        setContentView(R.layout.activity_food_scanner);
+        setContentView(R.layout.activity_camera);
         camFlipper = ((ViewFlipper) findViewById(R.id.viewFlipper_camera));
         camFlipper.setInAnimation(this, android.R.anim.fade_in);
         camFlipper.setOutAnimation(this, android.R.anim.fade_out);
@@ -100,30 +108,56 @@ public class FoodScannerActivity extends AppCompatActivity implements View.OnCli
         cameraContainer.findViewById(R.id.imageButton_takePicture).setOnClickListener(this);
         cameraContainer.findViewById(R.id.imageButton_cancel).setOnClickListener(this);
         cameraContainer.findViewById(R.id.imageButton_flashMode).setOnClickListener(this);
+
+        // reset cache dir
+        cacheDir = new File(getCacheDir(), dirName);
+        if(!cacheDir.exists()) {
+            cacheDir.mkdir();
+        } else {
+            for(File f : cacheDir.listFiles()) {
+                if(!f.delete()) {
+                    showErrorDialog("Reset cache dir: Could not delete file \"" + f.getName() + "\".");
+                }
+            }
+        }
     }
 
-    private void takePicture() {
-        camera.takePicture(null, null, this);
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("CameraActivity", "ONSTART: " + picNames[0]);
+        if(camera == null) {
+            if(cameraExists()) {
+                int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+                if(permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, requestCode_Camera);
+                } else {
+                    new CameraLoader(this).execute();
+                }
+            } else {
+                showErrorDialog("Device does not have a camera.");
+            }
+        }
     }
 
     @Override
-    public void onPictureTaken(byte[] data, Camera camera) {
-        try {
-            if(data != null) {
-                Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-                bmp = orientBitmap(bmp);
-                picBrowser.setImage(picBrowser.getCurrentIndex(), new BitmapDrawable(getResources(), bmp));
-                if(!picBrowser.containsNullImage()) {
-                    picBrowser.setFinishButtonEnabled(true);
-                }
-                Log.d("TAKEN JPEG", "size = " + bmp.getWidth() + "x" + bmp.getHeight());
-            } else {
-                showErrorDialog("FATAL: Unable to get picture data.");
-            }
-        } catch(Exception e) {
-            Log.e("OnPictureTaken", "Exception", e);
-            showErrorDialog(e.getMessage());
-        }
+    protected void onPause() {
+        super.onPause();
+        Log.d("CameraActivity", "ONPAUSE");
+        releaseCamera();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_camera, menu);
+        return true;
+    }
+
+
+    private void takePicture() {//TODO loading
+        camera.takePicture(this, null, this);
     }
 
     /**
@@ -143,63 +177,6 @@ public class FoodScannerActivity extends AppCompatActivity implements View.OnCli
         return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d("FoodScanner", "ONSTART: " + picNames[0]);
-        if(camera == null) {
-            if(cameraExists()) {
-                int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-                if(permissionCheck != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, requestCode_Camera);
-                } else {
-                    new CameraLoader(this).execute();
-                }
-            } else {
-                showErrorDialog("Device does not have a camera.");
-            }
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d("FoodScanner", "ONPAUSE");
-        releaseCamera();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_food_scanner, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if(id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if(requestCode == requestCode_Camera) {
-            if(grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                showErrorDialog("This application does not have permission to access the camera.");
-            } else {
-                new CameraLoader(this).execute();
-            }
-        }
-    }
 
     private void releaseCamera() {
         if(camera != null) {
@@ -218,11 +195,12 @@ public class FoodScannerActivity extends AppCompatActivity implements View.OnCli
             setCameraOrientation();
             cameraView = new CameraView(this, camera);
             cameraContainer.addView(cameraView, 0);
+            camera.stopPreview();
 
             Camera.Parameters parameters = camera.getParameters();
+            Camera.Size size = parameters.getPictureSize();
             Log.d("Cam load", "preview size = " + parameters.getPreviewSize().width + "x" + parameters.getPreviewSize().height);
             Log.d("Cam load", "picsize = " + parameters.getPictureSize().width + "x" + parameters.getPictureSize().height);
-
         } else {
             showErrorDialog(reason);
         }
@@ -283,7 +261,7 @@ public class FoodScannerActivity extends AppCompatActivity implements View.OnCli
         newFragment.show(getFragmentManager(), "dialog");
     }
 
-    public void errorDialogOk() {
+    public void onErrorDialogOk() {
         finish();
     }
 
@@ -303,7 +281,8 @@ public class FoodScannerActivity extends AppCompatActivity implements View.OnCli
         camFlipper.showNext();
     }
 
-    private void flipToPicture() {//TODO switch lines?
+    private void flipToPicture() {
+        camera.stopPreview();
         camFlipper.showNext();
     }
 
@@ -312,7 +291,6 @@ public class FoodScannerActivity extends AppCompatActivity implements View.OnCli
         switch(v.getId()) {
             case R.id.imageButton_takePicture:
                 takePicture();
-                flipToPicture();
                 break;
             case R.id.imageButton_cancel:
                 flipToPicture();
@@ -328,23 +306,103 @@ public class FoodScannerActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
-    public void OnActionButton() {
+    public void onActionButton() {
         flipToCamera();
     }
 
     @Override
-    public void OnFinishButton() {
-        //TODO
-        showErrorDialog("Not Implemented");
+    public void onFinishButton() {
+        Intent intent = new Intent(this, MealDetailsActivity.class);
+        intent.putExtra("image_directory", cacheDir);
+        setResult(Activity.RESULT_OK, intent);
+        finish();
+    }
+
+    @Override
+    public void onShutter() {
+        picDialog = new ProgressDialog(this);
+        picDialog.setTitle("Processing Picture...");
+        picDialog.show();
+    }
+
+    @Override
+    public void onPictureTaken(byte[] data, Camera camera) {
+        try {
+            if(data != null) {
+                // create bitmap from data bytes
+                Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+                bmp = orientBitmap(bmp);
+
+                // save to cache directory
+                File imgF = new File(cacheDir, picBrowser.getCurrentImageName()+FILE_FORMAT_EXTENSION);
+                if(imgF.exists()) {
+                    if(!imgF.delete()) {
+                        showErrorDialog("Cache directory saving: Could not delete file \"" + imgF.getName() + "\"");
+                    }
+                    if(!imgF.createNewFile()) {
+                        showErrorDialog("Cache directory saving: Could not create file \"" + imgF.getName() + "\"");
+                    }
+                }
+                FileOutputStream fos = new FileOutputStream(imgF.getPath());
+                bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                fos.close();
+
+                //update picBrowser
+                picBrowser.setImage(picBrowser.getCurrentIndex(), new BitmapDrawable(getResources(), bmp));
+                if(!picBrowser.containsNullImage()) {
+                    picBrowser.setFinishButtonEnabled(true);
+                }
+
+                // return to picBrowser
+                flipToPicture();
+
+                if(picDialog.isShowing()) {
+                    picDialog.dismiss();
+                }
+
+                Log.d("TAKEN JPEG", "size = " + bmp.getWidth() + "x" + bmp.getHeight());
+            } else {
+                showErrorDialog("FATAL: Unable to get picture data.");
+            }
+        } catch(Exception e) {
+            Log.e("OnPictureTaken", "Exception", e);
+            showErrorDialog("Exception:" + e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if(id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(requestCode == requestCode_Camera) {
+            if(grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                showErrorDialog("This application does not have permission to access the camera.");
+            } else {
+                new CameraLoader(this).execute();
+            }
+        }
     }
 
     private class CameraLoader extends AsyncTask<Void, Void, Camera> {
-        private FoodScannerActivity act;
+        private CameraActivity act;
         private ProgressDialog d;
         private String reason;
         private int cid = -1;
 
-        CameraLoader(FoodScannerActivity act) {
+        CameraLoader(CameraActivity act) {
             this.act = act;
         }
 

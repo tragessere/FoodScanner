@@ -6,7 +6,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
-import senior_project.foodscanner.activities.FoodScannerActivity;
+import senior_project.foodscanner.activities.CameraActivity;
 
 public class ErrorDialogFragment extends DialogFragment {
 
@@ -24,7 +24,7 @@ public class ErrorDialogFragment extends DialogFragment {
         builder = builder.setTitle("Error").setMessage(getArguments().getString("message")).setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ((FoodScannerActivity)getActivity()).errorDialogOk();
+                ((CameraActivity)getActivity()).onErrorDialogOk();
             }
         });
         return builder.create();

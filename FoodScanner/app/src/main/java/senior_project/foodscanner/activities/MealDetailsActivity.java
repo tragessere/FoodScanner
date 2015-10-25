@@ -1,8 +1,10 @@
 package senior_project.foodscanner.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,33 +14,36 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import senior_project.foodscanner.Meal;
+
+import java.io.File;
 import java.util.Calendar;
 
 import senior_project.foodscanner.R;
 
 /**
  * Shows details of the meal and allows editing.
- *
+ * <p/>
  * Details:
- *  Date and time
- *  Meal Type
- *  Total nutrition
- *  List of food items and each nutrition and volume
- *
+ * Date and time
+ * Meal Type
+ * Total nutrition
+ * List of food items and each nutrition and volume
+ * <p/>
  * Actions:
- *  Add Food Button
- *      - Pop up menu
- *          - Scan Food - takes user to Food Scanner activity
- *          - Manually add Food Item - takes user to Food Item activity
- *  Delete Food
- *  Edit Date and time
- *  Edit Meal Type
- *  Delete Meal
- *  Back Button - return to Meal Calendar
+ * Add Food Button
+ * - Pop up menu
+ * - Scan Food - takes user to Food Scanner activity
+ * - Manually add Food Item - takes user to Food Item activity
+ * Delete Food
+ * Edit Date and time
+ * Edit Meal Type
+ * Delete Meal
+ * Back Button - return to Meal Calendar
  */
-public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener{
+public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Meal meal;
+    private static final int REQUEST_FOODSCANNER = 0;
 
     private String[] meals;
     private Spinner mealSpinner;
@@ -84,15 +89,15 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         int time = minute + (hour * 60);
         String defaultMeal;
 
-        if (time >= breakfastTime && time < brunchTime) {
+        if(time >= breakfastTime && time < brunchTime) {
             defaultMeal = "Breakfast";
-        } else if (time >= brunchTime && time < lunchTime) {
+        } else if(time >= brunchTime && time < lunchTime) {
             defaultMeal = "Brunch";
-        } else if (time >= lunchTime && time < snackTime) {
+        } else if(time >= lunchTime && time < snackTime) {
             defaultMeal = "Lunch";
-        } else if (time >= snackTime && time < dinnerTime) {
+        } else if(time >= snackTime && time < dinnerTime) {
             defaultMeal = "Snack";
-        } else if (time >= dinnerTime && time < dessertTime) {
+        } else if(time >= dinnerTime && time < dessertTime) {
             defaultMeal = "Dinner";
         } else {
             defaultMeal = "Dessert";
@@ -132,7 +137,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if(id == R.id.action_settings) {
             return true;
         }
 
@@ -141,12 +146,29 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.button_foodscanner) {
-            Intent intent = new Intent(MealDetailsActivity.this, FoodScannerActivity.class);
+        if(v.getId() == R.id.button_foodscanner) {
+            Intent intent = new Intent(MealDetailsActivity.this, CameraActivity.class);
             intent.putExtra("pic_names", new String[]{"Top", "Side"});
-            startActivity(intent);
-        } else if (v.getId() == R.id.button_addfood) {
+            startActivityForResult(intent, REQUEST_FOODSCANNER);
+        } else if(v.getId() == R.id.button_addfood) {
             startActivity(new Intent(MealDetailsActivity.this, FoodItemActivity.class));
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+            case REQUEST_FOODSCANNER:
+                if(resultCode == Activity.RESULT_OK) {
+                    if(data.hasExtra(CameraActivity.EXTRA_IMAGE_DIR)) {
+                        File dir = (File) data.getSerializableExtra(CameraActivity.EXTRA_IMAGE_DIR);
+                        Log.d("Meal Details Activity", "Got image directory: " + dir.getPath());
+                        //TODO go to food drawing activity with a reference to the file
+                    }
+                }
+                break;
+            default:
+                break;
         }
     }
 
