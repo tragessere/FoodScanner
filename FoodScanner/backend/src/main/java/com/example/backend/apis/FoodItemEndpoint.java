@@ -39,14 +39,19 @@ import com.googlecode.objectify.cmd.Query;
 public class FoodItemEndpoint {
 
     /**
-     * Endpoint method that takes in a name, queries the database for that name,
-     * and returns a FoodItem from the query.
+     * Gets food item with specified name.
+     * @param name
+     * @return food item with name equal to the specified name.
      */
     @ApiMethod(name = "getDensity")
     public FoodItem getFoodItem(@Named("name") String name) {
         return ofy().load().type(FoodItem.class).filter("name", name).list().get(0);
     }
 
+    /**
+     * Gets all of the food items in the data store.
+     * @return CollectionResponse of all food items.
+     */
     @ApiMethod(name = "getAllFoodItems")
     public CollectionResponse<FoodItem> getFoodItems() {
 
