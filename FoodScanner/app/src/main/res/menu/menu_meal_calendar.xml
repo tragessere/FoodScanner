@@ -3,9 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="senior_project.foodscanner.activities.MealCalendarActivity">
     <item android:id="@+id/action_login"
-        android:title="@string/action_login"
-        app:showAsAction="ifRoom" />
-    <item android:id="@+id/action_meal_add"
-        android:title="@string/action_meal_add"
+        android:title="@string/action_logout"
         app:showAsAction="ifRoom" />
 </menu>

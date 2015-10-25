@@ -11,6 +11,8 @@
     <color name="Divider">#B6B6B6</color>
 
     <color name="White">#FFFFFF</color>
+    <color name="White.Transparent">#CCFFFFFF</color>
+    <color name="Grey.Light">#F4F4F4</color>
 
     <color name="black_overlay">#66000000</color>
 
