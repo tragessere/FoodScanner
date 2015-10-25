@@ -142,7 +142,9 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.button_foodscanner) {
-            startActivity(new Intent(MealDetailsActivity.this, FoodScannerActivity.class));
+            Intent intent = new Intent(MealDetailsActivity.this, FoodScannerActivity.class);
+            intent.putExtra("pic_names", new String[]{"Top", "Side"});
+            startActivity(intent);
         } else if (v.getId() == R.id.button_addfood) {
             startActivity(new Intent(MealDetailsActivity.this, FoodItemActivity.class));
         }

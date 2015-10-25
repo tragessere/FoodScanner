@@ -2,6 +2,7 @@ package senior_project.foodscanner.ui.components.foodscanner;
 
 import android.content.Context;
 import android.hardware.Camera;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -30,7 +31,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
         } catch (IOException e) {
-            //TODO
+            Log.e("Surface Created", "Exception", e);
         }
     }
 
@@ -65,7 +66,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
             mCamera.startPreview();
 
         } catch (Exception e){
-            //TODO
+            Log.e("Surface Created", "Exception", e);
         }
     }
 }
