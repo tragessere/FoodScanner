@@ -89,10 +89,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if(id == R.id.action_login) {
+        if(id == R.id.action_settings) {
             //TODO go to login screen here
             //TODO upon returning from logging in, update UI here to indicate user is logged in and has the ability to log out
-            LoginActivity.logout(this);
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
 
