@@ -18,8 +18,8 @@ import java.io.FileInputStream;
 
 import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.ui.components.ImageBrowser;
 import senior_project.foodscanner.ui.components.ErrorDialogFragment;
+import senior_project.foodscanner.ui.components.ImageBrowser;
 
 /**
  * Activity for taking an X number of pictures.
@@ -45,13 +45,13 @@ import senior_project.foodscanner.ui.components.ErrorDialogFragment;
  * -Cycle through pictures and take the rest of the pictures
  * -Finish button is enabled when all pictrues are taken
  */
-//TODO adjust for orientation and aspect ratio
-//TODO check reloading
-//TODO fix size changing
 public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialogFragment.ErrorDialogListener, ImageBrowser.ActionButtonListener, ImageBrowser.FinishButtonListener {
     public static final String EXTRA_PIC_NAMES = "pic_names";
     public static final String RESULT_IMAGE_FILES = "image_files";
+
     private static final int RESULT_CAMERA = 0;
+    private static final String SAVEINST_FILES = "picFiles";
+    private static final String SAVEINST_INDEX = "current_index";
     private String[] picNames = {"Picture"};
     private ImageBrowser picBrowser;
     private File[] picFiles;
@@ -59,7 +59,6 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("PhotoTakerActivity", "ONCREATE");
 
         if(getIntent().hasExtra(EXTRA_PIC_NAMES)) {
             picNames = getIntent().getStringArrayExtra(EXTRA_PIC_NAMES);
@@ -75,22 +74,35 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
         picBrowser.setActionButtonText("Take Picture");
         picBrowser.setFinishButtonEnabled(false);
         ((FrameLayout) findViewById(R.id.container)).addView(picBrowser);
+        picBrowser.setCurrentIndex(0);
 
-        if(!ImageDirectoryManager.clearImageDirectory(this)) {
-            ErrorDialogFragment.showErrorDialog(this, "Clear image directory failed.");
+
+        if(savedInstanceState != null) {
+            // restore pictures taken
+            picFiles = (File[]) savedInstanceState.getSerializable(SAVEINST_FILES);
+            for(int i = 0; i < picFiles.length; i++) {
+                if(picFiles[i] != null) {
+                    picBrowser.setImage(i, imageFileToBitmapDrawable(picFiles[i]));
+                }
+            }
+            picBrowser.setCurrentIndex(savedInstanceState.getInt(SAVEINST_INDEX));
+            if(!picBrowser.containsNullImage()) {
+                picBrowser.setFinishButtonEnabled(true);
+            }
+        } else {
+            // clear image directory
+            if(!ImageDirectoryManager.clearImageDirectory(this)) {
+                ErrorDialogFragment.showErrorDialog(this, "Clear image directory failed.");
+            }
         }
+
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d("PhotoTakerActivity", "ONSTART");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d("PhotoTakerActivity", "ONPAUSE");
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putSerializable(SAVEINST_FILES, picFiles);
+        savedInstanceState.putInt(SAVEINST_INDEX, picBrowser.getCurrentIndex());
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
@@ -141,6 +153,20 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
         startActivityForResult(intent, RESULT_CAMERA);
     }
 
+    private BitmapDrawable imageFileToBitmapDrawable(File f) {
+        FileInputStream fis;
+        BitmapDrawable bmp = null;
+        try {
+            fis = new FileInputStream(f);
+            bmp = new BitmapDrawable(getResources(), fis);
+            fis.close();
+        } catch(java.io.IOException e) {
+            Log.e("PhotoTakerActivity", "onActivityResult", e);
+            ErrorDialogFragment.showErrorDialog(this, "Exception: " + e.getMessage());
+        }
+        return bmp;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
@@ -149,17 +175,9 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
                     //get result
                     File f = (File) data.getSerializableExtra(CameraActivity.RESULT_IMAGE_FILE);
                     picFiles[picBrowser.getCurrentIndex()] = f;
+
                     //update picBrowser
-                    FileInputStream fis;
-                    try {
-                        fis = new FileInputStream(f);
-                        BitmapDrawable bmp = new BitmapDrawable(getResources(), fis);
-                        fis.close();
-                        picBrowser.setImage(picBrowser.getCurrentIndex(), bmp);
-                    } catch(java.io.IOException e) {
-                        Log.e("PhotoTakerActivity", "onActivityResult", e);
-                        ErrorDialogFragment.showErrorDialog(this, "Exception: " + e.getMessage());
-                    }
+                    picBrowser.setImage(picBrowser.getCurrentIndex(), imageFileToBitmapDrawable(f));
                     if(!picBrowser.containsNullImage()) {
                         picBrowser.setFinishButtonEnabled(true);
                     }

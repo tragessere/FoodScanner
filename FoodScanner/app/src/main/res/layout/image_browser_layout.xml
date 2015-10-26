@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal"
-        android:background="#a2a2a2">
+              android:layout_height="match_parent"
+              android:background="#a2a2a2">
 
         <ImageSwitcher
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:id="@+id/imageSwitcher"
             android:layout_gravity="center"/>
 
@@ -52,16 +46,15 @@
             android:text="Image Title"
             android:id="@+id/textView_title"
             android:layout_gravity="center_horizontal|top"
-            android:background="#963372de"/>
+            android:background="#9665d5ff"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="(0/0)"
+            android:text="0/0"
             android:id="@+id/textView_count"
             android:layout_gravity="right|top"
-            android:background="#963372de"/>
+            android:background="#9665d5ff"/>
 
-    </FrameLayout>
-</LinearLayout>
+</FrameLayout>

@@ -6,12 +6,15 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.File;
 
 import senior_project.foodscanner.R;
 
@@ -43,7 +46,7 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
         this.defaultImage = defaultImage;
         images = new Drawable[imgNames.length];
         inflate();
-        setCurrentImage(currentIndex);
+        setCurrentIndex(currentIndex);
     }
 
     public ImageBrowser(Context context, String[] imgNames, Drawable defaultImage, Drawable[] images) {
@@ -56,7 +59,7 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
         this.defaultImage = defaultImage;
         this.images = images;
         inflate();
-        setCurrentImage(currentIndex);
+        setCurrentIndex(currentIndex);
     }
 
     public int getNumImages() {
@@ -66,7 +69,7 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
     public void setImage(int index, Drawable image) {
         images[index] = image;
         if(index == currentIndex){
-            setCurrentImage(currentIndex);
+            setCurrentIndex(currentIndex);
         }
     }
 
@@ -114,7 +117,7 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
         textView_Name = ((TextView) browser.findViewById(R.id.textView_title));
         textView_Name.setText(imgNames[currentIndex]);
         textView_Index = ((TextView) browser.findViewById(R.id.textView_count));
-        textView_Index.setText("(" + (currentIndex + 1) + "/" + imgNames.length + ")");
+        textView_Index.setText((currentIndex + 1) + "/" + imgNames.length);
         imgBt_Next = (ImageButton) browser.findViewById(R.id.imageButton_next);
         imgBt_Next.setOnClickListener(this);
         imgBt_Prev = (ImageButton) browser.findViewById(R.id.imageButton_prev);
@@ -125,8 +128,8 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
         button_Action.setOnClickListener(this);
 
         imgSwitcher = ((ImageSwitcher) browser.findViewById(R.id.imageSwitcher));
-        imgSwitcher.addView(new ImageView(context));
-        imgSwitcher.addView(new ImageView(context));
+        imgSwitcher.addView(new ImageView(context), new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        imgSwitcher.addView(new ImageView(context), new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         //TODO animations
        // imgSwitcher.setInAnimation(context, android.R.anim.slide_in_left);
        // imgSwitcher.setOutAnimation(context, android.R.anim.slide_out_right);
@@ -136,7 +139,7 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
         button_Action.setText(text);
     }
 
-    public void setCurrentImage(int index) {
+    public void setCurrentIndex(int index) {
         currentIndex = index;
         if(isCyclic) {
             if(currentIndex < 0) {
@@ -158,7 +161,7 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
         }
         imgSwitcher.setImageDrawable(img);
         textView_Name.setText(imgNames[currentIndex]);
-        textView_Index.setText("(" + (currentIndex + 1) + "/" + imgNames.length + ")");
+        textView_Index.setText((currentIndex + 1) + "/" + imgNames.length);
 
         if(!isCyclic) {
             if(currentIndex == 0) {
@@ -207,10 +210,10 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.imageButton_next:
-                setCurrentImage(currentIndex + 1);
+                setCurrentIndex(currentIndex + 1);
                 break;
             case R.id.imageButton_prev:
-                setCurrentImage(currentIndex - 1);
+                setCurrentIndex(currentIndex - 1);
                 break;
             case R.id.button_finish:
                 if(fbl != null) {

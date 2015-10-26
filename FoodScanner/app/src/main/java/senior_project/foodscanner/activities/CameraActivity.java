@@ -31,6 +31,8 @@ import senior_project.foodscanner.ui.components.ErrorDialogFragment;
 
 /**
  * Activity to take a single picture.
+ * Must specify file name of the picture by putting a String extra in the Intent named EXTRA_FILENAME.
+ * To get the resulting image file, get the extra named RESULT_IMAGE_FILE.
  *
  * //TODO FEATURES:
  * -Tap to focus
@@ -43,9 +45,9 @@ import senior_project.foodscanner.ui.components.ErrorDialogFragment;
 public class CameraActivity extends AppCompatActivity implements ErrorDialogFragment.ErrorDialogListener, View.OnClickListener, Camera.ShutterCallback, Camera.PictureCallback {
 
     // Public fields
-    public static final String FILE_FORMAT_EXTENSION = ".jpg";//TODO png or set as option
     public static final String EXTRA_FILENAME = "filename";
     public static final String RESULT_IMAGE_FILE = "image_file";
+    public static final String FILE_FORMAT_EXTENSION = ".png";
 
     // Activity params
     private String filename;
@@ -103,24 +105,8 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d("PhotoTakerActivity", "ONPAUSE");
+        Log.d("CameraActivity", "ONPAUSE");
         releaseCamera();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_camera, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if(id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -165,13 +151,18 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
                 if(imgF.exists()) {
                     if(!imgF.delete()) {
                         ErrorDialogFragment.showErrorDialog(this, "Image directory saving: Could not delete file \"" + imgF.getName() + "\"");
+                        return;
                     }
                     if(!imgF.createNewFile()) {
                         ErrorDialogFragment.showErrorDialog(this, "Image directory saving: Could not create file \"" + imgF.getName() + "\"");
+                        return;
                     }
                 }
                 FileOutputStream fos = new FileOutputStream(imgF.getPath());
-                bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);//TODO format
+                if(!bmp.compress(Bitmap.CompressFormat.PNG, 100, fos)){
+                    ErrorDialogFragment.showErrorDialog(this, "Failed to compress bitmap.");
+                    return;
+                }
                 fos.close();
 
                 if(pDialog.isShowing()) {
@@ -182,8 +173,9 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
                 intent.putExtra("image_file", imgF);
                 setResult(RESULT_OK, intent);
                 finish();
+                overridePendingTransition(android.R.anim.fade_in,android.R.anim.fade_out);// fade animation
             } else {
-                ErrorDialogFragment.showErrorDialog(this, "FATAL: Unable to get picture data.");
+                ErrorDialogFragment.showErrorDialog(this, "Unable to get picture data.");
             }
         } catch(Exception e) {
             Log.e("OnPictureTaken", "Exception", e);
@@ -191,11 +183,15 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         }
     }
 
+
     private void onCameraLoad(int cameraId, Camera camera, String reason) {
         this.camera = camera;
         this.cameraId = cameraId;
         if(camera != null) {
             setCameraOrientation();
+            if(cameraView != null){
+                cameraContainer.removeView(cameraView);
+            }
             cameraView = new CameraView(this, camera);
             cameraContainer.addView(cameraView, 0);
             camera.stopPreview();
@@ -257,8 +253,6 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         if(camera != null) {
             camera.release();
             camera = null;
-            cameraContainer.removeView(cameraView);
-            cameraView = null;
         }
     }
 

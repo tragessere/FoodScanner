@@ -8,7 +8,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 
 /**
- * Pops up an error dialog.
+ * Easy error dialog pop up.
  * Implement interface ErrorDialogListener to listen for when the dialog is closed.
  */
 public class ErrorDialogFragment extends DialogFragment {
