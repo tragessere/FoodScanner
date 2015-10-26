@@ -29,7 +29,7 @@ public class MainActivity extends Activity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                startActivity(new Intent(MainActivity.this, MealCalendarActivity.class));
+                startActivity(new Intent(MainActivity.this, PaintingActivity.class));
                 finish();
             }
         }, wait);
