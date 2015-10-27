@@ -1,8 +1,10 @@
 package senior_project.foodscanner.database;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 /**
@@ -63,12 +65,50 @@ public class SQLHelper extends SQLiteOpenHelper {
 	}
 
 
+	/**
+	 * Convenience method for quickly inserting several rows into a single table
+	 *
+	 * @param tableName		Name of the table where the records will be inserted
+	 * @param vals			Array of ContentValues to be inserted
+	 */
+	public static void bulkInsert(@NonNull String tableName, @NonNull ContentValues[] vals) {
+		if(tableName == null)
+			throw new NullPointerException("SQLHelper:bulkInsert() - table name cannot be null");
+		if(vals == null)
+			throw new NullPointerException("SQLHelper:bulkInsert() - ContentValues cannot be null");
+
+
+		SQLiteDatabase mDb = mDbHelper.getWritableDatabase();
+		mDb.beginTransaction();
+		try {
+			for (ContentValues val : vals) {
+				mDb.insert(tableName, null, val);
+			}
+			mDb.setTransactionSuccessful();
+		} finally {
+			mDb.endTransaction();
+		}
+	}
+
+
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(TABLE_MEALS_CREATE);
 		db.execSQL(TABLE_FOOD_ITEM_CREATE);
 	}
 
+	/**
+	 * Upgrades the database when <code>DATABASE_VERSION</code> is incremented.
+	 *
+	 * This operation currently deletes all data stored in the database!
+	 *
+	 * To setup the upgrade to preserve data see:
+	 * http://stackoverflow.com/questions/8425861/how-do-i-upgrade-a-database-without-removing-the-data-that-the-user-input-in-the
+	 *
+	 * @param db 			The database to be updated
+	 * @param oldVersion	The current version of <code>db</code>
+	 * @param newVersion	The desired final version of <code>db</code>
+	 */
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		Log.w(SQLHelper.class.getSimpleName(), "Upgrading database from version " + oldVersion

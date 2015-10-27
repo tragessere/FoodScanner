@@ -24,6 +24,16 @@
         <item name="android:minWidth">72dip</item>
     </style>
 
+    <style name="EditText.White" parent="TextAppearance.AppCompat">
+        <item name="android:textColorHint">@color/White</item>
+        <item name="android:textSize">18sp</item>
+        <item name="colorAccent">@color/White</item>
+        <item name="colorControlNormal">@color/White.Transparent</item>
+    </style>
 
+    <style name="Button.Primary.Dark" parent="Widget.AppCompat.Button.Colored">
+        <item name="colorButtonNormal">@color/Primary.Dark</item>
+        <item name="android:textColor">@color/White</item>
+    </style>
 
 </resources>
