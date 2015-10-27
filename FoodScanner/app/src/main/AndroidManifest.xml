@@ -44,7 +44,8 @@
         </activity>
         <activity
             android:name=".activities.CameraActivity"
-            android:label="@string/title_activity_camera" >
+            android:label="Camera"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
 

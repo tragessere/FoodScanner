@@ -15,8 +15,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.Gravity;
 import android.view.Surface;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -26,33 +25,33 @@ import java.io.FileOutputStream;
 
 import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.ui.components.camera.CameraView;
 import senior_project.foodscanner.ui.components.ErrorDialogFragment;
+import senior_project.foodscanner.ui.components.camera.CameraView;
 
 /**
  * Activity to take a single picture.
  * Must specify file name of the picture by putting a String extra in the Intent named EXTRA_FILENAME.
  * To get the resulting image file, get the extra named RESULT_IMAGE_FILE.
- *
- * //TODO FEATURES:
- * -Tap to focus
- * -Zoom fingers
+ * <p/>
+ * Possible Features:
  * -Toggle flash: On/Off/Auto
- * -Auto focus
+ * -Zoom fingers
+ * -Focus and exposure
  */
 //TODO adjust for orientation and aspect ratio
-//TODO check reloading
 public class CameraActivity extends AppCompatActivity implements ErrorDialogFragment.ErrorDialogListener, View.OnClickListener, Camera.ShutterCallback, Camera.PictureCallback {
 
     // Public fields
     public static final String EXTRA_FILENAME = "filename";
     public static final String RESULT_IMAGE_FILE = "image_file";
-    public static final String FILE_FORMAT_EXTENSION = ".png";
+    public static final String IMAGE_FORMAT_EXTENSION = ".png";
+    public static final Bitmap.CompressFormat IMAGE_FORMAT_COMPRESSION = Bitmap.CompressFormat.PNG;
 
     // Activity params
     private String filename;
 
     // Private fields
+    private static final String SAVEINST_FLASH = "flash";
     private static final int REQUEST_PERMISSION_CAMERA = 0;
     private Camera camera;
     private int cameraId;
@@ -103,6 +102,13 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     }
 
     @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        //savedInstanceState.putSerializable(SAVEINST_FLASH, picFiles);
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+
+    @Override
     protected void onPause() {
         super.onPause();
         Log.d("CameraActivity", "ONPAUSE");
@@ -143,11 +149,11 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
             if(data != null) {
                 // create bitmap from data bytes
                 Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-                bmp = orientBitmap(bmp);
+                //bmp = orientBitmap(bmp);TODO
                 Log.d("TAKEN JPEG", "size = " + bmp.getWidth() + "x" + bmp.getHeight());
 
                 // save to image directory
-                File imgF = new File(ImageDirectoryManager.getImageDirectory(this), filename + FILE_FORMAT_EXTENSION);
+                File imgF = new File(ImageDirectoryManager.getImageDirectory(this), filename + IMAGE_FORMAT_EXTENSION);
                 if(imgF.exists()) {
                     if(!imgF.delete()) {
                         ErrorDialogFragment.showErrorDialog(this, "Image directory saving: Could not delete file \"" + imgF.getName() + "\"");
@@ -159,7 +165,7 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
                     }
                 }
                 FileOutputStream fos = new FileOutputStream(imgF.getPath());
-                if(!bmp.compress(Bitmap.CompressFormat.PNG, 100, fos)){
+                if(!bmp.compress(IMAGE_FORMAT_COMPRESSION, 100, fos)) {
                     ErrorDialogFragment.showErrorDialog(this, "Failed to compress bitmap.");
                     return;
                 }
@@ -173,7 +179,7 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
                 intent.putExtra("image_file", imgF);
                 setResult(RESULT_OK, intent);
                 finish();
-                overridePendingTransition(android.R.anim.fade_in,android.R.anim.fade_out);// fade animation
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);// fade animation
             } else {
                 ErrorDialogFragment.showErrorDialog(this, "Unable to get picture data.");
             }
@@ -183,23 +189,47 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         }
     }
 
+    private FrameLayout.LayoutParams getOptimalLayoutParams() {
+        //TODO rotation
+        //TODO over stretching
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(cameraId, info);
+
+        // fit to container
+        Camera.Size pSize = camera.getParameters().getPreviewSize();
+        int w = pSize.width;
+        int h = pSize.height;
+
+        if(getScreenRotation() == 0){//TODO make dynamic
+            int temp = w;
+            w = h;
+            h = temp;
+        }
+      /*  double ratio = (double) (w) / h;
+        if(w >= h) {
+            w = cameraContainer.getWidth();
+            h = (int) (w / ratio);
+        } else {
+            h = cameraContainer.getHeight();
+            w = (int) (h * ratio);
+        }
+        */
+        return new FrameLayout.LayoutParams(w, h, Gravity.CENTER);
+    }
+
 
     private void onCameraLoad(int cameraId, Camera camera, String reason) {
         this.camera = camera;
         this.cameraId = cameraId;
         if(camera != null) {
             setCameraOrientation();
-            if(cameraView != null){
+
+            // create camera view with optimal size
+            if(cameraView != null) {
                 cameraContainer.removeView(cameraView);
             }
             cameraView = new CameraView(this, camera);
-            cameraContainer.addView(cameraView, 0);
-            camera.stopPreview();
-
-            Camera.Parameters parameters = camera.getParameters();
-            Camera.Size size = parameters.getPictureSize();
-            Log.d("Cam load", "preview size = " + parameters.getPreviewSize().width + "x" + parameters.getPreviewSize().height);
-            Log.d("Cam load", "picsize = " + parameters.getPictureSize().width + "x" + parameters.getPictureSize().height);
+            cameraContainer.addView(cameraView, 0, getOptimalLayoutParams());
         } else {
             ErrorDialogFragment.showErrorDialog(this, reason);
         }
@@ -268,28 +298,65 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     }
 
     /**
-     * adjust camera display and picture orientations to match screen orientation
+     * Adjust camera display and picture orientations to always point up no matter the screen orientation.
      */
-    private void setCameraOrientation() {
-        int degrees = getScreenRotation();
+    private void setCameraOrientation() {//TODO
+        int deviceO = getScreenRotation();
 
         Camera.CameraInfo info = new Camera.CameraInfo();
         Camera.getCameraInfo(cameraId, info);
+        int camO = info.orientation;
+
         Camera.Parameters params = camera.getParameters();
-        int rDisp;
+        int rCamDisplay;
         int rPic;
         if(info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            rDisp = (info.orientation + degrees) % 360;
-            rDisp = (360 - rDisp) % 360;  // compensate the mirror
-            rPic = (info.orientation - degrees + 360) % 360;
+            rCamDisplay = (camO + deviceO) % 360;
+            rCamDisplay = (360 - rCamDisplay) % 360;  // compensate the mirror
+            rPic = (camO - deviceO + 360) % 360;
         } else {  // back-facing
-            rDisp = (info.orientation - degrees + 360) % 360;
-            rPic = (info.orientation + degrees) % 360;
+            rCamDisplay = camO;
+            rPic = (camO + deviceO) % 360;
         }
-        camera.setDisplayOrientation(rDisp);
-        Log.d("ROTATE", "" + rPic);
-        params.setRotation(rPic);
-        camera.setParameters(params);
+        camera.setDisplayOrientation(rCamDisplay);
+
+        //params.setRotation(rPic);
+        //camera.setParameters(params);
+
+        Log.d("CameraActivity", "info.orientation = " + info.orientation);
+        Log.d("CameraActivity", "deviceO = " + deviceO);
+        Log.d("CameraActivity", "rCamDisplay = " + rCamDisplay);
+        Log.d("CameraActivity", "rPic = " + rPic);
+
+
+    }
+
+    /**
+     * Adjust camera display and picture orientations to always be portrait.
+     */
+    private void setCameraOrientationPortrait() {//TODO
+        int deviceO = getScreenRotation();
+
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(cameraId, info);
+        int camO = info.orientation;
+
+        Camera.Parameters params = camera.getParameters();
+        int rCamDisplay;
+        int rPic;
+        if(info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            rCamDisplay = (camO + deviceO) % 360;
+            rCamDisplay = (360 - rCamDisplay) % 360;  // compensate the mirror
+            rPic = (camO - deviceO + 360) % 360;
+        } else {  // back-facing
+            rCamDisplay = (camO - deviceO + 360) % 360;
+            rPic = (camO + deviceO) % 360;
+        }
+        camera.setDisplayOrientation(rCamDisplay);
+
+        //params.setRotation(rPic);
+        //camera.setParameters(params);
+
     }
 
     @Override

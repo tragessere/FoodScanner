@@ -119,7 +119,7 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
 
     @Override
     public void onFinishButton() {
-        Intent intent = new Intent(this, MealDetailsActivity.class);
+        Intent intent = new Intent();
         intent.putExtra(RESULT_IMAGE_FILES, picFiles);
         setResult(Activity.RESULT_OK, intent);
         finish();

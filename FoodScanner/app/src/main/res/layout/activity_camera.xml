@@ -4,8 +4,7 @@
                 android:layout_height="match_parent"
                 android:id="@+id/container_camera"
                 android:background="#000000"
-                tools:context="senior_project.foodscanner.activities.CameraActivity"
-                android:theme="@style/AppTheme.NoActionBar">
+                tools:context="senior_project.foodscanner.activities.CameraActivity">
 
         <ImageButton
             android:layout_width="wrap_content"
