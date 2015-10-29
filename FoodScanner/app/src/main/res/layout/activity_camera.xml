@@ -1,0 +1,30 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/container_camera"
+                android:background="#000000"
+                tools:context="senior_project.foodscanner.activities.CameraActivity">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButton_takePicture"
+            android:layout_gravity="center_horizontal|bottom"
+            android:src="@drawable/abc_btn_radio_to_on_mtrl_015"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButton_cancel"
+            android:layout_gravity="right|bottom"
+            android:src="@drawable/abc_ic_clear_mtrl_alpha"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButton_flashMode"
+            android:layout_gravity="left|bottom"
+            android:src="@drawable/abc_ic_menu_share_mtrl_alpha"/>
+
+</FrameLayout>
