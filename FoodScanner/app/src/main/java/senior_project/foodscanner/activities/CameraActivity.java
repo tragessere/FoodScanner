@@ -1,14 +1,12 @@
 package senior_project.foodscanner.activities;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.Camera;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -33,18 +31,14 @@ import senior_project.foodscanner.ui.components.camera.CameraView;
  * Activity to take a single picture.
  * Must specify file name of the picture by putting a String extra in the Intent named EXTRA_FILENAME.
  * To get the resulting image file, get the extra named RESULT_IMAGE_FILE.
- * <p/>
- * Possible Features:
- * -Toggle flash: On/Off/Auto
- * -Zoom fingers
- * -Focus and exposure
  */
-//TODO make cam and taker activity fullscreen
 public class CameraActivity extends AppCompatActivity implements ErrorDialogFragment.ErrorDialogListener, View.OnClickListener, Camera.ShutterCallback, Camera.PictureCallback {
 
     // Public fields
     public static final String EXTRA_FILENAME = "filename";
     public static final String RESULT_IMAGE_FILE = "image_file";
+
+    // Image file format
     public static final String IMAGE_FORMAT_EXTENSION = ".png";
     public static final Bitmap.CompressFormat IMAGE_FORMAT_COMPRESSION = Bitmap.CompressFormat.PNG;
 
@@ -52,25 +46,16 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     private String filename;
 
     // Private fields
-    private static final String SAVEINST_FLASH = "flash";
     private static final int REQUEST_PERMISSION_CAMERA = 0;
     private Camera camera;
     private int cameraId;
     private FrameLayout cameraContainer;
     private CameraView cameraView;
-    private ProgressDialog pDialog;
     private int shutterOrientation;
-
-
-    @Override
-    public void onErrorDialogClose() {
-        finish();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("CameraActivity", "ONCREATE");
 
         if(getIntent().hasExtra(EXTRA_FILENAME)) {
             filename = getIntent().getStringExtra(EXTRA_FILENAME);
@@ -81,21 +66,18 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         setContentView(R.layout.activity_camera);
         cameraContainer = ((FrameLayout) findViewById(R.id.container_camera));
         cameraContainer.findViewById(R.id.imageButton_takePicture).setOnClickListener(this);
-        cameraContainer.findViewById(R.id.imageButton_cancel).setOnClickListener(this);
-        cameraContainer.findViewById(R.id.imageButton_flashMode).setOnClickListener(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d("CameraActivity", "ONSTART");
         if(camera == null) {
             if(cameraExists()) {
                 int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
                 if(permissionCheck != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_PERMISSION_CAMERA);
                 } else {
-                    new CameraLoader(this).execute();
+                    loadCamera();
                 }
             } else {
                 ErrorDialogFragment.showErrorDialog(this, "Device does not have a camera.");
@@ -104,17 +86,14 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        //savedInstanceState.putSerializable(SAVEINST_FLASH, picFiles);
-        super.onSaveInstanceState(savedInstanceState);
-    }
-
-
-    @Override
     protected void onPause() {
         super.onPause();
-        Log.d("CameraActivity", "ONPAUSE");
         releaseCamera();
+    }
+
+    @Override
+    public void onErrorDialogClose() {
+        finish();
     }
 
     @Override
@@ -123,26 +102,21 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
             case R.id.imageButton_takePicture:
                 takePicture();
                 break;
-            case R.id.imageButton_cancel:
-                setResult(RESULT_CANCELED);
-                finish();
-                break;
-            case R.id.imageButton_flashMode:
-                //TODO flash modes
-                ErrorDialogFragment.showErrorDialog(this, "Not Implemented");
-                break;
             default:
                 ErrorDialogFragment.showErrorDialog(this, "Unhandled click action!");
                 break;
         }
     }
 
+    private void takePicture() {
+        if(camera != null) {
+            camera.takePicture(this, null, this);
+        }
+    }
+
     @Override
     public void onShutter() {
         shutterOrientation = getScreenOrientation();
-        pDialog = new ProgressDialog(this);
-        pDialog.setTitle("Processing Picture...");
-        pDialog.show();
     }
 
 
@@ -174,10 +148,6 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
                 }
                 fos.close();
 
-                if(pDialog.isShowing()) {
-                    pDialog.dismiss();
-                }
-
                 Intent intent = new Intent();
                 intent.putExtra("image_file", imgF);
                 setResult(RESULT_OK, intent);
@@ -192,43 +162,47 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         }
     }
 
-    private FrameLayout.LayoutParams getOptimalLayoutParams() {
-        //TODO over stretching
 
-        Camera.Size pSize = camera.getParameters().getPreviewSize();
-        int w = pSize.width;
-        int h = pSize.height;
-
-        // flip width and height depending on screen orientation (determined by shape rather than rotation)
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        if(metrics.widthPixels < metrics.heightPixels && w > h) {
-            int temp = w;
-            w = h;
-            h = temp;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode == REQUEST_PERMISSION_CAMERA) {
+            if(grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                ErrorDialogFragment.showErrorDialog(this, "This application does not have permission to access the camera.");
+            } else {
+                loadCamera();
+            }
         }
-
-        Log.d("CameraActivity", "PreviewSize1: " + w + "x" + h);
-
-        // fit to container
-        double ratio = (double) (w) / h;
-        if(w > h) {
-            w = cameraContainer.getWidth();
-            h = (int) (w / ratio);
-        } else {
-            h = cameraContainer.getHeight();
-            w = (int) (h * ratio);
-        }
-
-        Log.d("CameraActivity", "PreviewSize2: " + w + "x" + h);
-        Log.d("CameraActivity", "LayoutSize: " + cameraContainer.getWidth() + "x" + cameraContainer.getHeight());
-        return new FrameLayout.LayoutParams(w, h, Gravity.CENTER);
     }
 
+    private void loadCamera() {
+        String reason = "";
+        camera = null;
+        try {
+            // choose first back-facing camera
+            int n = Camera.getNumberOfCameras();
+            for(int i = 0; i < n; i++) {
+                Camera.CameraInfo info = new Camera.CameraInfo();
+                Camera.getCameraInfo(i, info);
+                if(info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                    cameraId = i;
+                    break;
+                }
+            }
 
-    private void onCameraLoad(int cameraId, Camera camera, String reason) {
-        this.camera = camera;
-        this.cameraId = cameraId;
+            // open camera
+            if(cameraId != -1) {
+                camera = Camera.open(cameraId);
+                if(camera == null) {
+                    reason = "Could not access camera.";
+                }
+            } else {
+                reason = "Device does not have a back-facing camera.";
+            }
+        } catch(Exception e) {
+            Log.e("OnPictureTaken", "Exception", e);
+            reason = e.toString() + ":\n" + e.getMessage();
+        }
+
         if(camera != null) {
             setCameraOrientation();
             setPictureSizeToMin();
@@ -244,23 +218,45 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         }
     }
 
+    private FrameLayout.LayoutParams getOptimalLayoutParams() {
+        Camera.Size pSize = camera.getParameters().getPreviewSize();
+        int w = pSize.width;
+        int h = pSize.height;
+
+        // flip width and height depending on screen orientation (determined by shape rather than rotation)
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        if(metrics.widthPixels < metrics.heightPixels && w > h) {
+            int temp = w;
+            w = h;
+            h = temp;
+        }
+
+        // fit to container
+        double ratio = (double) (w) / h;
+        if(metrics.widthPixels < metrics.heightPixels) {
+            w = metrics.widthPixels;//cameraContainer.getWidth();
+            h = (int) (w / ratio);
+        } else {
+            h = metrics.heightPixels;//cameraContainer.getHeight();
+            w = (int) (h * ratio);
+        }
+
+        return new FrameLayout.LayoutParams(w, h, Gravity.CENTER);//new FrameLayout.LayoutParams(w, h, Gravity.CENTER);
+    }
+
     private void setPictureSizeToMin() {
         Camera.Parameters param = camera.getParameters();
         Camera.Size size = param.getPictureSize();
         for(Camera.Size s : param.getSupportedPictureSizes()) {
             if(s.width * s.height < size.width * size.height) {
                 size = s;
-                Log.d("CameraActivity", "PicSize = " + s.width + "x" + s.height);
             }
         }
         param.setPictureSize(size.width, size.height);
         camera.setParameters(param);
     }
 
-
-    private void takePicture() {
-        camera.takePicture(this, null, this);
-    }
 
     /**
      * Rotates bitmap to align with screen orientation.
@@ -397,74 +393,6 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
 
         params.setRotation(rPic);
         camera.setParameters(params);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == REQUEST_PERMISSION_CAMERA) {
-            if(grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                ErrorDialogFragment.showErrorDialog(this, "This application does not have permission to access the camera.");
-            } else {
-                new CameraLoader(this).execute();
-            }
-        }
-    }
-
-    private class CameraLoader extends AsyncTask<Void, Void, Camera> {
-        private CameraActivity act;
-        private ProgressDialog d;
-        private String reason;
-        private int cid = -1;
-
-        CameraLoader(CameraActivity act) {
-            this.act = act;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            d = new ProgressDialog(act);
-            d.setTitle("Loading Camera...");
-            d.show();
-        }
-
-        @Override
-        protected Camera doInBackground(Void... params) {
-            Camera c = null;
-            try {
-                // choose first back-facing camera
-                int n = Camera.getNumberOfCameras();
-                for(int i = 0; i < n; i++) {
-                    Camera.CameraInfo info = new Camera.CameraInfo();
-                    Camera.getCameraInfo(i, info);
-                    if(info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
-                        cid = i;
-                        break;
-                    }
-                }
-
-                // open camera
-                if(cid != -1) {
-                    c = Camera.open(cid);
-                    if(c == null) {
-                        reason = "Could not access camera.";
-                    }
-                } else {
-                    reason = "Device does not have a back-facing camera.";
-                }
-            } catch(Exception e) {
-                Log.e("OnPictureTaken", "Exception", e);
-                reason = e.toString() + ":\n" + e.getMessage();
-            }
-            return c;
-        }
-
-        @Override
-        protected void onPostExecute(Camera c) {
-            if(d.isShowing()) {
-                d.dismiss();
-            }
-            act.onCameraLoad(cid, c, reason);
-        }
     }
 
 }
