@@ -39,7 +39,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private CalendarView calendar;
     private MealArrayAdapter adapter;
 
-    private static final long msInDay = 24 * 60 * 60 * 1000;// TODO come up with more reliable method for prev/next day navigation
+    private static final long msInDay = 24 * 60 * 60 * 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
