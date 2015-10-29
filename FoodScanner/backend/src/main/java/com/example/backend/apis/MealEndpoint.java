@@ -1,11 +1,10 @@
 package com.example.backend.apis;
 
 /**
- * Created by mlenarto on 9/26/15.
+ * Created by mlenarto on 10/29/15.
  */
-
 import com.example.backend.Constants;
-import com.example.backend.model.Calculation;
+import com.example.backend.model.Meal;
 import com.example.backend.utils.AuthUtil;
 import com.google.api.server.spi.ServiceException;
 import com.google.api.server.spi.config.Api;
@@ -39,38 +38,24 @@ import static com.example.backend.OfyService.ofy;
         )
 )
 
-public class CalculationEndpoint {
+public class MealEndpoint {
 
-    /**
-     * Saves to provided calculation for the specified user.
-     * @param calculation
-     * @param user
-     * @throws ServiceException
-     */
-    @ApiMethod(name = "recordCalculation")
-    public void recordCalculation(Calculation calculation, User user) throws ServiceException {
+    @ApiMethod(name = "saveMeal")
+    public void saveMeal(Meal meal, User user) throws ServiceException {
         AuthUtil.throwIfNotAuthenticated(user);
-        ofy().save().entity(calculation).now();
+        ofy().save().entity(meal).now();
     }
 
-    /**
-     * Get list of calculation items for the specified user
-     * @param user
-     * @return CollectionResponse of calculation items
-     * @throws ServiceException
-     */
-    @ApiMethod(name = "getCalculationHistory")
-    public CollectionResponse<Calculation> getCalculationHistory(User user) throws ServiceException {
-        AuthUtil.throwIfNotAuthenticated(user);
-
-        Query<Calculation> query = ofy().load().type(Calculation.class);
-        List<Calculation> results = new ArrayList<Calculation>();
-        QueryResultIterator<Calculation> iterator = query.iterator();
+    @ApiMethod(name = "getAllMeals")
+    public CollectionResponse<Meal> getAllMeals (User user) throws ServiceException {
+        Query<Meal> query = ofy().load().type(Meal.class);
+        List<Meal> results = new ArrayList<Meal>();
+        QueryResultIterator<Meal> iterator = query.iterator();
 
         while (iterator.hasNext()) {
             results.add(iterator.next());
         }
 
-        return CollectionResponse.<Calculation>builder().setItems(results).build();
+        return CollectionResponse.<Meal>builder().setItems(results).build();
     }
 }

@@ -65,5 +65,4 @@ public class FoodItemEndpoint {
 
         return CollectionResponse.<FoodItem>builder().setItems(results).build();
     }
-
 }
