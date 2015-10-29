@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Surface;
@@ -38,7 +39,7 @@ import senior_project.foodscanner.ui.components.camera.CameraView;
  * -Zoom fingers
  * -Focus and exposure
  */
-//TODO adjust for orientation and aspect ratio
+//TODO make cam and taker activity fullscreen
 public class CameraActivity extends AppCompatActivity implements ErrorDialogFragment.ErrorDialogListener, View.OnClickListener, Camera.ShutterCallback, Camera.PictureCallback {
 
     // Public fields
@@ -58,6 +59,7 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     private FrameLayout cameraContainer;
     private CameraView cameraView;
     private ProgressDialog pDialog;
+    private int shutterOrientation;
 
 
     @Override
@@ -137,6 +139,7 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
 
     @Override
     public void onShutter() {
+        shutterOrientation = getScreenOrientation();
         pDialog = new ProgressDialog(this);
         pDialog.setTitle("Processing Picture...");
         pDialog.show();
@@ -149,8 +152,8 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
             if(data != null) {
                 // create bitmap from data bytes
                 Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-                //bmp = orientBitmap(bmp);TODO
-                Log.d("TAKEN JPEG", "size = " + bmp.getWidth() + "x" + bmp.getHeight());
+                bmp = orientBitmap(bmp);
+                Log.d("TAKEN PIC", "size = " + bmp.getWidth() + "x" + bmp.getHeight());
 
                 // save to image directory
                 File imgF = new File(ImageDirectoryManager.getImageDirectory(this), filename + IMAGE_FORMAT_EXTENSION);
@@ -190,30 +193,35 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     }
 
     private FrameLayout.LayoutParams getOptimalLayoutParams() {
-        //TODO rotation
         //TODO over stretching
-        Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(cameraId, info);
 
-        // fit to container
         Camera.Size pSize = camera.getParameters().getPreviewSize();
         int w = pSize.width;
         int h = pSize.height;
 
-        if(getScreenRotation() == 0){//TODO make dynamic
+        // flip width and height depending on screen orientation (determined by shape rather than rotation)
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        if(metrics.widthPixels < metrics.heightPixels && w > h) {
             int temp = w;
             w = h;
             h = temp;
         }
-      /*  double ratio = (double) (w) / h;
-        if(w >= h) {
+
+        Log.d("CameraActivity", "PreviewSize1: " + w + "x" + h);
+
+        // fit to container
+        double ratio = (double) (w) / h;
+        if(w > h) {
             w = cameraContainer.getWidth();
             h = (int) (w / ratio);
         } else {
             h = cameraContainer.getHeight();
             w = (int) (h * ratio);
         }
-        */
+
+        Log.d("CameraActivity", "PreviewSize2: " + w + "x" + h);
+        Log.d("CameraActivity", "LayoutSize: " + cameraContainer.getWidth() + "x" + cameraContainer.getHeight());
         return new FrameLayout.LayoutParams(w, h, Gravity.CENTER);
     }
 
@@ -223,6 +231,7 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         this.cameraId = cameraId;
         if(camera != null) {
             setCameraOrientation();
+            setPictureSizeToMin();
 
             // create camera view with optimal size
             if(cameraView != null) {
@@ -235,26 +244,54 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         }
     }
 
+    private void setPictureSizeToMin() {
+        Camera.Parameters param = camera.getParameters();
+        Camera.Size size = param.getPictureSize();
+        for(Camera.Size s : param.getSupportedPictureSizes()) {
+            if(s.width * s.height < size.width * size.height) {
+                size = s;
+                Log.d("CameraActivity", "PicSize = " + s.width + "x" + s.height);
+            }
+        }
+        param.setPictureSize(size.width, size.height);
+        camera.setParameters(param);
+    }
+
+
     private void takePicture() {
         camera.takePicture(this, null, this);
     }
 
     /**
-     * Rotates bitmap to align with screen orientation. //TODO may not work correctly on all devices, because it assumes 0 screen rotation is vertical.
+     * Rotates bitmap to align with screen orientation.
      *
      * @param bmp - bitmap
      * @return
      */
     private Bitmap orientBitmap(Bitmap bmp) {
-        int angleS = getScreenRotation();
-        int angleB = 0;
+
+        // orientation of bitmap
+        int orientBMP = 0;//portrait
         if(bmp.getWidth() > bmp.getHeight()) {
-            angleB = -90;//bmp is rotated so that top side is to the left
+            orientBMP = 90;//landscape
         }
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angleS - angleB);
-        return Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+
+        int rot = 0;
+        if(orientBMP != shutterOrientation && orientBMP != shutterOrientation - 180) {// if different orientations, rotate so they are the same
+            rot = 90;
+        }
+        if(shutterOrientation >= 180) {// picture was taken up-sidedown, so flip it
+            rot += 180;
+        }
+        if(rot > 0) {
+            Matrix matrix = new Matrix();
+            matrix.postRotate(rot);
+            bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+        }
+
+        return bmp;
     }
+
 
     /**
      * Gets screen rotation in degrees from it's default rotation.
@@ -279,6 +316,43 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         return degrees;
     }
 
+    /**
+     * Gets the natural(default) screen orientation of the device when it's rotation is zero.
+     *
+     * @return 0 for portrait, 90 for landscape.
+     */
+    private int getNaturalScreenOrientation() {
+
+        // width and height depending on screen orientation
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        int rot = getScreenRotation(); // degrees screen is rotated from it's natural orientation
+
+        int nOrient = 0;// start at portrait
+
+        // wider than taller indicates landscape
+        if(metrics.widthPixels > metrics.heightPixels) {
+            nOrient = 90;
+        }
+
+        // but if screen is rotated 90 degrees in either direction, then natural orientation is the opposite
+        if(rot % 180 != 0) {
+            nOrient = (nOrient + 90) % 180;
+        }
+
+        return nOrient;
+    }
+
+    /**
+     * Gets the current screen orientation.
+     *
+     * @return 0 for portrait, 90 for landscape, 180 for flipped portrait, 270 for flipped landscape
+     */
+    private int getScreenOrientation() {
+        return (getNaturalScreenOrientation() + getScreenRotation()) % 360;
+    }
+
     private void releaseCamera() {
         if(camera != null) {
             camera.release();
@@ -298,43 +372,9 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     }
 
     /**
-     * Adjust camera display and picture orientations to always point up no matter the screen orientation.
+     * Adjust camera display and picture orientations to always point up.
      */
-    private void setCameraOrientation() {//TODO
-        int deviceO = getScreenRotation();
-
-        Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(cameraId, info);
-        int camO = info.orientation;
-
-        Camera.Parameters params = camera.getParameters();
-        int rCamDisplay;
-        int rPic;
-        if(info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            rCamDisplay = (camO + deviceO) % 360;
-            rCamDisplay = (360 - rCamDisplay) % 360;  // compensate the mirror
-            rPic = (camO - deviceO + 360) % 360;
-        } else {  // back-facing
-            rCamDisplay = camO;
-            rPic = (camO + deviceO) % 360;
-        }
-        camera.setDisplayOrientation(rCamDisplay);
-
-        //params.setRotation(rPic);
-        //camera.setParameters(params);
-
-        Log.d("CameraActivity", "info.orientation = " + info.orientation);
-        Log.d("CameraActivity", "deviceO = " + deviceO);
-        Log.d("CameraActivity", "rCamDisplay = " + rCamDisplay);
-        Log.d("CameraActivity", "rPic = " + rPic);
-
-
-    }
-
-    /**
-     * Adjust camera display and picture orientations to always be portrait.
-     */
-    private void setCameraOrientationPortrait() {//TODO
+    private void setCameraOrientation() {
         int deviceO = getScreenRotation();
 
         Camera.CameraInfo info = new Camera.CameraInfo();
@@ -352,11 +392,11 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
             rCamDisplay = (camO - deviceO + 360) % 360;
             rPic = (camO + deviceO) % 360;
         }
+
         camera.setDisplayOrientation(rCamDisplay);
 
-        //params.setRotation(rPic);
-        //camera.setParameters(params);
-
+        params.setRotation(rPic);
+        camera.setParameters(params);
     }
 
     @Override

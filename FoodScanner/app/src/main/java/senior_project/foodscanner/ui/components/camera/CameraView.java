@@ -21,6 +21,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
         mCamera = camera;
 
         mHolder = getHolder();
+        mHolder.setKeepScreenOn(true);
         mHolder.addCallback(this);
     }
 
