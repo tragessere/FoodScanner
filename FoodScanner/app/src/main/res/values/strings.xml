@@ -24,6 +24,11 @@
     <string name="title_activity_food_adder">Add Food</string>
     <string name="title_activity_settings">Settings</string>
 
+    <string name="settings_24_hour">Use 24-hour format</string>
+    <string name="settings_meal_time">Set meal times</string>
+    <string name="settings_meal_time_automatic">Automatic</string>
+    <string name="settings_meal_time_manual">Manual</string>
+
     <string name="network_error">Error: Network connection failed.</string>
     <string name="generic_error">Error: Please try again.</string>
 
