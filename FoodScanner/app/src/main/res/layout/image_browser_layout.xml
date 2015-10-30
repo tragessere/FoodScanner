@@ -39,16 +39,7 @@
             android:layout_gravity="right|center_vertical"
             android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Image Title"
-            android:id="@+id/textView_title"
-            android:layout_gravity="center_horizontal|top"
-            android:background="#9665d5ff"/>
-
-        <TextView
+    <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
@@ -56,5 +47,14 @@
             android:id="@+id/textView_count"
             android:layout_gravity="right|top"
             android:background="#9665d5ff"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Image Title"
+        android:id="@+id/textView_title"
+        android:layout_gravity="left|top"
+        android:background="#9665d5ff"/>
 
 </FrameLayout>

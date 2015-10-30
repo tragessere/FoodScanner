@@ -6,11 +6,11 @@
                 android:background="#000000"
                 tools:context="senior_project.foodscanner.activities.CameraActivity">
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/imageButton_takePicture"
-            android:layout_gravity="center_horizontal|bottom"
-            android:src="@drawable/abc_btn_radio_to_on_mtrl_015"/>
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageButton_takePicture"
+        android:layout_gravity="right|center_vertical"
+        android:src="@drawable/abc_btn_radio_to_on_mtrl_015"/>
 
 </FrameLayout>

@@ -67,7 +67,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         // TODO determine when to upload meals to server
         // TODO indicator on meals that aren't uploaded
         // TODO make UI pretty
-
+        // TODO display logged in user?
     }
 
     @Override
@@ -90,8 +90,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         int id = item.getItemId();
 
         if(id == R.id.action_login) {
-            //TODO go to login screen here
-            //TODO upon returning from logging in, update UI here to indicate user is logged in and has the ability to log out
             LoginActivity.logout(this);
             return true;
         }
