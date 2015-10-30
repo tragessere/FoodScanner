@@ -8,6 +8,7 @@
         <item name="colorAccent">@color/Accent</item>
         <item name="android:textAppearanceButton">@style/TextAppearance.AppTheme.Button</item>
         <item name="android:buttonStyle">@style/Widget.AppTheme.Button</item>
+        <item name="alertDialogTheme">@style/Theme.AppCompat.Light.Dialog.Alert</item>
     </style>
 
     <style name="TextAppearance.AppTheme.Button" parent="TextAppearance.AppCompat.Button">

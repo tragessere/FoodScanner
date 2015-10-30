@@ -138,10 +138,20 @@ public class Settings {
 
     public void setTimeFormat(TimeFormat tf){
         setting_TimeFormat = tf;
+        setSharedPreference(Constants.SETTINGS_TIME_FORMAT, tf.toString());
+    }
+
+    public TimeFormat getTimeFormat() {
+        return setting_TimeFormat;
     }
 
     public void setDateFormat(DateFormat df){
         setting_DateFormat = df;
+        setSharedPreference(Constants.SETTINGS_DATE_FORMAT, df.toString());
+    }
+
+    public DateFormat getDateFormat() {
+        return setting_DateFormat;
     }
 
     /**
@@ -368,5 +378,9 @@ public class Settings {
 
     private void setSharedPreference(String key, int value) {
         mContext.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit().putInt(key, value).apply();
+    }
+
+    private void setSharedPreference(String key, String value) {
+        mContext.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit().putString(key, value).apply();
     }
 }
