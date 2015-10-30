@@ -14,10 +14,12 @@ public class Meal implements Serializable {
 
     public enum MealType{
         BREAKFAST ("Breakfast"),
+        BRUNCH ("Brunch"),
         LUNCH ("Lunch"),
+        SNACK ("Snack"),
         DINNER ("Dinner"),
-        DESSERT ("Dessert"),
-        SNACK ("Snack");
+        DESSERT ("Dessert");
+
 
         private final String name;
 
@@ -33,12 +35,12 @@ public class Meal implements Serializable {
     // Meal Details
     private MealType type;
     private GregorianCalendar date;
-    public List<FoodItem> food;  //made public for now, for ease of use in ListView
+    private List<FoodItem> food;
 
     public Meal(GregorianCalendar date, MealType type){
         this.date = date;
         this.type = type;
-        food = new ArrayList<FoodItem>();
+        food = new ArrayList<>();
     }
 
     public void setType(MealType type){
@@ -57,8 +59,23 @@ public class Meal implements Serializable {
         food.add(item);
     }
 
-    public void removeFoodItem(FoodItem item){
-        food.remove(item);
+    public void removeFoodItem(FoodItem item) {
+        //food.remove(item) doesn't work when FoodItem object gets passed as serializable extra
+        //NOTE: Because of this, only one instance of each food item can exist in a meal
+        for (FoodItem fi : food) {
+            if(fi.getName().equals(item.getName()) && fi.getBrand().equals(item.getBrand())) {
+                food.remove(fi);
+                break;
+            }
+        }
+    }
+
+    public FoodItem getFoodItem(int index) {
+        return food.get(index);
+    }
+
+    public List<FoodItem> getFood() {
+        return food;
     }
 
 }

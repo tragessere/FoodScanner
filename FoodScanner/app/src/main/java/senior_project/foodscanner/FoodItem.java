@@ -19,7 +19,7 @@ public class FoodItem implements Serializable {
 
     public FoodItem() {
         //LinkedHashMap used to ensure insertion order is maintained, for iteration.
-        fields = new LinkedHashMap<String, Double>(7);
+        fields = new LinkedHashMap<>(7);
     }
 
     public void setField(String field, Double value) {

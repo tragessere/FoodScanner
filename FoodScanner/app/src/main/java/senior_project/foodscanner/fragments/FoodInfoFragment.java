@@ -24,16 +24,19 @@ import senior_project.foodscanner.activities.FoodItemActivity;
 public class FoodInfoFragment extends DialogFragment {
 
     public FoodItem food;
+    private boolean isSaved;  //if true, dialog is being viewed after food item has been added.
 
-    public static FoodInfoFragment newInstance(FoodItem newFood, Meal newMeal) {
+    public static FoodInfoFragment newInstance(FoodItem food, boolean isSaved) {
         FoodInfoFragment frag = new FoodInfoFragment();
-        frag.food = newFood;
+        frag.food = food;
+        frag.isSaved = isSaved;
         return frag;
     }
 
     public interface FoodInfoDialogListener {
         public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
+        public void onDialogNeutralClick(DialogFragment dialog);
     }
 
     // Use this instance of the interface to deliver action events
@@ -79,20 +82,41 @@ public class FoodInfoFragment extends DialogFragment {
 
         Spanned nutritionInfo = Html.fromHtml(info.toString());
 
-        // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(food.getName())
-                .setMessage(nutritionInfo)
-                .setPositiveButton("Add to Meal", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onDialogPositiveClick(FoodInfoFragment.this);
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onDialogNegativeClick(FoodInfoFragment.this);
-                    }
-                });
+        if (!isSaved) {
+            // Dialog displayed before food item is added
+            builder.setTitle(food.getName())
+                    .setMessage(nutritionInfo)
+                    .setPositiveButton("Add to Meal", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            mListener.onDialogPositiveClick(FoodInfoFragment.this);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            mListener.onDialogNeutralClick(FoodInfoFragment.this);
+                        }
+                    });
+        } else {
+            // Dialog displayed after food item is added
+            builder.setTitle(food.getName())
+                    .setMessage(nutritionInfo)
+                    .setPositiveButton("Replace", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            mListener.onDialogPositiveClick(FoodInfoFragment.this);
+                        }
+                    })
+                    .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            mListener.onDialogNegativeClick(FoodInfoFragment.this);
+                        }
+                    })
+                    .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            mListener.onDialogNeutralClick(FoodInfoFragment.this);
+                        }
+                    });
+        }
 
         // Create the AlertDialog object and return it
         return builder.create();

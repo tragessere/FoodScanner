@@ -56,14 +56,23 @@ import senior_project.foodscanner.fragments.FoodInfoFragment;
  *  Cancel - return to Meal Details
  *  Ok - return to Meal Details with new food item added
  */
-public class FoodItemActivity extends AppCompatActivity implements View.OnClickListener, FoodInfoFragment.FoodInfoDialogListener {
+public class FoodItemActivity extends AppCompatActivity implements View.OnClickListener,
+        FoodInfoFragment.FoodInfoDialogListener {
 
     private Meal meal;
+    private FoodItem replacedFood = null;
+
+    private static int NEW_FOOD_ITEM = 1;  //TODO: add to constants.java
+    private static int REPLACE_FOOD_ITEM = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         meal = (Meal) getIntent().getSerializableExtra("meal");
+        int requestCode = getIntent().getIntExtra("requestCode", 0);  //0 is arbitrary
+        if (requestCode == REPLACE_FOOD_ITEM) {
+            replacedFood = (FoodItem) getIntent().getSerializableExtra("foodItem");
+        }
 
         setContentView(R.layout.activity_food_item);
 
@@ -128,11 +137,21 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
-        // User touched the dialog's positive button
-        // Add food item to meal
+        // User touched the dialog's positive button - "Add to Meal"
         FoodInfoFragment frag = (FoodInfoFragment)dialog;
-        meal.addFoodItem(frag.food);
-        displayToast("Added to meal!", this);
+
+        if (replacedFood == null) {
+            // Add food item to meal
+            meal.addFoodItem(frag.food);
+            displayToast("Added to meal", this);
+        } else {
+            // Replace previously added food item
+            // TODO: Replace FoodItem, but maintain linkage to pics, volume, density, etc.
+            // NOTE: For now, simply delete old FoodItem and add new one
+            meal.removeFoodItem(replacedFood);
+            meal.addFoodItem(frag.food);
+            displayToast("Replaced food item", this);
+        }
 
         Intent resultIntent = new Intent();
         resultIntent.putExtra("meal", meal);
@@ -143,8 +162,14 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
-        // User touched the dialog's negative button
-        // Do nothing at this time
+        // User touched the dialog's negative button - DNE
+        // Cannot get called currently
+    }
+
+    @Override
+    public void onDialogNeutralClick(DialogFragment dialog) {
+        // User touched the dialog's neutral button - "Cancel"
+        // Do nothing, besides exit dialog
     }
 
     public static void displayToast(final String message, Activity actArg) {
@@ -166,6 +191,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         private SearchResults results;
 
         //region Strings for nutritionix API
+        //TODO: add to constants.java
         final String API_ID = getResources().getString(R.string.nutritionix_api_id);
         final String API_KEY = getResources().getString(R.string.nutritionix_api_key);
         //endregion
@@ -427,7 +453,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
 
             if (food != null) {
                 // display confirmation prompt containing nutrition info
-                DialogFragment dialog = FoodInfoFragment.newInstance(food, meal);
+                DialogFragment dialog = FoodInfoFragment.newInstance(food, false);
                 dialog.show(getFragmentManager(), "FoodInfoFragment");
             }
         }

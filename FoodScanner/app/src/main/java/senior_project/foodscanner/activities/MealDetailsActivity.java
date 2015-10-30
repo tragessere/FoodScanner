@@ -1,8 +1,13 @@
 package senior_project.foodscanner.activities;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +23,7 @@ import senior_project.foodscanner.Meal;
 import java.util.Calendar;
 
 import senior_project.foodscanner.R;
+import senior_project.foodscanner.fragments.FoodInfoFragment;
 
 /**
  * Shows details of the meal and allows editing.
@@ -39,12 +45,14 @@ import senior_project.foodscanner.R;
  *  Delete Meal
  *  Back Button - return to Meal Calendar
  */
-public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener{
+public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener,
+        FoodInfoFragment.FoodInfoDialogListener{
 
     private Meal meal;
 
     private String[] meals;
     private Spinner mealSpinner;
+    private FoodItem removedFood;
 
     // region Times that meal spinner will start defaulting to each meal (in min, 24-hour format)
     // TODO: Allow user to set these times
@@ -85,32 +93,33 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         int minute = cal.get(Calendar.MINUTE);
         int hour = cal.get(Calendar.HOUR_OF_DAY); //24-hour format
         int time = minute + (hour * 60);
-        String defaultMeal;
+        Meal.MealType defaultMeal;
 
         if (time >= breakfastTime && time < brunchTime) {
-            defaultMeal = "Breakfast";
+            defaultMeal = Meal.MealType.BREAKFAST;
         } else if (time >= brunchTime && time < lunchTime) {
-            defaultMeal = "Brunch";
+            defaultMeal = Meal.MealType.BRUNCH;
         } else if (time >= lunchTime && time < snackTime) {
-            defaultMeal = "Lunch";
+            defaultMeal = Meal.MealType.LUNCH;
         } else if (time >= snackTime && time < dinnerTime) {
-            defaultMeal = "Snack";
+            defaultMeal = Meal.MealType.SNACK;
         } else if (time >= dinnerTime && time < dessertTime) {
-            defaultMeal = "Dinner";
+            defaultMeal = Meal.MealType.DINNER;
         } else {
-            defaultMeal = "Dessert";
+            defaultMeal = Meal.MealType.DESSERT;
         }
 
-        mealSpinner.setSelection(mealAdapter.getPosition(defaultMeal));
+        mealSpinner.setSelection(mealAdapter.getPosition(defaultMeal.getName()));
+        meal.setType(defaultMeal);
 
         // Set up what meal selection does
         mealSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Currently, do nothing. Below was for testing.
-                //String text = mealSpinner.getSelectedItem().toString();
-                //(Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT)).show();
+                // Set the meal type
+                String typeStr = mealSpinner.getSelectedItem().toString().toUpperCase();
+                meal.setType(Meal.MealType.valueOf(typeStr));
             }
 
             @Override
@@ -137,13 +146,16 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                 getApplicationContext(),
                 R.layout.list_layout,
                 R.id.foodListText,
-                meal.food);
+                meal.getFood());
         lv.setAdapter(arrayAdapter);
 
         // set up happens when you click a list item
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //TODO: View nutrition info
+                //View nutrition info
+                FoodItem food = meal.getFoodItem(position);
+                DialogFragment dialog = FoodInfoFragment.newInstance(food, true);
+                dialog.show(getFragmentManager(), "FoodInfoFragment");
             }
         });
 
@@ -164,7 +176,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         return super.onOptionsItemSelected(item);
     }
 
-    private static int BRANDON_IS_A_HACKER = 1;  //TODO: add to constants.java
+    private static int NEW_FOOD_ITEM = 1;  //TODO: add to constants.java
+    private static int REPLACE_FOOD_ITEM = 2;
 
     @Override
     public void onClick(View v) {
@@ -173,19 +186,85 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         } else if (v.getId() == R.id.button_addfood) {
             Intent intent = new Intent(MealDetailsActivity.this, FoodItemActivity.class);
             intent.putExtra("meal", meal);
-            startActivityForResult(intent, BRANDON_IS_A_HACKER);
+            intent.putExtra("requestCode", NEW_FOOD_ITEM);
+            startActivityForResult(intent, NEW_FOOD_ITEM);
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
-        if (requestCode == BRANDON_IS_A_HACKER) {
+        if (requestCode == NEW_FOOD_ITEM || requestCode == REPLACE_FOOD_ITEM) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 meal = (Meal) data.getSerializableExtra("meal");
             }
         }
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        // User touched the dialog's positive button - "Replace"
+        // Save FoodItem being edited
+        FoodInfoFragment frag = (FoodInfoFragment)dialog;
+        removedFood = frag.food;
+
+        // Open food searching page
+        Intent intent = new Intent(MealDetailsActivity.this, FoodItemActivity.class);
+        intent.putExtra("meal", meal);
+        intent.putExtra("requestCode", REPLACE_FOOD_ITEM);
+        intent.putExtra("foodItem", removedFood);
+        startActivityForResult(intent, REPLACE_FOOD_ITEM);
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        // User touched the dialog's negative button - "Delete"
+
+        FoodInfoFragment frag = (FoodInfoFragment)dialog;
+        removedFood = frag.food;
+
+        // Create confirmation dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to delete \"" + removedFood.getName() + " (" +
+                removedFood.getBrand() + ")\"?")
+                .setTitle("Confirm Food Deletion");
+        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked 'Delete' button
+                // Delete food item from meal
+                meal.removeFoodItem(removedFood);
+
+                // Update listview
+                ListView lv = (ListView) findViewById(R.id.food_list);
+                ArrayAdapter<FoodItem> arrayAdapter = new ArrayAdapter<>(
+                        getApplicationContext(),
+                        R.layout.list_layout,
+                        R.id.foodListText,
+                        meal.getFood());
+                lv.setAdapter(arrayAdapter);
+
+                Toast butteredToast = Toast.makeText(getApplicationContext(), "Removed from meal",
+                        Toast.LENGTH_SHORT);
+                butteredToast.setGravity(Gravity.CENTER, 0, 0);
+                butteredToast.show();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
+
+        // Create the AlertDialog
+        AlertDialog confirmDialog = builder.create();
+        confirmDialog.show();
+    }
+
+    @Override
+    public void onDialogNeutralClick(DialogFragment dialog) {
+        // User touched the dialog's neutral button - "Cancel"
+        // Do nothing, besides exit dialog.
     }
 
 }
