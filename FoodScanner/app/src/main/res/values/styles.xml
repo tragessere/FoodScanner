@@ -10,6 +10,15 @@
         <item name="android:buttonStyle">@style/Widget.AppTheme.Button</item>
     </style>
 
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar.Fullscreen" parent="AppTheme">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
     <style name="TextAppearance.AppTheme.Button" parent="TextAppearance.AppCompat.Button">
         <item name="textAllCaps">false</item>
         <item name="android:textAllCaps">false</item>
@@ -20,10 +29,16 @@
         <item name="android:minWidth">72dip</item>
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/Primary</item>
-        <item name="colorPrimaryDark">@color/Primary.Dark</item>
-        <item name="colorAccent">@color/Accent</item>
+    <style name="EditText.White" parent="TextAppearance.AppCompat">
+        <item name="android:textColorHint">@color/White</item>
+        <item name="android:textSize">18sp</item>
+        <item name="colorAccent">@color/White</item>
+        <item name="colorControlNormal">@color/White.Transparent</item>
+    </style>
+
+    <style name="Button.Primary.Dark" parent="Widget.AppCompat.Button.Colored">
+        <item name="colorButtonNormal">@color/Primary.Dark</item>
+        <item name="android:textColor">@color/White</item>
     </style>
 
 </resources>

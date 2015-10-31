@@ -7,10 +7,12 @@
 
     <string name="action_meal_add">Add Meal</string>
     <string name="action_login">Log In</string>
+    <string name="action_logout">Log Out</string>
 
     <string name="login_food_scanner">Login with FoodScanner account</string>
     <string name="login_google_plus">Login with Google+</string>
     <string name="login_facebook">Login with Facebook</string>
+    <string name="login">Login</string>
 
     <string name="Email_prompt">Email</string>
     <string name="password_prompt">Password</string>
@@ -35,5 +37,6 @@
         <item>Dinner</item>
         <item>Dessert</item>
     </string-array>
+    <string name="title_activity_camera">CameraActivity</string>
 
 </resources>

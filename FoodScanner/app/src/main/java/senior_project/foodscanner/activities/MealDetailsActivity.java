@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +21,8 @@ import android.widget.Toast;
 
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
+
+import java.io.File;
 import java.util.Calendar;
 
 import senior_project.foodscanner.R;
@@ -27,28 +30,29 @@ import senior_project.foodscanner.fragments.FoodInfoFragment;
 
 /**
  * Shows details of the meal and allows editing.
- *
+ * <p/>
  * Details:
- *  Date and time
- *  Meal Type
- *  Total nutrition
- *  List of food items and each nutrition and volume
- *
+ * Date and time
+ * Meal Type
+ * Total nutrition
+ * List of food items and each nutrition and volume
+ * <p/>
  * Actions:
- *  Add Food Button
- *      - Pop up menu
- *          - Scan Food - takes user to Food Scanner activity
- *          - Manually add Food Item - takes user to Food Item activity
- *  Delete Food
- *  Edit Date and time
- *  Edit Meal Type
- *  Delete Meal
- *  Back Button - return to Meal Calendar
+ * Add Food Button
+ * - Pop up menu
+ * - Scan Food - takes user to Food Scanner activity
+ * - Manually add Food Item - takes user to Food Item activity
+ * Delete Food
+ * Edit Date and time
+ * Edit Meal Type
+ * Delete Meal
+ * Back Button - return to Meal Calendar
  */
 public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener,
         FoodInfoFragment.FoodInfoDialogListener{
 
     private Meal meal;
+    private static final int REQUEST_FOODSCANNER = 0;
 
     private String[] meals;
     private Spinner mealSpinner;
@@ -106,7 +110,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         } else if (time >= dinnerTime && time < dessertTime) {
             defaultMeal = Meal.MealType.DINNER;
         } else {
-            defaultMeal = Meal.MealType.DESSERT;
+            defaultMeal = Meal.MealType.DESSERT
         }
 
         mealSpinner.setSelection(mealAdapter.getPosition(defaultMeal.getName()));
@@ -169,7 +173,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if(id == R.id.action_settings) {
             return true;
         }
 
@@ -181,13 +185,32 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.button_foodscanner) {
-            startActivity(new Intent(MealDetailsActivity.this, FoodScannerActivity.class));
-        } else if (v.getId() == R.id.button_addfood) {
+        if(v.getId() == R.id.button_foodscanner) {
+            Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
+            intent.putExtra("pic_names", new String[]{"Top", "Side"});
+            startActivityForResult(intent, REQUEST_FOODSCANNER);
+        } else if(v.getId() == R.id.button_addfood) {
             Intent intent = new Intent(MealDetailsActivity.this, FoodItemActivity.class);
             intent.putExtra("meal", meal);
             intent.putExtra("requestCode", NEW_FOOD_ITEM);
             startActivityForResult(intent, NEW_FOOD_ITEM);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+            case REQUEST_FOODSCANNER:
+                if(resultCode == Activity.RESULT_OK) {
+                    if(data.hasExtra(PhotoTakerActivity.RESULT_IMAGE_FILES)) {
+                        File[] imgFiles = (File[]) data.getSerializableExtra(PhotoTakerActivity.RESULT_IMAGE_FILES);
+                        //TODO go to food drawing activity with these file, or you can find them with ImageDirectoryManager.getImageDirectory().list()
+                        //TODO delete files after they are not needed anymore. To do this use ImageDirectoryManager.clearImageDirectory()
+                    }
+                }
+                break;
+            default:
+                break;
         }
     }
 

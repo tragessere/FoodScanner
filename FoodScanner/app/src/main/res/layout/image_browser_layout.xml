@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="#a2a2a2">
+
+        <ImageSwitcher
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/imageSwitcher"
+            android:layout_gravity="center"/>
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="&lt;Action>"
+            android:id="@+id/button_action"
+            android:layout_gravity="left|bottom"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Finish"
+            android:id="@+id/button_finish"
+            android:layout_gravity="right|bottom"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButton_prev"
+            android:layout_gravity="left|center_vertical"
+            android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButton_next"
+            android:layout_gravity="right|center_vertical"
+            android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="0/0"
+            android:id="@+id/textView_count"
+            android:layout_gravity="right|top"
+            android:background="#9665d5ff"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Image Title"
+        android:id="@+id/textView_title"
+        android:layout_gravity="left|top"
+        android:background="#9665d5ff"/>
+
+</FrameLayout>
