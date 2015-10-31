@@ -244,7 +244,7 @@ public class Settings {
         this.useManualTimes = useManualTimes;
     }
 
-    public boolean useManualTimes() {
+    public boolean isUsingManualTimes() {
         return useManualTimes;
     }
 

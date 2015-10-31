@@ -1,6 +1,7 @@
 package senior_project.foodscanner.activities;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -23,10 +24,12 @@ public class SettingsActivity extends AppCompatActivity {
 	private static final String format12Hour = "h:mm a";
 	private static final String format24Hour = "HH:mm";
 
-	View hourFormat;
+	View hourFormatButton;
 	TextView hourExample;
 	SwitchCompat hourSwitch;
-	View logout;
+	View setTimesButton;
+	TextView currentTimeSetting;
+	View logoutButton;
 
 	Settings settings;
 	Calendar calendarExample;
@@ -36,10 +39,12 @@ public class SettingsActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
 
-		hourFormat = findViewById(R.id.hour_format_layout);
+		hourFormatButton = findViewById(R.id.hour_format_layout);
 		hourExample = (TextView) findViewById(R.id.hour_format_example);
 		hourSwitch = (SwitchCompat) findViewById(R.id.hour_format_switch);
-		logout = findViewById(R.id.logout_layout);
+		setTimesButton = findViewById(R.id.manual_meal_time_layout);
+		currentTimeSetting = (TextView) findViewById(R.id.meal_time_current);
+		logoutButton = findViewById(R.id.logout_layout);
 
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -53,14 +58,21 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 
 	private void setListeners() {
-		hourFormat.setOnClickListener(new View.OnClickListener() {
+		hourFormatButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				setHourFormat(!hourSwitch.isChecked());
 			}
 		});
 
-		logout.setOnClickListener(new View.OnClickListener() {
+		setTimesButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(SettingsActivity.this, SettingsManualTimes.class));
+			}
+		});
+
+		logoutButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				new AlertDialog.Builder(SettingsActivity.this)
@@ -83,6 +95,12 @@ public class SettingsActivity extends AppCompatActivity {
 		SimpleDateFormat format = new SimpleDateFormat(use24HourTime ? format24Hour : format12Hour, Locale.getDefault());
 		hourExample.setText(format.format(calendarExample.getTimeInMillis()));
 		settings.setTimeFormat(use24HourTime? Settings.TimeFormat._24 : Settings.TimeFormat._12);
+	}
+
+	@Override
+	protected void onResume() {
+		currentTimeSetting.setText(settings.isUsingManualTimes() ? getString(R.string.settings_meal_time_manual) : getString(R.string.settings_meal_time_automatic));
+		super.onResume();
 	}
 
 	@Override
