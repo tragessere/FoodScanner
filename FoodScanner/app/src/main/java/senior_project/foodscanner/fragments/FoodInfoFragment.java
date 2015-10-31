@@ -80,6 +80,16 @@ public class FoodInfoFragment extends DialogFragment {
             }
         }
 
+        // TEMP: Display whether volume, mass, or neither need to be calculated.
+        info.append("<br><b>Calculate:</b> ");
+        if (food.needCalculateMass()) {
+            info.append("mass");
+        } else if(food.needCalculateVol()) {
+            info.append("volume");
+        } else {
+            info.append("nothing");
+        }
+
         Spanned nutritionInfo = Html.fromHtml(info.toString());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
