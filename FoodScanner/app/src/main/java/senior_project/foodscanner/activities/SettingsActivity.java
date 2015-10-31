@@ -10,9 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
 
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
@@ -21,8 +19,6 @@ import senior_project.foodscanner.Settings;
  * Created by Evan on 10/24/2015.
  */
 public class SettingsActivity extends AppCompatActivity {
-	private static final String format12Hour = "h:mm a";
-	private static final String format24Hour = "HH:mm";
 
 	View hourFormatButton;
 	TextView hourExample;
@@ -92,9 +88,8 @@ public class SettingsActivity extends AppCompatActivity {
 
 	private void setHourFormat(boolean use24HourTime) {
 		hourSwitch.setChecked(use24HourTime);
-		SimpleDateFormat format = new SimpleDateFormat(use24HourTime ? format24Hour : format12Hour, Locale.getDefault());
-		hourExample.setText(format.format(calendarExample.getTimeInMillis()));
 		settings.setTimeFormat(use24HourTime? Settings.TimeFormat._24 : Settings.TimeFormat._12);
+		hourExample.setText(settings.formatHour(13, 0));
 	}
 
 	@Override

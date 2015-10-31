@@ -4,12 +4,21 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 /**
  * Represents app settings.
  */
 public class Settings {
+    private static final int MILLIS_IN_HOUR = 3600000;
+    private static final int MILLIS_IN_MIN = 60000;
+
+    private static final String FORMAT_12_HOUR = "h:mm a";
+    private static final String FORMAT_24_HOUR = "HH:mm";
+
     private static Settings mSettings;
     private Context mContext;
 
@@ -35,6 +44,7 @@ public class Settings {
     private DateFormat setting_DateFormat;
     private boolean setting_DateFormat_TYT;// whether or not to display today's, yesterday's, and tomorrow's dates as "Today", "Yesterday", "Tomorrow" respectively.
     private boolean useManualTimes;
+    private Calendar formatHelper;
 
     private int breakfastStartManual;
     private int breakfastEndManual;
@@ -57,6 +67,8 @@ public class Settings {
     private Settings(Context context) {
         mContext = context.getApplicationContext();
         SharedPreferences prefs = mContext.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE);
+        formatHelper = Calendar.getInstance();
+        formatHelper.setTimeInMillis(0);
 
         breakfastStartManual = prefs.getInt(Constants.SETTINGS_BREAKFAST_START_MANUAL, -1);
         if(breakfastStartManual == -1) {    //No meal times in SharedPreferences
@@ -105,17 +117,17 @@ public class Settings {
             setting_DateFormat_TYT = prefs.getBoolean(Constants.SETTINGS_DATE_TYT, Constants.DEFAULT_DATE_TYT);
             useManualTimes = prefs.getBoolean(Constants.SETTINGS_USE_MANUAL_TIMES, Constants.DEFAULT_USE_MANUAL_TIMES);
 
-            breakfastStartAuto = prefs.getInt(Constants.SETTINGS_BREAKFAST_START_AUTO, -1);
-            breakfastEndManual = prefs.getInt(Constants.SETTINGS_BREAKFAST_END_MANUAL, -1);
-            breakfastEndAuto = prefs.getInt(Constants.SETTINGS_BREAKFAST_END_AUTO, -1);
-            lunchStartManual = prefs.getInt(Constants.SETTINGS_LUNCH_START_MANUAL, -1);
-            lunchStartAuto = prefs.getInt(Constants.SETTINGS_LUNCH_START_AUTO, -1);
-            lunchEndManual = prefs.getInt(Constants.SETTINGS_LUNCH_END_MANUAL, -1);
-            lunchEndAuto = prefs.getInt(Constants.SETTINGS_LUNCH_END_AUTO, -1);
-            dinnerStartManual = prefs.getInt(Constants.SETTINGS_DINNER_START_MANUAL, -1);
-            dinnerStartAuto = prefs.getInt(Constants.SETTINGS_DINNER_START_AUTO, -1);
-            dinnerEndManual = prefs.getInt(Constants.SETTINGS_DINNER_END_MANUAL, -1);
-            dinnerEndAuto = prefs.getInt(Constants.SETTINGS_DINNER_END_AUTO, -1);
+            breakfastStartAuto = prefs.getInt(Constants.SETTINGS_BREAKFAST_START_AUTO, Constants.DEFAULT_BREAKFAST_START);
+            breakfastEndManual = prefs.getInt(Constants.SETTINGS_BREAKFAST_END_MANUAL, Constants.DEFAULT_BREAKFAST_END);
+            breakfastEndAuto = prefs.getInt(Constants.SETTINGS_BREAKFAST_END_AUTO, Constants.DEFAULT_BREAKFAST_END);
+            lunchStartManual = prefs.getInt(Constants.SETTINGS_LUNCH_START_MANUAL, Constants.DEFAULT_LUNCH_START);
+            lunchStartAuto = prefs.getInt(Constants.SETTINGS_LUNCH_START_AUTO, Constants.DEFAULT_LUNCH_START);
+            lunchEndManual = prefs.getInt(Constants.SETTINGS_LUNCH_END_MANUAL, Constants.DEFAULT_LUNCH_END);
+            lunchEndAuto = prefs.getInt(Constants.SETTINGS_LUNCH_END_AUTO, Constants.DEFAULT_LUNCH_END);
+            dinnerStartManual = prefs.getInt(Constants.SETTINGS_DINNER_START_MANUAL, Constants.DEFAULT_DINNER_START);
+            dinnerStartAuto = prefs.getInt(Constants.SETTINGS_DINNER_START_AUTO, Constants.DEFAULT_DINNER_START);
+            dinnerEndManual = prefs.getInt(Constants.SETTINGS_DINNER_END_MANUAL, Constants.DEFAULT_DINNER_END);
+            dinnerEndAuto = prefs.getInt(Constants.SETTINGS_DINNER_END_AUTO, Constants.DEFAULT_DINNER_END);
         }
 
     }
@@ -143,6 +155,10 @@ public class Settings {
 
     public TimeFormat getTimeFormat() {
         return setting_TimeFormat;
+    }
+
+    public boolean isUsing24HourFormat() {
+        return setting_TimeFormat == TimeFormat._24;
     }
 
     public void setDateFormat(DateFormat df){
@@ -240,6 +256,20 @@ public class Settings {
         return s;
     }
 
+    public String formatHour(int millis) {
+        formatHelper.set(Calendar.HOUR_OF_DAY, millisToHours(millis));
+        formatHelper.set(Calendar.MINUTE, millisToMins(millis));
+        return new SimpleDateFormat(isUsing24HourFormat() ? FORMAT_24_HOUR : FORMAT_12_HOUR, Locale.getDefault())
+                .format(formatHelper.getTimeInMillis());
+    }
+
+    public String formatHour(int hour, int minute) {
+        formatHelper.set(Calendar.HOUR_OF_DAY, hour);
+        formatHelper.set(Calendar.MINUTE, minute);
+        return new SimpleDateFormat(isUsing24HourFormat() ? FORMAT_24_HOUR : FORMAT_12_HOUR, Locale.getDefault())
+                .format(formatHelper.getTimeInMillis());
+    }
+
     public void setUseManualTimes(boolean useManualTimes) {
         this.useManualTimes = useManualTimes;
     }
@@ -248,13 +278,29 @@ public class Settings {
         return useManualTimes;
     }
 
+
+
+    //Lots of time setters/getters below
+
     public void setBreakfastStartManual(int startTime) {
         setSharedPreference(Constants.SETTINGS_BREAKFAST_START_MANUAL, startTime);
         breakfastStartManual = startTime;
     }
 
+    public void setBreakfastStartManual(int hour, int minute) {
+        setBreakfastStartManual(timeToMillis(hour, minute));
+    }
+
     public int getBreakfastStartManual() {
         return breakfastStartManual;
+    }
+
+    public int getBreakfastStartManualHour() {
+        return millisToHours(breakfastStartManual);
+    }
+
+    public int getBreakfastStartManualMinute() {
+        return millisToMins(breakfastStartManual);
     }
 
     public void setBreakfastEndManual(int endTime) {
@@ -262,8 +308,20 @@ public class Settings {
         breakfastEndManual = endTime;
     }
 
+    public void setBreakfastEndManual(int hour, int minute) {
+        setBreakfastEndManual(timeToMillis(hour, minute));
+    }
+
     public int getBreakfastEndManual() {
         return breakfastEndManual;
+    }
+
+    public int getBreakfastEndManualHour() {
+        return millisToHours(breakfastEndManual);
+    }
+
+    public int getBreakfastEndManualMinute() {
+        return millisToMins(breakfastEndManual);
     }
 
     public void setLunchStartManual(int startTime) {
@@ -271,8 +329,20 @@ public class Settings {
         lunchStartManual = startTime;
     }
 
+    public void setLunchStartManual(int hour, int minute) {
+        setLunchStartManual(timeToMillis(hour, minute));
+    }
+
     public int getLunchStartManual() {
         return lunchStartManual;
+    }
+
+    public int getLunchStartManualHour() {
+        return millisToHours(lunchStartManual);
+    }
+
+    public int getLunchStartManualMinute() {
+        return millisToMins(lunchStartManual);
     }
 
     public void setLunchEndManual(int endTime) {
@@ -280,8 +350,20 @@ public class Settings {
         lunchEndManual = endTime;
     }
 
+    public void setLunchEndManual(int hour, int minute) {
+        setLunchEndManual(timeToMillis(hour, minute));
+    }
+
     public int getLunchEndManual() {
         return lunchEndManual;
+    }
+
+    public int getLunchEndManualHour() {
+        return millisToHours(lunchEndManual);
+    }
+
+    public int getLunchEndManualMinute() {
+        return millisToMins(lunchEndManual);
     }
 
     public void setDinnerStartManual(int startTime) {
@@ -289,8 +371,20 @@ public class Settings {
         dinnerStartManual = startTime;
     }
 
+    public void setDinnerStartManual(int hour, int minute) {
+        setDinnerStartManual(timeToMillis(hour, minute));
+    }
+
     public int getDinnerStartManual() {
         return dinnerStartManual;
+    }
+
+    public int getDinnerStartManualHour() {
+        return millisToHours(dinnerStartManual);
+    }
+
+    public int getDinnerStartManualMinute() {
+        return millisToMins(dinnerStartManual);
     }
 
     public void setDinnerEndManual(int endTime) {
@@ -298,8 +392,20 @@ public class Settings {
         dinnerEndManual = endTime;
     }
 
+    public void setDinnerEndManual(int hour, int minute) {
+        setDinnerEndManual(timeToMillis(hour, minute));
+    }
+
     public int getDinnerEndManual() {
         return dinnerEndManual;
+    }
+
+    public int getDinnerEndManualHour() {
+        return millisToHours(dinnerEndManual);
+    }
+
+    public int getDinnerEndManualMinute() {
+        return millisToMins(dinnerEndManual);
     }
 
     public void setBreakfastStartAuto(int startTime) {
@@ -311,13 +417,33 @@ public class Settings {
         return breakfastStartAuto;
     }
 
+    public int getBreakfastStartAutoHour() {
+        return millisToHours(breakfastStartAuto);
+    }
+
+    public int getBreakfastStartAutoMinute() {
+        return millisToMins(breakfastStartAuto);
+    }
+
     public void setBreakfastEndAuto(int endTime) {
         setSharedPreference(Constants.SETTINGS_BREAKFAST_END_AUTO, endTime);
         breakfastEndAuto = endTime;
     }
 
+    public void setBreakfastEndAuto(int hour, int minute) {
+        setBreakfastEndAuto(timeToMillis(hour, minute));
+    }
+
     public int getBreakfastEndAuto() {
         return breakfastEndAuto;
+    }
+
+    public int getBreakfastEndAutoHour() {
+        return millisToHours(breakfastEndAuto);
+    }
+
+    public int getBreakfastEndAutoMinute() {
+        return millisToMins(breakfastEndAuto);
     }
 
     public void setLunchStartAuto(int startTime) {
@@ -325,8 +451,20 @@ public class Settings {
         lunchStartAuto = startTime;
     }
 
+    public void setLunchStartAuto(int hour, int minute) {
+        setLunchStartAuto(timeToMillis(hour, minute));
+    }
+
     public int getLunchStartAuto() {
         return lunchStartAuto;
+    }
+
+    public int getLunchStartAutoHour() {
+        return millisToHours(lunchStartAuto);
+    }
+
+    public int getLunchStartAutoMinute() {
+        return millisToMins(lunchStartAuto);
     }
 
     public void setLunchEndAuto(int endTime) {
@@ -334,8 +472,20 @@ public class Settings {
         lunchEndAuto = endTime;
     }
 
+    public void setLunchEndAuto(int hour, int minute) {
+        setLunchEndAuto(timeToMillis(hour, minute));
+    }
+
     public int getLunchEndAuto() {
         return lunchEndAuto;
+    }
+
+    public int getLunchEndAutoHour() {
+        return millisToHours(lunchEndAuto);
+    }
+
+    public int getLunchEndAutoMinute() {
+        return millisToMins(lunchEndAuto);
     }
 
     public void setDinnerStartAuto(int startTime) {
@@ -343,8 +493,20 @@ public class Settings {
         dinnerStartAuto = startTime;
     }
 
+    public void setDinnerStartAuto(int hour, int minute) {
+        setDinnerStartAuto(timeToMillis(hour, minute));
+    }
+
     public int getDinnerStartAuto() {
         return dinnerStartAuto;
+    }
+
+    public int getDinnerStartAutoHour() {
+        return millisToHours(dinnerStartAuto);
+    }
+
+    public int getDinnerStartAutoMinute() {
+        return millisToMins(dinnerStartAuto);
     }
 
     public void setDinnerEndAuto(int endTime) {
@@ -352,8 +514,20 @@ public class Settings {
         dinnerEndAuto = endTime;
     }
 
+    public void setDinnerEndAuto(int hour, int minute) {
+        setDinnerEndAuto(timeToMillis(hour, minute));
+    }
+
     public int getDinnerEndAuto() {
         return dinnerEndAuto;
+    }
+
+    public int getDinnerEndAutoHour() {
+        return millisToHours(dinnerEndAuto);
+    }
+
+    public int getDinnerEndAutoMinute() {
+        return millisToMins(dinnerEndAuto);
     }
 
     private void setAllManualTimes(int breakfastStart, int breakfastEnd, int lunchStart, int lunchEnd, int dinnerStart, int dinnerEnd) {
@@ -382,5 +556,17 @@ public class Settings {
 
     private void setSharedPreference(String key, String value) {
         mContext.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit().putString(key, value).apply();
+    }
+
+    public int timeToMillis(int hour, int minute) {
+        return hour * MILLIS_IN_HOUR + minute * MILLIS_IN_MIN;
+    }
+
+    private int millisToHours(int millis) {
+        return millis / MILLIS_IN_HOUR;
+    }
+
+    private int millisToMins(int millis) {
+        return (millis % MILLIS_IN_HOUR) / MILLIS_IN_MIN;
     }
 }
