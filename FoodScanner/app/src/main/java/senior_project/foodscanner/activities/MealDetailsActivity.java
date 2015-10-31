@@ -53,6 +53,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     private Meal meal;
     private static final int REQUEST_FOODSCANNER = 0;
+    private static final int NEW_FOOD_ITEM = 1;
+    private static final int REPLACE_FOOD_ITEM = 2;
 
     private String[] meals;
     private Spinner mealSpinner;
@@ -110,7 +112,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         } else if (time >= dinnerTime && time < dessertTime) {
             defaultMeal = Meal.MealType.DINNER;
         } else {
-            defaultMeal = Meal.MealType.DESSERT
+            defaultMeal = Meal.MealType.DESSERT;
         }
 
         mealSpinner.setSelection(mealAdapter.getPosition(defaultMeal.getName()));
@@ -180,9 +182,6 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         return super.onOptionsItemSelected(item);
     }
 
-    private static int NEW_FOOD_ITEM = 1;  //TODO: add to constants.java
-    private static int REPLACE_FOOD_ITEM = 2;
-
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.button_foodscanner) {
@@ -209,19 +208,15 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                     }
                 }
                 break;
+            case NEW_FOOD_ITEM:
+                //fall through
+            case REPLACE_FOOD_ITEM:
+                if (resultCode == RESULT_OK) {
+                    meal = (Meal) data.getSerializableExtra("meal");
+                }
+                break;
             default:
                 break;
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Check which request we're responding to
-        if (requestCode == NEW_FOOD_ITEM || requestCode == REPLACE_FOOD_ITEM) {
-            // Make sure the request was successful
-            if (resultCode == RESULT_OK) {
-                meal = (Meal) data.getSerializableExtra("meal");
-            }
         }
     }
 
