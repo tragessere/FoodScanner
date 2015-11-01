@@ -1,5 +1,6 @@
 package senior_project.foodscanner.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -38,8 +39,12 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private Button button_total;
     private CalendarView calendar;
     private MealArrayAdapter adapter;
+    private int lastClickedMealPos;
+    private Meal lastClickedMeal;
 
     private static final long msInDay = 24 * 60 * 60 * 1000;
+    private static final int VIEW_MEAL = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,11 +109,17 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         return newMeal;
     }
 
+    private void updateMeal(Meal updatedMeal) {
+        adapter.remove(lastClickedMeal);
+        adapter.insert(updatedMeal, lastClickedMealPos);
+        //TODO update meal on device here
+    }
+
     private void viewMeal(Meal meal) {
         // Note: uses Serializable to pass the meal which may have high overhead. Consider Parcelable as alternative.
         Intent intent = new Intent(MealCalendarActivity.this, MealDetailsActivity.class);
         intent.putExtra("meal", meal);
-        startActivity(intent);
+        startActivityForResult(intent, VIEW_MEAL);
     }
 
     private void changeSelectedDay(int year, int month, int dayOfMonth) {
@@ -187,6 +198,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         if(meal == null) {
             meal = createMeal();
         }
+        lastClickedMealPos = position;
+        lastClickedMeal = meal;
         viewMeal(meal);
     }
 
@@ -196,6 +209,19 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         //TODO confirm dialog
         //TODO delete from device
         adapter.remove(adapter.getItem(position));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+            case VIEW_MEAL:
+                if (resultCode == RESULT_OK) {
+                    updateMeal((Meal) data.getSerializableExtra("meal"));
+                }
+                break;
+            default:
+                break;
+        }
     }
 
 }

@@ -1,11 +1,14 @@
 package senior_project.foodscanner.activities;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.JsonReader;
+import android.util.JsonToken;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -29,14 +32,18 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import senior_project.foodscanner.FoodItem;
+import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
-import com.example.backend.foodScannerBackendAPI.model.FoodItem;
+//import com.example.backend.foodScannerBackendAPI.model.FoodItem;
 
 import java.util.Collections;
 
 import senior_project.foodscanner.backend_helpers.EndpointBuilderHelper;
+import senior_project.foodscanner.fragments.FoodInfoFragment;
+
 /**
  * Activity for manually adding a food item.
  *
@@ -49,11 +56,24 @@ import senior_project.foodscanner.backend_helpers.EndpointBuilderHelper;
  *  Cancel - return to Meal Details
  *  Ok - return to Meal Details with new food item added
  */
-public class FoodItemActivity extends AppCompatActivity implements View.OnClickListener {
+public class FoodItemActivity extends AppCompatActivity implements View.OnClickListener,
+        FoodInfoFragment.FoodInfoDialogListener {
+
+    private Meal meal;
+    private FoodItem replacedFood = null;
+
+    private static int NEW_FOOD_ITEM = 1;  //TODO: add to constants.java
+    private static int REPLACE_FOOD_ITEM = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        meal = (Meal) getIntent().getSerializableExtra("meal");
+        int requestCode = getIntent().getIntExtra("requestCode", 0);  //0 is arbitrary
+        if (requestCode == REPLACE_FOOD_ITEM) {
+            replacedFood = (FoodItem) getIntent().getSerializableExtra("foodItem");
+        }
+
         setContentView(R.layout.activity_food_item);
 
         // Set up Search button
@@ -115,6 +135,51 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        // User touched the dialog's positive button - "Add to Meal"
+        FoodInfoFragment frag = (FoodInfoFragment)dialog;
+
+        if (replacedFood == null) {
+            // Add food item to meal
+            meal.addFoodItem(frag.food);
+            displayToast("Added to meal", this);
+        } else {
+            // Replace previously added food item
+            meal.replaceFoodItem(replacedFood, frag.food);
+            displayToast("Replaced food item", this);
+        }
+
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("meal", meal);
+        setResult(Activity.RESULT_OK, resultIntent);
+
+        finish();
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        // User touched the dialog's negative button - DNE
+        // Cannot get called currently
+    }
+
+    @Override
+    public void onDialogNeutralClick(DialogFragment dialog) {
+        // User touched the dialog's neutral button - "Cancel"
+        // Do nothing, besides exit dialog
+    }
+
+    public static void displayToast(final String message, Activity actArg) {
+        final Activity act = actArg;
+        act.runOnUiThread(new Runnable() {
+            public void run() {
+                Toast butteredToast = Toast.makeText(act.getApplicationContext(), message, Toast.LENGTH_SHORT);
+                //butteredToast.setGravity(Gravity.CENTER, 0, 0);
+                butteredToast.show();
+            }
+        });
+    }
+
     private class FoodSearch extends AsyncTask<String, Void, Boolean> {
 
         private Activity act;
@@ -123,8 +188,9 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         private SearchResults results;
 
         //region Strings for nutritionix API
-        static final String API_ID = "4d784f94";
-        static final String API_KEY = "a3e15aa81cdbe791ad05625dcc3d417a";
+        //TODO: add to constants.java
+        final String API_ID = getResources().getString(R.string.nutritionix_api_id);
+        final String API_KEY = getResources().getString(R.string.nutritionix_api_key);
         //endregion
 
         FoodSearch(Activity act, String searchTerm) {
@@ -162,7 +228,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
                 url = new URL(urlStr);
             } catch (Exception e) {
                 e.printStackTrace();
-                displayToast("Error: Please try again.");
+                displayToast("Error: Please try again.", act);
                 return false;
             }
 
@@ -179,7 +245,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
 
             } catch (Exception e) {
                 e.printStackTrace();
-                displayToast("Error: Please try again.");
+                displayToast("Error: Please try again.", act);
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -193,14 +259,14 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
                 results = readResults(reader);
             } catch (Exception e) {
                 e.printStackTrace();
-                displayToast("Error: Please try again.");
+                displayToast("Error: Please try again.", act);
             } finally {
                 if (reader != null) {
                     try {
                         reader.close();
                     } catch (Exception e) {
                         e.printStackTrace();
-                        displayToast("Error: Please try again.");
+                        displayToast("Error: Please try again.", act);
                     }
                 }
             }
@@ -208,9 +274,9 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
             urlConnection.disconnect();
 
             if (results.count == 0) {
-                displayToast("No results found.");
+                displayToast("No results found.", act);
             } else {
-                displayToast("Found " + results.count + " matches.");
+                displayToast("Found " + results.count + " matches.", act);
                 act.runOnUiThread(new Runnable() {
                     public void run() {
                         ListView lv = (ListView) act.findViewById(R.id.resultList);
@@ -224,9 +290,11 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
                         // set up happens when you click a list item
                         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                // temporary; in the future, add this food and/or display more info
                                 FoodResult selectedFood = results.list.get(position);
-                                displayToast(selectedFood.name + " (" + selectedFood.brand + ")");
+
+                                // query database for nutrition info in async task
+                                // will also display confirmation prompt with info
+                                new NutritionInfoQuery(act, selectedFood.id).execute();
                             }
                         });
 
@@ -323,17 +391,6 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        private void displayToast(final String message) {
-            act.runOnUiThread(new Runnable() {
-                public void run() {
-                    Toast butteredToast = Toast.makeText(act.getApplicationContext(), message, Toast.LENGTH_SHORT);
-                    butteredToast.setGravity(Gravity.CENTER, 0, 0);
-                    butteredToast.show();
-                }
-            });
-        }
-
-
         /**
          * Object representing search results
          */
@@ -357,5 +414,172 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
             }
         }
 
+    }
+
+    private class NutritionInfoQuery extends AsyncTask<String, Void, Boolean> {
+
+        private Activity act;
+        private String id;
+        private ProgressDialog dialog;
+        private FoodItem food;
+
+        //region Strings for nutritionix API
+        final String API_ID = getResources().getString(R.string.nutritionix_api_id);
+        final String API_KEY = getResources().getString(R.string.nutritionix_api_key);
+        //endregion
+
+        NutritionInfoQuery(Activity act, String id) {
+            this.act = act;
+            this.id = id;
+            food = null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog = new ProgressDialog(act);
+            dialog.setMessage("Loading...");
+            //dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+
+            if (food != null) {
+                // display confirmation prompt containing nutrition info
+                DialogFragment dialog = FoodInfoFragment.newInstance(food, false);
+                dialog.show(getFragmentManager(), "FoodInfoFragment");
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            // Construct GET request
+            String urlStr = "https://api.nutritionix.com/v1_1/item?id=" + id +
+                    "&appId=" + API_ID + "&appKey=" + API_KEY;
+            System.out.println(urlStr);
+            URL url;
+            try {
+                url = new URL(urlStr);
+            } catch (Exception e) {
+                e.printStackTrace();
+                displayToast("Error: Please try again.", act);
+                return false;
+            }
+
+            HttpURLConnection urlConnection = null;
+            InputStream in = null;
+
+            // Make GET request and save input
+            try {
+                urlConnection = (HttpURLConnection) url.openConnection();
+                if (urlConnection.getResponseCode() != 200) {
+                    throw new Exception(urlConnection.getErrorStream().toString());
+                }
+                in = new BufferedInputStream(urlConnection.getInputStream());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                displayToast("Error: Please try again.", act);
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                return false;
+            }
+
+            JsonReader reader = null;
+            try {
+                reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+                food = readFoodInfo(reader);
+            } catch (Exception e) {
+                e.printStackTrace();
+                displayToast("Error: Please try again.", act);
+                food = null;  //just to be safe
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        displayToast("Error: Please try again.", act);
+                    }
+                }
+            }
+
+            urlConnection.disconnect();
+            return true;
+        }
+
+        private FoodItem readFoodInfo(JsonReader reader) throws IOException {
+            FoodItem food = new FoodItem();
+            reader.beginObject();
+            while (reader.hasNext()) {
+                String name = reader.nextName();
+                if (name.equals("item_name") && reader.peek() != JsonToken.NULL) {
+                    food.setName(reader.nextString());
+                } else if (name.equals("brand_name") && reader.peek() != JsonToken.NULL) {
+                    food.setBrand(reader.nextString());
+                } else if (name.equals("nf_serving_size_qty") && reader.peek() != JsonToken.NULL) {
+                    food.setServingSize(reader.nextDouble());
+                } else if (name.equals("nf_serving_size_unit") && reader.peek() != JsonToken.NULL) {
+                    food.setServingSizeUnit(reader.nextString());
+                } else if (name.equals("nf_calories")) {
+                    if (reader.peek() == JsonToken.NULL) {
+                        food.setField("Calories", 0.0);
+                        reader.skipValue();
+                    }
+                    else {
+                        food.setField("Calories", reader.nextDouble());
+                    }
+                } else if (name.equals("nf_total_fat")) {
+                    if (reader.peek() == JsonToken.NULL) {
+                        food.setField("Total Fat", 0.0);
+                        reader.skipValue();
+                    }
+                    else {
+                        food.setField("Total Fat", reader.nextDouble());
+                    }
+                } else if (name.equals("nf_sodium")) {
+                    if (reader.peek() == JsonToken.NULL) {
+                        food.setField("Sodium", 0.0);
+                        reader.skipValue();
+                    }
+                    else {
+                        food.setField("Sodium", reader.nextDouble());
+                    }
+                } else if (name.equals("nf_total_carbohydrate")) {
+                    if (reader.peek() == JsonToken.NULL) {
+                        food.setField("Total Carbohydrate", 0.0);
+                        reader.skipValue();
+                    }
+                    else {
+                        food.setField("Total Carbohydrate", reader.nextDouble());
+                    }
+                } else if (name.equals("nf_sugars")) {
+                    if (reader.peek() == JsonToken.NULL) {
+                        food.setField("Sugars", 0.0);
+                        reader.skipValue();
+                    }
+                    else {
+                        food.setField("Sugars", reader.nextDouble());
+                    }
+                } else if (name.equals("nf_protein")) {
+                    if (reader.peek() == JsonToken.NULL) {
+                        food.setField("Protein", 0.0);
+                        reader.skipValue();
+                    }
+                    else {
+                        food.setField("Protein", reader.nextDouble());
+                    }
+                } else {
+                    reader.skipValue();
+                }
+            }
+            reader.endObject();
+            return food;
+        }
     }
 }
