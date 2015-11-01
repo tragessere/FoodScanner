@@ -1,9 +1,11 @@
 package senior_project.foodscanner;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,13 +26,19 @@ public class FoodItem implements Serializable {
     private Set<String> massUnits;
     private int maxMassLen;
     private int maxVolLen;
+    private List<Portion> portions;  //list of individual items, e.g. 3 pieces of chicken that we
+                                     //want to calculate individually will each have a portion.
 
     public FoodItem() {
         //LinkedHashMap used to ensure insertion order is maintained, for iteration.
         fields = new LinkedHashMap<>(7);
 
+        //Create portions list and first portion
+        portions = new ArrayList<>();
+        portions.add(new Portion());
+
         //NOTE: when checking if the serving size matches, call toLower() on it first, and remove
-                // 's' at the end of the word, if necessary.
+        //'s' at the end of the word, if necessary.
 
         //Create list of volume units, and find max length
         String[] vol_values = new String[] { "cup", "quart", "pt", "pint", "ml", "milliliter",
@@ -112,11 +120,11 @@ public class FoodItem implements Serializable {
 
         //check if volume, mass, or neither is needed
 
+        formattedUnit = formattedUnit.toLowerCase();
         if (formattedUnit.charAt(formattedUnit.length()-1) == 's') {
             //remove last 's' for comparison
             formattedUnit = formattedUnit.substring(0, formattedUnit.length()-1);
         }
-        formattedUnit = formattedUnit.toLowerCase();
 
         if (massUnits.contains(formattedUnit)) {
             setCalculateVol(true);
@@ -187,6 +195,76 @@ public class FoodItem implements Serializable {
     @Override
     public String toString() {
         return name + " (" + brand + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (getClass() != o.getClass()) {
+            return false;
+        }
+        FoodItem fi = (FoodItem)o;
+        if(fi.getName().equals(this.getName()) &&
+                fi.getBrand().equals(this.getBrand()) &&
+                fi.getServingSizeUnit().equals(this.getServingSizeUnit())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private class Portion implements Serializable {
+        private double volume;
+        private double mass;
+
+        //region getters and setters
+        public double getVolume() {
+            return volume;
+        }
+
+        public void setVolume(double volume) {
+            this.volume = volume;
+        }
+
+        public double getMass() {
+            return mass;
+        }
+
+        public void setMass(double mass) {
+            this.mass = mass;
+        }
+        //endregion
+    }
+
+    //NOTE: not sure how these will be used exactly. subject to change.
+
+    public List<Portion> getPortions() {
+        return portions;
+    }
+
+    public Portion getPortion(int index) {
+        return portions.get(index);
+    }
+
+    public int getNumPortions() {
+        return portions.size();
+    }
+
+    public Portion addPortion() {
+        Portion p = new Portion();
+        portions.add(p);
+        return p;
+    }
+
+    public void removePortion(int index) throws IndexOutOfBoundsException {
+        portions.remove(index);
+    }
+
+    public void removePortion(Portion p) {
+        portions.remove(p);
+    }
+
+    public void replacePortions(List<Portion> newPortions) {
+        portions = newPortions;
     }
 
 }

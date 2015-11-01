@@ -264,7 +264,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
                 Toast butteredToast = Toast.makeText(getApplicationContext(), "Removed from meal",
                         Toast.LENGTH_SHORT);
-                butteredToast.setGravity(Gravity.CENTER, 0, 0);
+                //butteredToast.setGravity(Gravity.CENTER, 0, 0);
                 butteredToast.show();
             }
         });

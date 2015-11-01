@@ -146,10 +146,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
             displayToast("Added to meal", this);
         } else {
             // Replace previously added food item
-            // TODO: Replace FoodItem, but maintain linkage to pics, volume, density, etc.
-            // NOTE: For now, simply delete old FoodItem and add new one
-            meal.removeFoodItem(replacedFood);
-            meal.addFoodItem(frag.food);
+            meal.replaceFoodItem(replacedFood, frag.food);
             displayToast("Replaced food item", this);
         }
 
@@ -177,7 +174,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         act.runOnUiThread(new Runnable() {
             public void run() {
                 Toast butteredToast = Toast.makeText(act.getApplicationContext(), message, Toast.LENGTH_SHORT);
-                butteredToast.setGravity(Gravity.CENTER, 0, 0);
+                //butteredToast.setGravity(Gravity.CENTER, 0, 0);
                 butteredToast.show();
             }
         });

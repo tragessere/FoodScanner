@@ -63,6 +63,12 @@ public class FoodInfoFragment extends DialogFragment {
 
         info.append("<b>Brand:</b>  ");
         info.append(food.getBrand());
+
+        if (isSaved) {
+            info.append("<br><b>Portions:</b> ");
+            info.append(food.getNumPortions());
+        }
+
         info.append("<br><b>Serving Size:</b>  ");
         info.append(food.getServingSize());
         info.append(" ");

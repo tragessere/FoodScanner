@@ -56,18 +56,21 @@ public class Meal implements Serializable {
     }
 
     public void addFoodItem(FoodItem item){
+        // Check if food item has already been added
+        for (FoodItem fi : food) {
+            if (fi.equals(item)) {
+                // Add one more portion of food item
+                fi.addPortion();
+                return;
+            }
+        }
+
+        // Food item hasn't already been added
         food.add(item);
     }
 
     public void removeFoodItem(FoodItem item) {
-        //food.remove(item) doesn't work when FoodItem object gets passed as serializable extra
-        //NOTE: Because of this, only one instance of each food item can exist in a meal
-        for (FoodItem fi : food) {
-            if(fi.getName().equals(item.getName()) && fi.getBrand().equals(item.getBrand())) {
-                food.remove(fi);
-                break;
-            }
-        }
+        food.remove(item);
     }
 
     public FoodItem getFoodItem(int index) {
@@ -78,4 +81,9 @@ public class Meal implements Serializable {
         return food;
     }
 
+    public void replaceFoodItem(FoodItem oldFood, FoodItem newFood) {
+        newFood.replacePortions(oldFood.getPortions());
+        this.addFoodItem(newFood);
+        this.removeFoodItem(oldFood);
+    }
 }
