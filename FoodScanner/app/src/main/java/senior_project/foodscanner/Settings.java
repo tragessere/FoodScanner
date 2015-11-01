@@ -13,8 +13,6 @@ import java.util.Locale;
  * Represents app settings.
  */
 public class Settings {
-    private static final int MILLIS_IN_HOUR = 3600000;
-    private static final int MILLIS_IN_MIN = 60000;
 
     private static final String FORMAT_12_HOUR = "h:mm a";
     private static final String FORMAT_24_HOUR = "HH:mm";
@@ -272,6 +270,7 @@ public class Settings {
 
     public void setUseManualTimes(boolean useManualTimes) {
         this.useManualTimes = useManualTimes;
+        setSharedPreference(Constants.SETTINGS_USE_MANUAL_TIMES, useManualTimes);
     }
 
     public boolean isUsingManualTimes() {
@@ -530,7 +529,7 @@ public class Settings {
         return millisToMins(dinnerEndAuto);
     }
 
-    private void setAllManualTimes(int breakfastStart, int breakfastEnd, int lunchStart, int lunchEnd, int dinnerStart, int dinnerEnd) {
+    public void setAllManualTimes(int breakfastStart, int breakfastEnd, int lunchStart, int lunchEnd, int dinnerStart, int dinnerEnd) {
         SharedPreferences.Editor edit = mContext.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
 
         edit.putInt(Constants.SETTINGS_BREAKFAST_START_MANUAL, breakfastStart);
@@ -558,15 +557,19 @@ public class Settings {
         mContext.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit().putString(key, value).apply();
     }
 
+    private void setSharedPreference(String key, boolean value) {
+        mContext.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit().putBoolean(key, value).apply();
+    }
+
     public int timeToMillis(int hour, int minute) {
-        return hour * MILLIS_IN_HOUR + minute * MILLIS_IN_MIN;
+        return hour * Constants.MILLIS_IN_HOUR + minute * Constants.MILLIS_IN_MIN;
     }
 
-    private int millisToHours(int millis) {
-        return millis / MILLIS_IN_HOUR;
+    public int millisToHours(int millis) {
+        return millis / Constants.MILLIS_IN_HOUR;
     }
 
-    private int millisToMins(int millis) {
-        return (millis % MILLIS_IN_HOUR) / MILLIS_IN_MIN;
+    public int millisToMins(int millis) {
+        return (millis % Constants.MILLIS_IN_HOUR) / Constants.MILLIS_IN_MIN;
     }
 }

@@ -59,15 +59,34 @@
 
 
 
-
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
-            android:padding="16dp"
-            android:textColor="@color/Accent"
-            android:textStyle="bold"
-            android:text="@string/breakfast"/>
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginRight="16dp"
+                android:textColor="@color/Accent"
+                android:textStyle="bold"
+                android:text="@string/breakfast"/>
+
+            <ImageView
+                android:id="@+id/breakfast_overlap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_error_outline_black"
+                android:contentDescription="@string/accessibility_meal_time_overlap"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/breakfast_start"
@@ -136,15 +155,33 @@
 
 
 
-
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
-            android:padding="16dp"
-            android:textColor="@color/Accent"
-            android:textStyle="bold"
-            android:text="@string/lunch"/>
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginRight="16dp"
+                android:textColor="@color/Accent"
+                android:textStyle="bold"
+                android:text="@string/lunch"/>
+
+            <ImageView
+                android:id="@+id/lunch_overlap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_error_outline_black"
+                android:contentDescription="@string/accessibility_meal_time_overlap"
+                android:visibility="gone"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/lunch_start"
@@ -214,14 +251,33 @@
 
 
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
-            android:padding="16dp"
-            android:textColor="@color/Accent"
-            android:textStyle="bold"
-            android:text="@string/dinner"/>
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginRight="16dp"
+                android:textColor="@color/Accent"
+                android:textStyle="bold"
+                android:text="@string/dinner"/>
+
+            <ImageView
+                android:id="@+id/dinner_overlap"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_error_outline_black"
+                android:contentDescription="@string/accessibility_meal_time_overlap"
+                android:visibility="gone"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/dinner_start"

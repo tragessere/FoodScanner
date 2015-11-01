@@ -1,18 +1,22 @@
 package senior_project.foodscanner.activities;
 
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
 import java.util.Calendar;
 
+import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
 
@@ -23,18 +27,21 @@ public class SettingsManualTimes extends AppCompatActivity {
 
 	View manualTimeButton;
 	SwitchCompat manualTimeSwitch;
+	ImageView breakfastOverlapImage;
 	View breakfastStartButton;
 	TextView breakfastStartPrompt;
 	TextView breakfastStartTime;
 	View breakfastEndButton;
 	TextView breakfastEndPrompt;
 	TextView breakfastEndTime;
+	ImageView lunchOverlapImage;
 	View lunchStartButton;
 	TextView lunchStartPrompt;
 	TextView lunchStartTime;
 	View lunchEndButton;
 	TextView lunchEndPrompt;
 	TextView lunchEndTime;
+	ImageView dinnerOverlapImage;
 	View dinnerStartButton;
 	TextView dinnerStartPrompt;
 	TextView dinnerStartTime;
@@ -42,6 +49,7 @@ public class SettingsManualTimes extends AppCompatActivity {
 	TextView dinnerEndPrompt;
 	TextView dinnerEndTime;
 
+	boolean overlaps;
 	int breakfastStart;
 	int breakfastEnd;
 	int lunchStart;
@@ -59,18 +67,21 @@ public class SettingsManualTimes extends AppCompatActivity {
 
 		manualTimeButton = findViewById(R.id.manual_time_button);
 		manualTimeSwitch = (SwitchCompat) findViewById(R.id.manual_time_switch);
+		breakfastOverlapImage = (ImageView) findViewById(R.id.breakfast_overlap);
 		breakfastStartButton = findViewById(R.id.breakfast_start);
 		breakfastStartPrompt = (TextView) findViewById(R.id.breakfast_start_prompt);
 		breakfastStartTime = (TextView) findViewById(R.id.breakfast_start_current);
 		breakfastEndButton = findViewById(R.id.breakfast_end);
 		breakfastEndPrompt = (TextView) findViewById(R.id.breakfast_end_prompt);
 		breakfastEndTime = (TextView) findViewById(R.id.breakfast_end_current);
+		lunchOverlapImage = (ImageView) findViewById(R.id.lunch_overlap);
 		lunchStartButton = findViewById(R.id.lunch_start);
 		lunchStartPrompt = (TextView) findViewById(R.id.lunch_start_prompt);
 		lunchStartTime = (TextView) findViewById(R.id.lunch_start_current);
 		lunchEndButton = findViewById(R.id.lunch_end);
 		lunchEndPrompt = (TextView) findViewById(R.id.lunch_end_prompt);
 		lunchEndTime = (TextView) findViewById(R.id.lunch_end_current);
+		dinnerOverlapImage = (ImageView) findViewById(R.id.dinner_overlap);
 		dinnerStartButton = findViewById(R.id.dinner_start);
 		dinnerStartPrompt = (TextView) findViewById(R.id.dinner_start_prompt);
 		dinnerStartTime = (TextView) findViewById(R.id.dinner_start_current);
@@ -121,8 +132,9 @@ public class SettingsManualTimes extends AppCompatActivity {
 					public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 						breakfastStart = settings.timeToMillis(hourOfDay, minute);
 						breakfastStartTime.setText(settings.formatHour(hourOfDay, minute));
+						checkTimeOverlaps();
 					}
-				}, settings.getBreakfastStartManualHour(), settings.getBreakfastStartManualMinute(), settings.isUsing24HourFormat());
+				}, settings.millisToHours(breakfastStart), settings.millisToMins(breakfastStart), settings.isUsing24HourFormat());
 				timePicker.show();
 			}
 		});
@@ -135,8 +147,9 @@ public class SettingsManualTimes extends AppCompatActivity {
 					public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 						breakfastEnd = settings.timeToMillis(hourOfDay, minute);
 						breakfastEndTime.setText(settings.formatHour(hourOfDay, minute));
+						checkTimeOverlaps();
 					}
-				}, settings.getBreakfastEndManualHour(), settings.getBreakfastEndManualMinute(), settings.isUsing24HourFormat());
+				}, settings.millisToHours(breakfastEnd), settings.millisToMins(breakfastEnd), settings.isUsing24HourFormat());
 				timePicker.show();
 			}
 		});
@@ -149,8 +162,9 @@ public class SettingsManualTimes extends AppCompatActivity {
 					public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 						lunchStart = settings.timeToMillis(hourOfDay, minute);
 						lunchStartTime.setText(settings.formatHour(hourOfDay, minute));
+						checkTimeOverlaps();
 					}
-				}, settings.getLunchStartManualHour(), settings.getLunchStartManualMinute(), settings.isUsing24HourFormat());
+				}, settings.millisToHours(lunchStart), settings.millisToMins(lunchStart), settings.isUsing24HourFormat());
 				timePicker.show();
 			}
 		});
@@ -163,8 +177,9 @@ public class SettingsManualTimes extends AppCompatActivity {
 					public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 						lunchEnd = settings.timeToMillis(hourOfDay, minute);
 						lunchEndTime.setText(settings.formatHour(hourOfDay, minute));
+						checkTimeOverlaps();
 					}
-				}, settings.getLunchEndManualHour(), settings.getLunchEndManualMinute(), settings.isUsing24HourFormat());
+				}, settings.millisToHours(lunchEnd), settings.millisToMins(lunchEnd), settings.isUsing24HourFormat());
 				timePicker.show();
 			}
 		});
@@ -177,8 +192,9 @@ public class SettingsManualTimes extends AppCompatActivity {
 					public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 						dinnerStart = settings.timeToMillis(hourOfDay, minute);
 						dinnerStartTime.setText(settings.formatHour(hourOfDay, minute));
+						checkTimeOverlaps();
 					}
-				}, settings.getDinnerStartManualHour(), settings.getDinnerStartManualMinute(), settings.isUsing24HourFormat());
+				}, settings.millisToHours(dinnerStart), settings.millisToMins(dinnerStart), settings.isUsing24HourFormat());
 				timePicker.show();
 			}
 		});
@@ -191,8 +207,9 @@ public class SettingsManualTimes extends AppCompatActivity {
 					public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 						dinnerEnd = settings.timeToMillis(hourOfDay, minute);
 						dinnerEndTime.setText(settings.formatHour(hourOfDay, minute));
+						checkTimeOverlaps();
 					}
-				}, settings.getDinnerEndManualHour(), settings.getDinnerEndManualMinute(), settings.isUsing24HourFormat());
+				}, settings.millisToHours(dinnerEnd), settings.millisToMins(dinnerEnd), settings.isUsing24HourFormat());
 				timePicker.show();
 			}
 		});
@@ -255,13 +272,77 @@ public class SettingsManualTimes extends AppCompatActivity {
 	}
 
 
-	private void checkTimeOverlaps() {
+	private boolean checkTimeOverlaps() {
+		boolean breakfastOverlaps = false;
+		boolean lunchOverlaps = false;
+		boolean dinnerOverlaps = false;
 
+		//If the time period wraps around midnight add 24 hours to the end
+		int breakfastEndWrap = 0;
+		int lunchEndWrap = 0;
+		int dinnerEndWrap = 0;
+
+		if(breakfastStart > breakfastEnd)
+			breakfastEndWrap = Constants.MILLIS_IN_DAY;
+		if(lunchStart > lunchEnd)
+			lunchEndWrap = Constants.MILLIS_IN_DAY;
+		if(dinnerStart > dinnerEnd)
+			dinnerEndWrap = Constants.MILLIS_IN_DAY;
+
+		if(breakfastStart < (lunchEnd + lunchEndWrap) && (breakfastEnd + breakfastEndWrap) > lunchStart) {
+			breakfastOverlaps = true;
+			lunchOverlaps = true;
+		}
+
+		if(breakfastStart < (dinnerEnd + dinnerEndWrap) && (breakfastEnd + breakfastEndWrap) > dinnerStart) {
+			breakfastOverlaps = true;
+			dinnerOverlaps = true;
+		}
+
+		if(lunchStart < (dinnerEnd + dinnerEndWrap) && (lunchEnd + lunchEndWrap) > dinnerStart) {
+			lunchOverlaps = true;
+			dinnerOverlaps = true;
+		}
+
+
+		if(breakfastOverlaps)
+			breakfastOverlapImage.setVisibility(View.VISIBLE);
+		else
+			breakfastOverlapImage.setVisibility(View.GONE);
+
+		if(lunchOverlaps)
+			lunchOverlapImage.setVisibility(View.VISIBLE);
+		else
+			lunchOverlapImage.setVisibility(View.GONE);
+
+		if(dinnerOverlaps)
+			dinnerOverlapImage.setVisibility(View.VISIBLE);
+		else
+			dinnerOverlapImage.setVisibility(View.GONE);
+
+		overlaps = breakfastOverlaps || lunchOverlaps || dinnerOverlaps;
+
+		return overlaps;
 	}
 
 	@Override
 	public void onBackPressed() {
-		super.onBackPressed();
+		if(overlaps) {
+			new AlertDialog.Builder(SettingsManualTimes.this)
+					.setTitle(getString(R.string.settings_time_overlap_title))
+					.setMessage(getString(R.string.settings_time_overlap_subtitle))
+					.setPositiveButton(getString(R.string.reset_changes), new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							SettingsManualTimes.super.onBackPressed();
+						}
+					})
+					.setNegativeButton(getString(android.R.string.cancel).toUpperCase(), null)
+					.show();
+		} else {
+			settings.setAllManualTimes(breakfastStart, breakfastEnd, lunchStart, lunchEnd, dinnerStart, dinnerEnd);
+			super.onBackPressed();
+		}
 	}
 
 	@Override

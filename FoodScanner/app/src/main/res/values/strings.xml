@@ -38,6 +38,9 @@
     <string name="breakfast">Breakfast</string>
     <string name="lunch">Lunch</string>
     <string name="dinner">Dinner</string>
+    <string name="settings_time_overlap_title">Conflicting meal times</string>
+    <string name="settings_time_overlap_subtitle">Some meals have overlapping time intervals. Going back now will reset your changes.</string>
+    <string name="reset_changes">RESET CHANGES</string>
 
     <string name="network_error">Error: Network connection failed.</string>
     <string name="generic_error">Error: Please try again.</string>
@@ -50,5 +53,7 @@
         <item>Dinner</item>
         <item>Dessert</item>
     </string-array>
+
+    <string name="accessibility_meal_time_overlap">Overlapping meal times</string>
 
 </resources>

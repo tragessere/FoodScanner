@@ -36,4 +36,8 @@ public class Constants {
 	public static final int DEFAULT_DINNER_START = 61200000;	//5 P.M.
 	public static final int DEFAULT_DINNER_END = 72000000;		//8 P.M.
 
+	public static final int MILLIS_IN_DAY = 86400000;
+	public static final int MILLIS_IN_HOUR = 3600000;
+	public static final int MILLIS_IN_MIN = 60000;
+
 }
