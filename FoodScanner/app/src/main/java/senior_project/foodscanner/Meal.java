@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class represents a meal.
@@ -36,11 +38,13 @@ public class Meal implements Serializable {
     private MealType type;
     private GregorianCalendar date;
     private List<FoodItem> food;
+    private boolean isNew;
 
     public Meal(GregorianCalendar date, MealType type){
         this.date = date;
         this.type = type;
         food = new ArrayList<>();
+        setIsNew(true);
     }
 
     public void setType(MealType type){
@@ -85,5 +89,20 @@ public class Meal implements Serializable {
         newFood.replacePortions(oldFood.getPortions());
         this.addFoodItem(newFood);
         this.removeFoodItem(oldFood);
+    }
+
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public void setIsNew(boolean isNew) {
+        this.isNew = isNew;
+    }
+
+    //returns a set, which can be iterated through
+    public Set<Map.Entry<String, Double>> getTotalNutrition() {
+        //TODO: create & return total nutrition info, based on calculations of all FoodItems
+        //For now, simply return null
+        return null;
     }
 }

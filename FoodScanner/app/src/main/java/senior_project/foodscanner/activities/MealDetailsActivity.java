@@ -94,29 +94,35 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         mealAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mealSpinner.setAdapter(mealAdapter);
 
-        // Set default meal, based on time of day
-        Calendar cal = Calendar.getInstance();
-        int minute = cal.get(Calendar.MINUTE);
-        int hour = cal.get(Calendar.HOUR_OF_DAY); //24-hour format
-        int time = minute + (hour * 60);
-        Meal.MealType defaultMeal;
+        if (meal.isNew()) {
+            meal.setIsNew(false);
 
-        if (time >= breakfastTime && time < brunchTime) {
-            defaultMeal = Meal.MealType.BREAKFAST;
-        } else if (time >= brunchTime && time < lunchTime) {
-            defaultMeal = Meal.MealType.BRUNCH;
-        } else if (time >= lunchTime && time < snackTime) {
-            defaultMeal = Meal.MealType.LUNCH;
-        } else if (time >= snackTime && time < dinnerTime) {
-            defaultMeal = Meal.MealType.SNACK;
-        } else if (time >= dinnerTime && time < dessertTime) {
-            defaultMeal = Meal.MealType.DINNER;
+            // Set default meal, based on time of day
+            Calendar cal = Calendar.getInstance();
+            int minute = cal.get(Calendar.MINUTE);
+            int hour = cal.get(Calendar.HOUR_OF_DAY); //24-hour format
+            int time = minute + (hour * 60);
+            Meal.MealType defaultMeal;
+
+            if (time >= breakfastTime && time < brunchTime) {
+                defaultMeal = Meal.MealType.BREAKFAST;
+            } else if (time >= brunchTime && time < lunchTime) {
+                defaultMeal = Meal.MealType.BRUNCH;
+            } else if (time >= lunchTime && time < snackTime) {
+                defaultMeal = Meal.MealType.LUNCH;
+            } else if (time >= snackTime && time < dinnerTime) {
+                defaultMeal = Meal.MealType.SNACK;
+            } else if (time >= dinnerTime && time < dessertTime) {
+                defaultMeal = Meal.MealType.DINNER;
+            } else {
+                defaultMeal = Meal.MealType.DESSERT;
+            }
+
+            mealSpinner.setSelection(mealAdapter.getPosition(defaultMeal.getName()));
+            meal.setType(defaultMeal);
         } else {
-            defaultMeal = Meal.MealType.DESSERT;
+            mealSpinner.setSelection(mealAdapter.getPosition(meal.getType().getName()));
         }
-
-        mealSpinner.setSelection(mealAdapter.getPosition(defaultMeal.getName()));
-        meal.setType(defaultMeal);
 
         // Set up what meal selection does
         mealSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -165,6 +171,15 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("meal", meal);
+        setResult(Activity.RESULT_OK, resultIntent);
+
+        super.onBackPressed();
     }
 
     @Override

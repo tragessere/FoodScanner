@@ -175,7 +175,20 @@ public class FoodItem implements Serializable {
     }
 
     public boolean needCalculateVol() {
-        return calculateVol;
+        if (!calculateVol) {
+            return false;
+        }
+
+        // Check if all portions have been calculated
+        for(Portion p : portions) {
+            if (p.getVolume() == 0.0) {
+                // Has not yet been calculated
+                return true;
+            }
+        }
+
+        // All portions have been calculated
+        return false;
     }
 
     public void setCalculateVol(boolean calculateVol) {
@@ -183,7 +196,19 @@ public class FoodItem implements Serializable {
     }
 
     public boolean needCalculateMass() {
-        return calculateMass;
+        if (!calculateMass) {
+            return false;
+        }
+        // Check if all portions have been calculated
+        for(Portion p : portions) {
+            if (p.getMass() == 0.0) {
+                // Has not yet been calculated
+                return true;
+            }
+        }
+
+        // All portions have been calculated
+        return false;
     }
 
     public void setCalculateMass(boolean calculateMass) {
@@ -213,8 +238,8 @@ public class FoodItem implements Serializable {
     }
 
     private class Portion implements Serializable {
-        private double volume;
-        private double mass;
+        private double volume = 0.0;
+        private double mass = 0.0;
 
         //region getters and setters
         public double getVolume() {
@@ -266,5 +291,29 @@ public class FoodItem implements Serializable {
     public void replacePortions(List<Portion> newPortions) {
         portions = newPortions;
     }
+
+    //returns a set, which can be iterated through
+    public Set<Map.Entry<String, Double>> getTotalNutrition() {
+        //TODO: create & return total nutrition info, based on calculations
+        //For now, simply return nutrition info set, same as getSet()
+        return fields.entrySet();
+    }
+
+    public double getTotalMass() {
+        double totalMass = 0.0;
+        for (Portion p : portions) {
+            totalMass += p.getMass();
+        }
+        return totalMass;
+    }
+
+    public double getTotalVolume() {
+        double totalVolume = 0.0;
+        for (Portion p : portions) {
+            totalVolume += p.getVolume();
+        }
+        return totalVolume;
+    }
+
 
 }
