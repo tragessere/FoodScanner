@@ -42,7 +42,7 @@
         </activity>
         <activity
             android:name=".activities.PhotoTakerActivity"
-            android:label="@string/title_activity_food_scanner" >
+            android:label="Photo Taker" >
         </activity>
         <activity
             android:name=".activities.FoodItemActivity"
@@ -52,7 +52,7 @@
         <activity
             android:name=".activities.CameraActivity"
             android:label="Camera"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar.Fullscreen">
         </activity>
 
         <activity
