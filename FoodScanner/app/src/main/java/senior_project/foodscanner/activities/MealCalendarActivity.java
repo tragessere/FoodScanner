@@ -1,6 +1,7 @@
 package senior_project.foodscanner.activities;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,11 +14,13 @@ import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.ListView;
 
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
+import senior_project.foodscanner.ui.components.CalendarDialog;
 import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
 
 /**
@@ -34,16 +37,16 @@ import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
  * - Clicking this will log out the user
  * - Maybe a drop down menu for account settings
  */
-public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, CalendarView.OnDateChangeListener, AdapterView.OnItemClickListener, MealArrayAdapter.OnDeleteListener {
+public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, CalendarDialog.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.OnDeleteListener {
     private Button button_calendar;
     private Button button_total;
-    private CalendarView calendar;
     private MealArrayAdapter adapter;
     private int lastClickedMealPos;
     private Meal lastClickedMeal;
 
     private static final long msInDay = 24 * 60 * 60 * 1000;
     private static final int VIEW_MEAL = 0;
+    private long currentDate;
 
 
     @Override
@@ -53,12 +56,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
         button_calendar = (Button) findViewById(R.id.button_calendar);
         button_total = (Button) findViewById(R.id.button_total_day);
-        calendar = (CalendarView) findViewById(R.id.calendarView);
         ListView mealListView = (ListView) findViewById(R.id.listView_meals);
 
         button_calendar.setOnClickListener(this);
         button_total.setOnClickListener(this);
-        calendar.setOnDateChangeListener(this);
         findViewById(R.id.imageButton_prev).setOnClickListener(this);
         findViewById(R.id.imageButton_next).setOnClickListener(this);
         adapter = new MealArrayAdapter(MealCalendarActivity.this);
@@ -66,7 +67,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         mealListView.setAdapter(adapter);
         mealListView.setOnItemClickListener(this);
 
-        calendar.setVisibility(View.GONE);
+        currentDate = new Date().getTime();
 
 
         // TODO determine when to upload meals to server
@@ -122,10 +123,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         startActivityForResult(intent, VIEW_MEAL);
     }
 
-    private void changeSelectedDay(int year, int month, int dayOfMonth) {
-        changeSelectedDay(new GregorianCalendar(year, month, dayOfMonth));
-    }
-
     private void changeSelectedDay(long date) {
         GregorianCalendar cal = new GregorianCalendar();
         cal.setTimeInMillis(date);
@@ -133,13 +130,13 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void changeSelectedDay(GregorianCalendar cal) {
-        calendar.setDate(cal.getTimeInMillis());
+        currentDate = cal.getTimeInMillis();
         button_calendar.setText(new Settings().formatDate(cal));//TODO reference global Settings object
         loadMeals(cal);
     }
 
     private void loadMeals(){
-        loadMeals(calendar.getDate());
+        loadMeals(currentDate);
     }
 
     private void loadMeals(long date){
@@ -158,13 +155,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.button_calendar:
-                if(calendar.getVisibility() == View.GONE) {
-                    calendar.setDate(calendar.getDate());
-                    calendar.setVisibility(View.VISIBLE);
-                } else {
-                    calendar.setVisibility(View.GONE);
-                    calendar.setDate(calendar.getDate());
-                }
+                CalendarDialog.show(this, this, currentDate);
                 break;
             case R.id.button_total_day:
                 // TODO display dialog
@@ -176,10 +167,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 // TODO display dialog
                 break;
             case R.id.imageButton_prev:
-                changeSelectedDay(calendar.getDate() - msInDay);
+                changeSelectedDay(currentDate - msInDay);
                 break;
             case R.id.imageButton_next:
-                changeSelectedDay(calendar.getDate() + msInDay);
+                changeSelectedDay(currentDate + msInDay);
                 break;
             default:
                 // Do nothing
@@ -187,9 +178,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     }
 
     @Override
-    public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
-        calendar.setVisibility(View.GONE);
-        changeSelectedDay(year, month, dayOfMonth);
+    public void onCalendarDialogDateSelected(GregorianCalendar date) {
+        changeSelectedDay(date);
     }
 
     @Override

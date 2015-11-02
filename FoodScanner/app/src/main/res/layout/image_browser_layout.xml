@@ -30,14 +30,14 @@
             android:layout_height="wrap_content"
             android:id="@+id/imageButton_prev"
             android:layout_gravity="left|center_vertical"
-            android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"/>
+            android:src="@android:drawable/ic_media_rew"/>
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/imageButton_next"
             android:layout_gravity="right|center_vertical"
-            android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"/>
+            android:src="@android:drawable/ic_media_ff"/>
 
     <TextView
             android:layout_width="wrap_content"
