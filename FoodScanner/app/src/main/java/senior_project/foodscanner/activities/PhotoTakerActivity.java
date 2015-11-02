@@ -66,7 +66,7 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
         picFiles = new File[picNames.length];
 
         setContentView(R.layout.activity_photo_taker);
-        Bitmap defbmp = BitmapFactory.decodeResource(getResources(), R.drawable.camera512);
+        Bitmap defbmp = BitmapFactory.decodeResource(getResources(), R.drawable.camera);
         Drawable defPic = new BitmapDrawable(getResources(), defbmp);
         picBrowser = new ImageBrowser(this, picNames, defPic);
         picBrowser.setActionButtonListener(this);
