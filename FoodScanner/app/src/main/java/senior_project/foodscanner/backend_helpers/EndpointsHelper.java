@@ -4,20 +4,25 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
+import com.example.backend.foodScannerBackendAPI.model.FoodItem;
+import com.example.backend.foodScannerBackendAPI.model.Meal;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.util.DateTime;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 
 
 /**
  * Created by Evan on 10/3/2015.
  */
 public class EndpointsHelper {
-	private static EndpointsHelper mEndpoints;
-	private FoodScannerBackendAPI mAPI;
+	public static EndpointsHelper mEndpoints;
+	public FoodScannerBackendAPI mAPI;
 
-	private EndpointsHelper() { }
+	public EndpointsHelper() { }
 
 	/**
 	 * Use when logging in to allow API requests
@@ -74,6 +79,97 @@ public class EndpointsHelper {
 			}
 		}
 	}
+
+	public class GetAllDensityFoodItemsTask extends AsyncTask<Void, Void, List<FoodItem>> {
+		private TaskCompletionListener mListener;
+
+		public GetAllDensityFoodItemsTask(TaskCompletionListener listener) {
+			mListener = listener;
+		}
+
+		@Override
+		protected List<FoodItem> doInBackground(Void... params) {
+			try {
+				return mAPI.getAllFoodItems().execute().getItems();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(List<FoodItem> foodItems) {
+			if(!isCancelled()) {
+				Bundle b = new Bundle();
+				if(!foodItems.isEmpty()) {
+					//b.putString("test", testBean.getData());
+				}
+				mListener.onTaskCompleted(b);
+			}
+		}
+	}
+
+	public class SaveMealTask extends AsyncTask<Meal, Void, Meal> {
+		private TaskCompletionListener mListener;
+
+		public SaveMealTask(TaskCompletionListener listener) {
+			mListener = listener;
+		}
+
+		@Override
+		protected Meal doInBackground(Meal... meals) {
+			try {
+				mAPI.saveMeal(meals[0]).execute();
+				return meals[0];
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Meal meal) {
+			if(!isCancelled()) {
+				Bundle b = new Bundle();
+//				if(!foodItems.isEmpty()) {
+//					//b.putString("test", testBean.getData());
+//				}
+				mListener.onTaskCompleted(b);
+			}
+		}
+	}
+
+	public class GetMealsWithinDates extends AsyncTask<Date, Void, List<Meal>> {
+		private TaskCompletionListener mListener;
+
+		public GetMealsWithinDates(TaskCompletionListener listener) {
+			mListener = listener;
+		}
+
+		@Override
+		protected List<Meal> doInBackground(Date... dates) {
+			try {
+				Date startDate = dates[0];
+				Date endDate = dates[1];
+				return mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(List<Meal> meals) {
+			if(!isCancelled()) {
+				Bundle b = new Bundle();
+//				if(!foodItems.isEmpty()) {
+//					//b.putString("test", testBean.getData());
+//				}
+				mListener.onTaskCompleted(b);
+			}
+		}
+	}
+
 
 	/**
 	 * Callback for API calls finishing.

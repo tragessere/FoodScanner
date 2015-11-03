@@ -3,6 +3,13 @@
     package="senior_project.foodscanner" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
 
@@ -24,6 +31,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".activities.MealCalendarActivity"
             android:label="@string/title_activity_meal_calendar" >
@@ -33,8 +41,8 @@
             android:label="@string/title_activity_meal_details" >
         </activity>
         <activity
-            android:name=".activities.FoodScannerActivity"
-            android:label="@string/title_activity_food_scanner" >
+            android:name=".activities.PhotoTakerActivity"
+            android:label="Photo Taker" >
         </activity>
         <activity
             android:name=".activities.FoodItemActivity"
@@ -46,6 +54,12 @@
         <activity
             android:name=".activities.SettingsManualTimes"
             android:label="@string/title_activity_settings_set_times"/>
+
+        <activity
+            android:name=".activities.CameraActivity"
+            android:label="Camera"
+            android:theme="@style/AppTheme.NoActionBar.Fullscreen">
+        </activity>
 
         <activity
             android:name="senior_project.foodscanner.activities.LoginActivity"
