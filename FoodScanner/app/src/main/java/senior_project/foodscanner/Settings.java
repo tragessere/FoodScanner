@@ -328,23 +328,14 @@ public class Settings {
 
 
         if(breakfastEnd < breakfastStart) {
-            if(currentDayTime >= breakfastStart && currentDayTime < breakfastEnd + Constants.MILLIS_IN_DAY)
+            if(currentDayTime >= breakfastStart || currentDayTime < breakfastEnd)
                 return Meal.MealType.BREAKFAST;
         } else {
             if(currentDayTime >= breakfastStart && currentDayTime < breakfastEnd)
                 return Meal.MealType.BREAKFAST;
         }
-
-        if(lunchStart < breakfastEnd) {
-            if(currentDayTime >= breakfastEnd && currentDayTime < lunchStart + Constants.MILLIS_IN_DAY)
-                return Meal.MealType.BRUNCH;
-        } else {
-            if(currentDayTime >= breakfastEnd && currentDayTime < lunchStart)
-                return Meal.MealType.BRUNCH;
-        }
-
         if(lunchEnd < lunchStart) {
-            if(currentDayTime >= lunchStart && currentDayTime < lunchEnd + Constants.MILLIS_IN_DAY)
+            if(currentDayTime >= lunchStart || currentDayTime < lunchEnd)
                 return Meal.MealType.LUNCH;
         } else {
             if(currentDayTime >= lunchStart && currentDayTime < lunchEnd)
@@ -352,12 +343,30 @@ public class Settings {
         }
 
         if(dinnerEnd < dinnerStart) {
-            if(currentDayTime >= dinnerStart && currentDayTime < dinnerEnd + Constants.MILLIS_IN_DAY)
+            if(currentDayTime >= dinnerStart || currentDayTime < dinnerEnd)
                 return Meal.MealType.DINNER;
         } else {
             if(currentDayTime >= dinnerStart && currentDayTime < dinnerEnd)
                 return Meal.MealType.DINNER;
         }
+
+        if(dinnerEnd < breakfastStart) {
+            if(currentDayTime >= dinnerEnd && currentDayTime < breakfastStart)
+                return Meal.MealType.DESSERT;
+        } else {
+            if(currentDayTime >= dinnerEnd || currentDayTime < breakfastStart)
+                return Meal.MealType.DESSERT;
+        }
+
+        if(lunchStart < breakfastEnd) {
+            if(currentDayTime >= breakfastEnd || currentDayTime < lunchStart)
+                return Meal.MealType.BRUNCH;
+        } else {
+            if(currentDayTime >= breakfastEnd && currentDayTime < lunchStart)
+                return Meal.MealType.BRUNCH;
+        }
+
+
 
         return Meal.MealType.SNACK;
     }
