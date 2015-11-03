@@ -1,13 +1,23 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/Primary</item>
         <item name="colorPrimaryDark">@color/Primary.Dark</item>
         <item name="colorAccent">@color/Accent</item>
         <item name="android:textAppearanceButton">@style/TextAppearance.AppTheme.Button</item>
         <item name="android:buttonStyle">@style/Widget.AppTheme.Button</item>
+        <item name="alertDialogTheme">@style/Theme.AppCompat.Light.Dialog.Alert</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar.Fullscreen" parent="AppTheme">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
     </style>
 
     <style name="TextAppearance.AppTheme.Button" parent="TextAppearance.AppCompat.Button">
@@ -20,12 +30,6 @@
         <item name="android:minWidth">72dip</item>
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/Primary</item>
-        <item name="colorPrimaryDark">@color/Primary.Dark</item>
-        <item name="colorAccent">@color/White</item>
-    </style>
-
     <style name="EditText.White" parent="TextAppearance.AppCompat">
         <item name="android:textColorHint">@color/White</item>
         <item name="android:textSize">18sp</item>
@@ -36,6 +40,10 @@
     <style name="Button.Primary.Dark" parent="Widget.AppCompat.Button.Colored">
         <item name="colorButtonNormal">@color/Primary.Dark</item>
         <item name="android:textColor">@color/White</item>
+    </style>
+
+    <style name="TimePicker" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/Primary</item>
     </style>
 
 </resources>

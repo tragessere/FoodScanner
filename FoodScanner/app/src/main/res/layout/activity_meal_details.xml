@@ -11,9 +11,8 @@
         android:layout_height="wrap_content"
         android:text="Scan Food"
         android:id="@+id/button_foodscanner"
-        android:layout_marginBottom="50dp"
-        android:layout_marginRight="38dp"
-        android:layout_marginEnd="38dp"
+        android:layout_marginRight="45dp"
+        android:layout_marginEnd="45dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
@@ -24,19 +23,26 @@
         android:id="@+id/spinner_meal"
         android:layout_alignParentTop="true"
         android:layout_alignLeft="@+id/button_foodscanner"
-        android:layout_alignStart="@+id/button_foodscanner"
-        android:layout_marginLeft="34dp"
-        android:layout_marginStart="34dp" />
+        android:layout_alignStart="@+id/button_foodscanner" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add Food"
         android:id="@+id/button_addfood"
-        android:layout_marginLeft="39dp"
-        android:layout_marginStart="39dp"
-        android:layout_alignTop="@+id/button_foodscanner"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="45dp"
+        android:layout_marginStart="45dp" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/food_list"
+        android:layout_below="@+id/spinner_meal"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/button_foodscanner" />
 
 </RelativeLayout>

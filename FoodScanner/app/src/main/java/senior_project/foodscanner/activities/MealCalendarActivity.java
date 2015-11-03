@@ -1,9 +1,9 @@
 package senior_project.foodscanner.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,8 +38,12 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private Button button_total;
     private CalendarView calendar;
     private MealArrayAdapter adapter;
+    private int lastClickedMealPos;
+    private Meal lastClickedMeal;
 
-    private static final long msInDay = 24 * 60 * 60 * 1000;// TODO come up with more reliable method for prev/next day navigation
+    private static final long msInDay = 24 * 60 * 60 * 1000;
+    private static final int VIEW_MEAL = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +71,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         // TODO determine when to upload meals to server
         // TODO indicator on meals that aren't uploaded
         // TODO make UI pretty
-
+        // TODO display logged in user?
     }
 
     @Override
@@ -89,10 +93,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if(id == R.id.action_login) {
+        if(id == R.id.action_settings) {
             //TODO go to login screen here
             //TODO upon returning from logging in, update UI here to indicate user is logged in and has the ability to log out
-            LoginActivity.logout(this);
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
 
@@ -106,11 +110,17 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         return newMeal;
     }
 
+    private void updateMeal(Meal updatedMeal) {
+        adapter.remove(lastClickedMeal);
+        adapter.insert(updatedMeal, lastClickedMealPos);
+        //TODO update meal on device here
+    }
+
     private void viewMeal(Meal meal) {
         // Note: uses Serializable to pass the meal which may have high overhead. Consider Parcelable as alternative.
         Intent intent = new Intent(MealCalendarActivity.this, MealDetailsActivity.class);
         intent.putExtra("meal", meal);
-        startActivity(intent);
+        startActivityForResult(intent, VIEW_MEAL);
     }
 
     private void changeSelectedDay(int year, int month, int dayOfMonth) {
@@ -125,7 +135,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
     private void changeSelectedDay(GregorianCalendar cal) {
         calendar.setDate(cal.getTimeInMillis());
-        button_calendar.setText(new Settings().formatDate(cal));//TODO reference global Settings object
+        button_calendar.setText(Settings.getInstance().formatDate(cal));
         loadMeals(cal);
     }
 
@@ -189,6 +199,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         if(meal == null) {
             meal = createMeal();
         }
+        lastClickedMealPos = position;
+        lastClickedMeal = meal;
         viewMeal(meal);
     }
 
@@ -198,6 +210,19 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         //TODO confirm dialog
         //TODO delete from device
         adapter.remove(adapter.getItem(position));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+            case VIEW_MEAL:
+                if (resultCode == RESULT_OK) {
+                    updateMeal((Meal) data.getSerializableExtra("meal"));
+                }
+                break;
+            default:
+                break;
+        }
     }
 
 }

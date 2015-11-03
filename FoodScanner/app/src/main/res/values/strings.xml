@@ -8,6 +8,8 @@
     <string name="action_meal_add">Add Meal</string>
     <string name="action_login">Log In</string>
     <string name="action_logout">Log Out</string>
+    <string name="action_logout_confirm">Are you sure you want to logout?</string>
+    <string name="logout_button">LOG OUT</string>
 
     <string name="login_food_scanner">Login with FoodScanner account</string>
     <string name="login_google_plus">Login with Google+</string>
@@ -22,9 +24,29 @@
     <string name="title_activity_meal_details">Meal Details</string>
     <string name="title_activity_food_scanner">Food Scanner</string>
     <string name="title_activity_food_adder">Add Food</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_settings_set_times">Set Meal Times</string>
+
+    <string name="settings_24_hour">Use 24-hour format</string>
+    <string name="settings_meal_time">Set meal times</string>
+    <string name="settings_meal_time_automatic">Automatic</string>
+    <string name="settings_meal_time_manual">Manual</string>
+    <string name="settings_time_switch_title">Set meal times manually</string>
+    <string name="settings_time_switch_subtitle">When disabled, the app will track times you commonly set for meals and adjust the boundaries automatically.</string>
+    <string name="settings_set_start_time">Set start time</string>
+    <string name="settings_set_end_time">Set end time</string>
+    <string name="breakfast">Breakfast</string>
+    <string name="lunch">Lunch</string>
+    <string name="dinner">Dinner</string>
+    <string name="settings_time_overlap_title">Conflicting meal times</string>
+    <string name="settings_time_overlap_subtitle">Some meals have overlapping time intervals. Going back now will reset your changes.</string>
+    <string name="reset_changes">RESET CHANGES</string>
 
     <string name="network_error">Error: Network connection failed.</string>
     <string name="generic_error">Error: Please try again.</string>
+
+    <string name="nutritionix_api_id">4d784f94</string>
+    <string name="nutritionix_api_key">a3e15aa81cdbe791ad05625dcc3d417a</string>
 
     <string-array name="meal_list">
         <item>Breakfast</item>
@@ -34,5 +56,8 @@
         <item>Dinner</item>
         <item>Dessert</item>
     </string-array>
+    <string name="title_activity_camera">CameraActivity</string>
+
+    <string name="accessibility_meal_time_overlap">Overlapping meal times</string>
 
 </resources>

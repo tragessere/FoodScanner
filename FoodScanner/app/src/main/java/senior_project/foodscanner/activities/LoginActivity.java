@@ -2,26 +2,16 @@ package senior_project.foodscanner.activities;
 
 import android.Manifest;
 import android.accounts.AccountManager;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ArgbEvaluator;
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.Rect;
 import android.os.Bundle;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -29,6 +19,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
+import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLHelper;
 
@@ -116,6 +107,8 @@ public class LoginActivity extends AppCompatActivity {
 		//Create endpoints helper singleton on login to set the user's credentials
 		EndpointsHelper helper = EndpointsHelper.initEndpoints(credential);
 		SQLHelper.initialize(activity);
+
+		Settings.initialize(activity);
 
 		//Example usage of an API call
 		helper.new ExampleTask(new EndpointsHelper.TaskCompletionListener() {
