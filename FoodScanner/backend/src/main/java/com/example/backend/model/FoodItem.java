@@ -31,7 +31,7 @@ public class FoodItem {
 
     public FoodItem() {}
 
-    public FoodItem(String name, String category, Float density, Float specialGravity) {
+    public FoodItem(String name, Float density) {
         this.name = name;
         this.density = density;
     }

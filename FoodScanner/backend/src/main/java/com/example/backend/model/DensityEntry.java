@@ -28,7 +28,7 @@ public class DensityEntry {
 
     public DensityEntry() {}
 
-    public DensityEntry(String name, String category, Float density, Float specialGravity) {
+    public DensityEntry(String name, Float density) {
         this.name = name;
         this.density = density;
     }
