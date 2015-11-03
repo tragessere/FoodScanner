@@ -1,5 +1,6 @@
 package com.example.backend;
 
+import com.example.backend.model.DensityEntry;
 import com.example.backend.model.FoodItem;
 import com.example.backend.model.Meal;
 
@@ -18,6 +19,7 @@ public final class OfyService {
     
     static {
         factory().register(FoodItem.class);
+        factory().register(DensityEntry.class);
         factory().register(Meal.class);
     }
 

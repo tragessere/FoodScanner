@@ -1,7 +1,7 @@
 package com.example.backend.apis;
 
 import com.example.backend.Constants;
-import com.example.backend.model.FoodItem;
+import com.example.backend.model.DensityEntry;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Named;
-
-import sun.awt.FontDescriptor;
 
 import static com.example.backend.OfyService.ofy;
 
@@ -34,33 +32,33 @@ import static com.example.backend.OfyService.ofy;
         )
 )
 
-public class FoodItemEndpoint {
+public class DensityEntryEndpoint {
 
     /**
-     * Gets food item with specified name.
+     * Gets density entry with specified name.
      * @param name
-     * @return food item with name equal to the specified name.
+     * @return density entry with name equal to the specified name.
      */
-    @ApiMethod(name = "getFoodItem")
-    public FoodItem getFoodItem(@Named("name") String name) {
-        return ofy().load().type(FoodItem.class).filter("name", name).list().get(0);
+    @ApiMethod(name = "getDensity")
+    public DensityEntry getDensityEntry(@Named("name") String name) {
+        return ofy().load().type(DensityEntry.class).filter("name", name).list().get(0);
     }
 
     /**
-     * Gets all of the food item in the data store.
-     * @return CollectionResponse of all food items.
+     * Gets all of the density entries in the data store.
+     * @return CollectionResponse of all density entries.
      */
-    @ApiMethod(name = "getAllFoodItems")
-    public CollectionResponse<FoodItem> getFoodItems() {
+    @ApiMethod(name = "getAllDensityEntries")
+    public CollectionResponse<DensityEntry> getAllDensityEntries() {
 
-        Query<FoodItem> query = ofy().load().type(FoodItem.class);
-        List<FoodItem> results = new ArrayList<FoodItem>();
-        QueryResultIterator<FoodItem> iterator = query.iterator();
+        Query<DensityEntry> query = ofy().load().type(DensityEntry.class);
+        List<DensityEntry> results = new ArrayList<DensityEntry>();
+        QueryResultIterator<DensityEntry> iterator = query.iterator();
 
         while (iterator.hasNext()) {
             results.add(iterator.next());
         }
 
-        return CollectionResponse.<FoodItem>builder().setItems(results).build();
+        return CollectionResponse.<DensityEntry>builder().setItems(results).build();
     }
 }
