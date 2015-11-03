@@ -37,6 +37,7 @@ import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 public class LoginActivity extends AppCompatActivity {
 	private static final int REQUEST_ACCOUNT_PICKER = 2;
 	private static final int REQUEST_READ_CONTACTS = 3;
+    public static final String EXTRA_ACCOUNT_NAME = "account_name";
 
 	SharedPreferences prefs;
 	GoogleAccountCredential credential;
@@ -124,6 +125,7 @@ public class LoginActivity extends AppCompatActivity {
 
 				Intent intent = new Intent(activity, MealCalendarActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra(EXTRA_ACCOUNT_NAME, credential.getSelectedAccountName());
 				activity.startActivity(intent);
 				activity.finish();
 			}

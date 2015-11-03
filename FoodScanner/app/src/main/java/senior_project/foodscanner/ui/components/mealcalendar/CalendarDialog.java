@@ -1,4 +1,4 @@
-package senior_project.foodscanner.ui.components;
+package senior_project.foodscanner.ui.components.mealcalendar;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -34,9 +34,7 @@ public class CalendarDialog {
         d.findViewById(R.id.button_today).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GregorianCalendar date = new GregorianCalendar();
-                date.setTimeInMillis(new Date().getTime());
-                listener.onCalendarDialogDateSelected(date);
+                listener.onCalendarDialogDateSelected(new GregorianCalendar());
                 d.hide();
             }
         });

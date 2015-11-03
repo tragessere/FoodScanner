@@ -60,6 +60,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     private Spinner mealSpinner;
     private FoodItem removedFood;
 
+    // TODO add ui to display date of meal (Settings class has some useful functions to format a date)
+
     // region Times that meal spinner will start defaulting to each meal (in min, 24-hour format)
     // TODO: Allow user to set these times
     public int breakfastTime = 240; // 3:00 (am)
