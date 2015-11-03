@@ -141,8 +141,27 @@ public class Settings {
         return mSettings;
     }
 
-    public static void clearSettings() {
-        mSettings = null;
+    public void clearSettings() {
+        SharedPreferences.Editor edit = mContext.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
+
+        edit.remove(Constants.SETTINGS_TIME_FORMAT);
+        edit.remove(Constants.SETTINGS_DATE_FORMAT);
+        edit.remove(Constants.SETTINGS_DATE_TYT);
+        edit.remove(Constants.SETTINGS_USE_MANUAL_TIMES);
+        edit.remove(Constants.SETTINGS_BREAKFAST_START_MANUAL);
+        edit.remove(Constants.SETTINGS_BREAKFAST_START_AUTO);
+        edit.remove(Constants.SETTINGS_BREAKFAST_END_MANUAL);
+        edit.remove(Constants.SETTINGS_BREAKFAST_END_AUTO);
+        edit.remove(Constants.SETTINGS_LUNCH_START_MANUAL);
+        edit.remove(Constants.SETTINGS_LUNCH_START_AUTO);
+        edit.remove(Constants.SETTINGS_LUNCH_END_MANUAL);
+        edit.remove(Constants.SETTINGS_LUNCH_END_AUTO);
+        edit.remove(Constants.SETTINGS_DINNER_START_MANUAL);
+        edit.remove(Constants.SETTINGS_DINNER_START_AUTO);
+        edit.remove(Constants.SETTINGS_DINNER_END_MANUAL);
+        edit.remove(Constants.SETTINGS_DINNER_END_AUTO);
+
+        edit.apply();
     }
 
 
@@ -267,6 +286,93 @@ public class Settings {
         return new SimpleDateFormat(isUsing24HourFormat() ? FORMAT_24_HOUR : FORMAT_12_HOUR, Locale.getDefault())
                 .format(formatHelper.getTimeInMillis());
     }
+
+
+    /**
+     * Get the meal that would be eaten during the given time based on the current meal time settings.
+     * This method does not auto-suggest dessert since it happens immediately after a meal (thus during another given meal time)
+     *
+     * @param millis    milliseconds since epoch
+     * @return          best guess at current meal
+     */
+    public Meal.MealType getMealAtTime(long millis) {
+        int currentDayTime;
+
+        formatHelper.setTimeInMillis(millis);
+        currentDayTime = formatHelper.get(Calendar.HOUR_OF_DAY) * Constants.MILLIS_IN_HOUR + formatHelper.get(Calendar.MINUTE) * Constants.MILLIS_IN_MIN;
+
+
+
+        int breakfastStart;
+        int breakfastEnd;
+        int lunchStart;
+        int lunchEnd;
+        int dinnerStart;
+        int dinnerEnd;
+
+        if(useManualTimes) {
+            breakfastStart = breakfastStartManual;
+            breakfastEnd = breakfastEndManual;
+            lunchStart = lunchStartManual;
+            lunchEnd = lunchEndManual;
+            dinnerStart = dinnerStartManual;
+            dinnerEnd = dinnerEndManual;
+        } else {
+            breakfastStart = breakfastStartAuto;
+            breakfastEnd = breakfastEndAuto;
+            lunchStart = lunchStartAuto;
+            lunchEnd = lunchEndAuto;
+            dinnerStart = dinnerStartAuto;
+            dinnerEnd = dinnerEndAuto;
+        }
+
+
+        if(breakfastEnd < breakfastStart) {
+            if(currentDayTime >= breakfastStart && currentDayTime < breakfastEnd + Constants.MILLIS_IN_DAY)
+                return Meal.MealType.BREAKFAST;
+        } else {
+            if(currentDayTime >= breakfastStart && currentDayTime < breakfastEnd)
+                return Meal.MealType.BREAKFAST;
+        }
+
+        if(lunchStart < breakfastEnd) {
+            if(currentDayTime >= breakfastEnd && currentDayTime < lunchStart + Constants.MILLIS_IN_DAY)
+                return Meal.MealType.BRUNCH;
+        } else {
+            if(currentDayTime >= breakfastEnd && currentDayTime < lunchStart)
+                return Meal.MealType.BRUNCH;
+        }
+
+        if(lunchEnd < lunchStart) {
+            if(currentDayTime >= lunchStart && currentDayTime < lunchEnd + Constants.MILLIS_IN_DAY)
+                return Meal.MealType.LUNCH;
+        } else {
+            if(currentDayTime >= lunchStart && currentDayTime < lunchEnd)
+                return Meal.MealType.LUNCH;
+        }
+
+        if(dinnerEnd < dinnerStart) {
+            if(currentDayTime >= dinnerStart && currentDayTime < dinnerEnd + Constants.MILLIS_IN_DAY)
+                return Meal.MealType.DINNER;
+        } else {
+            if(currentDayTime >= dinnerStart && currentDayTime < dinnerEnd)
+                return Meal.MealType.DINNER;
+        }
+
+        return Meal.MealType.SNACK;
+    }
+
+    /**
+     * Get the most likely meal being eaten at the time this method was called.
+     * This method does not auto-suggest dessert since it happens immediately after a meal (thus during another given meal time)
+     *
+     * @return
+     */
+    public Meal.MealType getCurrentMeal() {
+        return getMealAtTime(System.currentTimeMillis());
+    }
+
+
 
     public void setUseManualTimes(boolean useManualTimes) {
         this.useManualTimes = useManualTimes;
