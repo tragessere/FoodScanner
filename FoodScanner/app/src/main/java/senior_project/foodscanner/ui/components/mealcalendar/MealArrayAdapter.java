@@ -92,7 +92,7 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
     }
 
     private String mealString(Meal meal) {
-        return new Settings().formatTime(meal) + " - " + meal.getType().getName();//TODO reference global Settings object
+        return Settings.getInstance().formatTime(meal) + " - " + meal.getType().getName();
     }
 
     @Override

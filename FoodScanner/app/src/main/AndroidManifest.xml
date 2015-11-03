@@ -48,6 +48,12 @@
             android:name=".activities.FoodItemActivity"
             android:label="@string/title_activity_food_adder" >
         </activity>
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:label="@string/title_activity_settings"/>
+        <activity
+            android:name=".activities.SettingsManualTimes"
+            android:label="@string/title_activity_settings_set_times"/>
 
         <activity
             android:name=".activities.CameraActivity"
