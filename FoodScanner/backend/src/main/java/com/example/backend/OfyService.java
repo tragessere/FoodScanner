@@ -1,6 +1,7 @@
 package com.example.backend;
 
 import com.example.backend.model.FoodItem;
+import com.example.backend.model.Meal;
 
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyFactory;
@@ -17,6 +18,7 @@ public final class OfyService {
     
     static {
         factory().register(FoodItem.class);
+        factory().register(Meal.class);
     }
 
     /**
