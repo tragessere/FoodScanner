@@ -26,6 +26,7 @@ import java.io.File;
 import java.util.Calendar;
 
 import senior_project.foodscanner.R;
+import senior_project.foodscanner.fragments.FoodActionFragment;
 import senior_project.foodscanner.fragments.FoodInfoFragment;
 
 /**
@@ -49,12 +50,13 @@ import senior_project.foodscanner.fragments.FoodInfoFragment;
  * Back Button - return to Meal Calendar
  */
 public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener,
-        FoodInfoFragment.FoodInfoDialogListener{
+        FoodInfoFragment.FoodInfoDialogListener, FoodActionFragment.FoodActionDialogListener {
 
     private Meal meal;
     private static final int REQUEST_FOODSCANNER = 0;
     private static final int NEW_FOOD_ITEM = 1;
     private static final int REPLACE_FOOD_ITEM = 2;
+    private static final int OPEN_ACTION_MENU = 3;
 
     private String[] meals;
     private Spinner mealSpinner;
@@ -161,13 +163,24 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                 meal.getFood());
         lv.setAdapter(arrayAdapter);
 
-        // set up happens when you click a list item
+        // Set up what happens when you click a list item
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //View nutrition info
+                //Bring up dialog to get density, open FoodScanner, etc.
+                FoodItem food = meal.getFoodItem(position);
+                DialogFragment dialog = FoodActionFragment.newInstance(food);
+                dialog.show(getFragmentManager(), "FoodActionFragment");
+            }
+        });
+
+        // Set up what happens when you long click a list item
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                //View nutrition info & give option to replace or delete
                 FoodItem food = meal.getFoodItem(position);
                 DialogFragment dialog = FoodInfoFragment.newInstance(food, true);
                 dialog.show(getFragmentManager(), "FoodInfoFragment");
+                return true;
             }
         });
 
@@ -235,6 +248,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+
+    // This is for the food info dialog
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         // User touched the dialog's positive button - "Replace"
@@ -250,6 +265,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         startActivityForResult(intent, REPLACE_FOOD_ITEM);
     }
 
+    // This is for the food info dialog
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         // User touched the dialog's negative button - "Delete"
@@ -294,10 +310,24 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         confirmDialog.show();
     }
 
+    // This is for the food info dialog
     @Override
     public void onDialogNeutralClick(DialogFragment dialog) {
         // User touched the dialog's neutral button - "Cancel"
         // Do nothing, besides exit dialog.
     }
 
+    // This is for the food action dialog
+    @Override
+    public void onActionDialogPositiveClick(DialogFragment dialog) {
+        // User touched the dialog's positive button - "Scan Food"
+        //do nothing
+    }
+
+    // This is for the food action dialog
+    @Override
+    public void onActionDialogNeutralClick(DialogFragment dialog) {
+        // User touched the dialog's neutral button - "Cancel"
+        // Do nothing, besides exit dialog.
+    }
 }

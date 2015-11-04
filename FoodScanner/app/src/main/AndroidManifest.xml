@@ -60,6 +60,12 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+
+        <activity
+            android:name="senior_project.foodscanner.activities.FoodActionDialogActivity"
+            android:label="Food Actions"
+            android:theme="@style/Theme.AppCompat.Light.Dialog" >
+        </activity>
     </application>
 
 </manifest>

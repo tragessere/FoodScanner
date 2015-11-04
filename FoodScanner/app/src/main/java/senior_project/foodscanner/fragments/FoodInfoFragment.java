@@ -108,7 +108,7 @@ public class FoodInfoFragment extends DialogFragment {
                             mListener.onDialogPositiveClick(FoodInfoFragment.this);
                         }
                     })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             mListener.onDialogNeutralClick(FoodInfoFragment.this);
                         }

@@ -26,6 +26,7 @@ public class FoodItem implements Serializable {
     private Set<String> massUnits;
     private int maxMassLen;
     private int maxVolLen;
+    private Density density;
     private List<Portion> portions;  //list of individual items, e.g. 3 pieces of chicken that we
                                      //want to calculate individually will each have a portion.
 
@@ -62,6 +63,9 @@ public class FoodItem implements Serializable {
             }
         }
         massUnits = new HashSet<>(Arrays.asList(mass_values));
+
+        density = new Density();
+        density.value = 0.0;  //for clarity
     }
 
     public void setField(String field, Double value) {
@@ -215,6 +219,7 @@ public class FoodItem implements Serializable {
         this.calculateMass = calculateMass;
     }
 
+
     //endregion
 
     @Override
@@ -313,6 +318,36 @@ public class FoodItem implements Serializable {
             totalVolume += p.getVolume();
         }
         return totalVolume;
+    }
+
+    private class Density implements Serializable {
+        private double value;
+        private String name;
+        private String id;
+    }
+
+    public double getDensity() {
+        return density.value;
+    }
+
+    public void setDensity(double value) {
+        this.density.value = value;
+    }
+
+    public String getDensityName() {
+        return density.name;
+    }
+
+    public void setDensityName(String name) {
+        density.name = name;
+    }
+
+    public String getDensityId() {
+        return density.id;
+    }
+
+    public void setDensityId(String id) {
+        density.id = id;
     }
 
 
