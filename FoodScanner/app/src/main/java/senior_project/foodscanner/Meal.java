@@ -49,8 +49,10 @@ public class Meal extends Nutritious implements Serializable {
     }
 
     public void setType(MealType type) {
-        this.type = type;
-        isChanged = true;
+        if(!this.type.equals(type)) {
+            this.type = type;
+            setIsChanged(true);
+        }
     }
 
     public MealType getType() {
@@ -73,13 +75,12 @@ public class Meal extends Nutritious implements Serializable {
 
         // Food item hasn't already been added
         food.add(item);
-
-        isChanged = true;
+        setIsChanged(true);
     }
 
     public void removeFoodItem(FoodItem item) {
         food.remove(item);
-        isChanged = true;
+        setIsChanged(true);
     }
 
     public FoodItem getFoodItem(int index) {
@@ -94,7 +95,7 @@ public class Meal extends Nutritious implements Serializable {
         newFood.replacePortions(oldFood.getPortions());
         this.addFoodItem(newFood);
         this.removeFoodItem(oldFood);
-        isChanged = true;
+        setIsChanged(true);
     }
 
     public boolean isNew() {

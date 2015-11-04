@@ -105,7 +105,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_meal_calendar, menu);
-        menu.findItem(R.id.action_logout).setTitle(username);
         return true;
     }
 
@@ -116,13 +115,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if(id == R.id.action_logout) {
-            //TODO confirm dialog
-            LoginActivity.logout(this);
-        }
         if(id == R.id.action_settings) {
-            //TODO go to login screen here
-            //TODO upon returning from logging in, update UI here to indicate user is logged in and has the ability to log out
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
