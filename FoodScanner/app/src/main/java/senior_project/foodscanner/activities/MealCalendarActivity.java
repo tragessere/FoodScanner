@@ -2,7 +2,9 @@ package senior_project.foodscanner.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+
 import android.support.v7.app.AppCompatActivity;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -117,6 +119,11 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         if(id == R.id.action_logout) {
             //TODO confirm dialog
             LoginActivity.logout(this);
+        }
+        if(id == R.id.action_settings) {
+            //TODO go to login screen here
+            //TODO upon returning from logging in, update UI here to indicate user is logged in and has the ability to log out
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
 
@@ -156,7 +163,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
     private void changeSelectedDay(long date) {
         currentDate = date;
-        button_calendar.setText(new Settings().formatDate(date));//TODO reference global Settings object
+        button_calendar.setText(Settings.getInstance().formatDate(date));
         loadMeals(date);
     }
 

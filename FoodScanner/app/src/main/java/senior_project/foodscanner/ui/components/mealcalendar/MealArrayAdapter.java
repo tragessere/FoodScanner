@@ -94,10 +94,6 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         return convertView;
     }
 
-    private String mealString(Meal meal) {//TODO reference global Settings object
-        return new Settings().formatTime(meal) + " - " + meal.getType().getName();
-    }
-
     private String nutrString(Meal meal) {
         double cal = 0;
         Map<String, Double> nutr = meal.getNutrition();
@@ -105,6 +101,10 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
             cal = nutr.get(FoodItem.KEY_CAL);
         }
         return (int) cal + " Cal";
+    }
+
+    private String mealString(Meal meal) {
+        return Settings.getInstance().formatTime(meal) + " - " + meal.getType().getName();
     }
 
     @Override
