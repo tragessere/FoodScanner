@@ -7,6 +7,7 @@
             <param-name>services</param-name>
             <param-value>
                 com.example.backend.apis.FoodItemEndpoint,
+                com.example.backend.apis.DensityEntryEndpoint,
                 com.example.backend.apis.MealEndpoint,
                 com.example.backend.apis.MyEndpoint
             </param-value>
