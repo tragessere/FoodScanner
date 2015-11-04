@@ -272,14 +272,8 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
             orientBMP = 90;//landscape
         }
 
-        int rot = 0;
-        if(orientBMP != shutterOrientation && orientBMP != shutterOrientation - 180) {// if different orientations, rotate so they are the same
-            rot = 90;
-        }
-        if(shutterOrientation >= 180) {// picture was taken up-sidedown, so flip it
-            rot += 180;
-        }
-        if(rot > 0) {
+        int rot = orientBMP - shutterOrientation;
+        if(rot != 0) {
             Matrix matrix = new Matrix();
             matrix.postRotate(rot);
             bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);

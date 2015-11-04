@@ -9,6 +9,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.util.List;
+import java.util.Map;
+
+import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
@@ -16,11 +20,18 @@ import senior_project.foodscanner.Settings;
 public class MealArrayAdapter extends ArrayAdapter<Meal> {
     private static final int layoutId = R.layout.list_layout_meal;
     private static final int textViewId = R.id.meal_text;
+    private static final int textViewNutrId = R.id.textView_nutr;
     private static final int deleteButtonId = R.id.button_delete;
-    private OnDeleteListener odl = null;
+    private static final int warnButtonId = R.id.imageButton_warning;
+    private MealArrayAdapterListener listener = null;
 
     public MealArrayAdapter(Context context) {
         super(context, layoutId);
+        addAddItem();
+    }
+
+    public MealArrayAdapter(Context context, List<Meal> list) {
+        super(context, layoutId, list);
         addAddItem();
     }
 
@@ -36,63 +47,64 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
 
         // text
         final TextView text = (TextView) convertView.findViewById(textViewId);
+        final TextView textNutr = (TextView) convertView.findViewById(textViewNutrId);
         if(meal != null) {
             text.setGravity(Gravity.CENTER_VERTICAL);
             text.setText(mealString(meal));
+            textNutr.setText(nutrString(meal));
+            textNutr.setVisibility(View.VISIBLE);
         } else {
             text.setGravity(Gravity.CENTER);
             text.setText("+");
+            textNutr.setVisibility(View.GONE);
         }
 
-        // delete button handling
-        final ImageButton button = (ImageButton) convertView.findViewById(deleteButtonId);
-        button.setOnClickListener(new View.OnClickListener() {
+        // button handling
+        final ImageButton buttonDel = (ImageButton) convertView.findViewById(deleteButtonId);
+        buttonDel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(meal != null && odl != null) {
-                    odl.onDelete(MealArrayAdapter.this, position);
+                if(meal != null && listener != null) {
+                    listener.onDelete(MealArrayAdapter.this, position);
+                }
+            }
+        });
+        final ImageButton buttonWarn = (ImageButton) convertView.findViewById(warnButtonId);
+        buttonWarn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(meal != null && listener != null) {
+                    listener.onWarning(MealArrayAdapter.this, position);
                 }
             }
         });
         if(meal == null) {
-            button.setVisibility(View.GONE);
-        }
-        else{
-            button.setVisibility(View.VISIBLE);
-        }
-
-    /*    // swipe handling
-        convertView.setOnTouchListener(new View.OnTouchListener() {
-            private float x1 = -1;
-            private float x2 = -1;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(event.getPointerCount() == 1) {
-                    if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                        x1 = event.getX();
-                    } else if(x1 > -1 && event.getAction() == MotionEvent.ACTION_MOVE) {
-                        x2 = event.getX();
-                        if(x2 - x1 <= -20) {
-                            button.setVisibility(View.VISIBLE);
-                        } else {
-                            button.setVisibility(View.GONE);
-                        }
-                        return true;
-                    }
-                } else {
-                    x1 = -1;
-                }
-                return false;
+            buttonDel.setVisibility(View.GONE);
+            buttonWarn.setVisibility(View.GONE);
+        } else {
+            buttonDel.setVisibility(View.VISIBLE);
+            if(meal.isChanged()){
+                buttonWarn.setVisibility(View.VISIBLE);
             }
-        });
-        */
+            else{
+                buttonWarn.setVisibility(View.GONE);
+            }
+        }
 
         return convertView;
     }
 
+    private String nutrString(Meal meal) {
+        double cal = 0;
+        Map<String, Double> nutr = meal.getNutrition();
+        if(nutr != null && nutr.containsKey(FoodItem.KEY_CAL)) {
+            cal = nutr.get(FoodItem.KEY_CAL);
+        }
+        return (int) cal + " Cal";
+    }
+
     private String mealString(Meal meal) {
-        return new Settings().formatTime(meal) + " - " + meal.getType().getName();//TODO reference global Settings object
+        return Settings.getInstance().formatTime(meal) + " - " + meal.getType().getName();
     }
 
     @Override
@@ -108,8 +120,8 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         addAddItem();
     }
 
-    public void setOnDeleteListener(OnDeleteListener l) {
-        odl = l;
+    public void setOnDeleteListener(MealArrayAdapterListener l) {
+        listener = l;
     }
 
     private void addAddItem() {
@@ -120,8 +132,10 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         super.remove(null);
     }
 
-    public interface OnDeleteListener {
+    public interface MealArrayAdapterListener {
         void onDelete(MealArrayAdapter adapter, int position);
+
+        void onWarning(MealArrayAdapter adapter, int position);
     }
 
 }
