@@ -3,8 +3,10 @@ package senior_project.foodscanner.activities;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -77,6 +79,11 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Query density database, if necessary
+        if (FoodItem.getDensityKeys() == null) {
+            new DensityListQuery(this).execute();
+        }
 
         meal = (Meal) getIntent().getSerializableExtra("meal");
 
@@ -331,5 +338,49 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     public void onActionDialogNeutralClick(DialogFragment dialog) {
         // User touched the dialog's neutral button - "Cancel"
         // Do nothing, besides exit dialog.
+    }
+
+
+    // Class for querying density database, runs once per app session
+
+    private class DensityListQuery extends AsyncTask<String, Void, Boolean> {
+
+        private Activity act;
+        private ProgressDialog dialog;
+
+        DensityListQuery(Activity act) {
+            this.act = act;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog = new ProgressDialog(act);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setMessage("Loading...");
+            dialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            // TODO: MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT
+            // TODO: MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT
+            // TODO: MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT
+            // TODO: Query database for entire density list
+            // (see below examples of how to enter values)
+            FoodItem.addDensity("beef", 15.4);
+            FoodItem.addDensity("fish", 12.1);
+            FoodItem.addDensity("rice", 5.2);
+            // etc....
+
+            return true;
+        }
+
     }
 }

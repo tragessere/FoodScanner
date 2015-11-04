@@ -3,6 +3,7 @@ package senior_project.foodscanner;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,6 +32,8 @@ public class FoodItem extends Nutritious implements Serializable {
     private Density density;
     private List<Portion> portions;  //list of individual items, e.g. 3 pieces of chicken that we
     //want to calculate individually will each have a portion.
+
+    private static Map<String, Double> densities = null;
 
     public FoodItem() {
         //LinkedHashMap used to ensure insertion order is maintained, for iteration.
@@ -221,6 +224,14 @@ public class FoodItem extends Nutritious implements Serializable {
         this.calculateMass = calculateMass;
     }
 
+    public boolean needDisplayMass() {
+        return calculateMass;
+    }
+
+    public boolean needDisplayVolume() {
+        return calculateVol;
+    }
+
 
     //endregion
 
@@ -350,6 +361,34 @@ public class FoodItem extends Nutritious implements Serializable {
 
     public void setDensityId(String id) {
         density.id = id;
+    }
+
+
+    // Methods for saving & retrieving densities from database (may be moved)
+
+    public static void addDensity(String name, Double value) {
+        if (densities == null) {
+            densities = new HashMap<>();
+        }
+        densities.put(name, value);
+    }
+
+    public static String[] getDensityKeys() {
+        if (densities == null) {
+            return null;
+        } else {
+            Set<String> densitySet = densities.keySet();
+            String[] retArray = densitySet.toArray(new String[densitySet.size()]);
+            return retArray;
+        }
+    }
+
+    public static Double getDensityValue(String name) {
+        if (densities == null) {
+            return null;
+        } else {
+            return densities.get(name);
+        }
     }
 
 }

@@ -202,7 +202,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         protected void onPreExecute() {
             dialog = new ProgressDialog(act);
             dialog.setMessage("Loading...");
-            //dialog.setCanceledOnTouchOutside(false);
+            dialog.setCanceledOnTouchOutside(false);
             dialog.show();
         }
 
@@ -438,7 +438,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         protected void onPreExecute() {
             dialog = new ProgressDialog(act);
             dialog.setMessage("Loading...");
-            //dialog.setCanceledOnTouchOutside(false);
+            dialog.setCanceledOnTouchOutside(false);
             dialog.show();
         }
 
