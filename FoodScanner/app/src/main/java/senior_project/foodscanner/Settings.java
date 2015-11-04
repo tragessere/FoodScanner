@@ -60,7 +60,7 @@ public class Settings {
 
     private static DateFormatSymbols format = new DateFormatSymbols();
     private static final String[] am_pm = {"am", "pm"};
-    private static final long msInDay = 24*60*60*1000;// TODO come up with more reliable method for prev/next day navigation
+    private static final long msInDay = 24*60*60*1000;
 
     private Settings(Context context) {
         mContext = context.getApplicationContext();
@@ -192,7 +192,8 @@ public class Settings {
      * @return
      */
     public String formatTime(Meal meal){
-        GregorianCalendar date = meal.getDate();
+        GregorianCalendar date = new GregorianCalendar();
+        date.setTimeInMillis(meal.getDate());
 
         int hour = date.get(GregorianCalendar.HOUR);
         if(hour == 0){
@@ -222,6 +223,12 @@ public class Settings {
      */
     public String formatDate(Meal meal){
         return formatDate(meal.getDate());
+    }
+
+    public String formatDate(long date){
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTimeInMillis(date);
+        return formatDate(cal);
     }
 
     /**

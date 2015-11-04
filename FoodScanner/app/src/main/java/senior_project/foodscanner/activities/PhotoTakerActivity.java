@@ -66,7 +66,7 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
         picFiles = new File[picNames.length];
 
         setContentView(R.layout.activity_photo_taker);
-        Bitmap defbmp = BitmapFactory.decodeResource(getResources(), R.drawable.camera512);
+        Bitmap defbmp = BitmapFactory.decodeResource(getResources(), R.drawable.camera);
         Drawable defPic = new BitmapDrawable(getResources(), defbmp);
         picBrowser = new ImageBrowser(this, picNames, defPic);
         picBrowser.setActionButtonListener(this);
@@ -103,13 +103,6 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
         savedInstanceState.putSerializable(SAVEINST_FILES, picFiles);
         savedInstanceState.putInt(SAVEINST_INDEX, picBrowser.getCurrentIndex());
         super.onSaveInstanceState(savedInstanceState);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_photo_taker, menu);
-        return true;
     }
 
     @Override
