@@ -1,11 +1,16 @@
 package senior_project.foodscanner;
 
+import android.content.ContentValues;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import senior_project.foodscanner.database.SQLHelper;
+import senior_project.foodscanner.database.SQLQueryHelper;
 
 /**
  * This class represents a meal.
@@ -34,6 +39,9 @@ public class Meal implements Serializable {
         }
     }
 
+    //Database ID
+    private long id;
+
     // Meal Details
     private MealType type;
     private GregorianCalendar date;
@@ -41,10 +49,28 @@ public class Meal implements Serializable {
     private boolean isNew;
 
     public Meal(GregorianCalendar date, MealType type){
+        id = -1;
         this.date = date;
         this.type = type;
         food = new ArrayList<>();
         setIsNew(true);
+    }
+
+    public Meal(long id, long date, MealType type, ArrayList<FoodItem> foodItems) {
+        this.id = id;
+        this.date = (GregorianCalendar) GregorianCalendar.getInstance();
+        this.date.setTimeInMillis(date);
+        this.type = type;
+        food = foodItems;
+        setIsNew(false);
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public void setType(MealType type){
@@ -104,5 +130,28 @@ public class Meal implements Serializable {
         //TODO: create & return total nutrition info, based on calculations of all FoodItems
         //For now, simply return null
         return null;
+    }
+
+    public ContentValues toContentValues() {
+        ContentValues cv = new ContentValues();
+        cv.put(SQLHelper.COLUMN_MEAL_TYPE, type.toString());
+        cv.put(SQLHelper.COLUMN_TIME, date.getTimeInMillis());
+        cv.put(SQLHelper.COLUMN_FOOD_LIST, SQLQueryHelper.foodListToBytes(food));
+        return cv;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        sb.append(": id=");
+        sb.append(id);
+        sb.append(", type=");
+        sb.append(type);
+        sb.append(", time=");
+        sb.append(date.toString());
+        sb.append(", food item count=");
+        sb.append(food.size());
+        return sb.toString();
     }
 }

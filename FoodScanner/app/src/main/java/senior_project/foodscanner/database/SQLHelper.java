@@ -35,7 +35,7 @@ public class SQLHelper extends SQLiteOpenHelper {
 
 	private static final String TABLE_MEALS_CREATE = "CREATE TABLE IF NOT EXISTS "
 			+ TABLE_MEALS + "("
-			+ COLUMN_ID + " INTEGER, "
+			+ COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
 			+ COLUMN_MEAL_TYPE + " TEXT, "
 			+ COLUMN_TIME + " INT, "
 			+ COLUMN_FOOD_LIST + " BLOB, "
