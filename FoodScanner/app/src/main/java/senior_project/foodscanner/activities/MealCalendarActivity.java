@@ -134,7 +134,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         // update time of meal with currently selected date
         mealTime.set(currentDate.get(GregorianCalendar.YEAR), currentDate.get(GregorianCalendar.MONTH), currentDate.get(GregorianCalendar.DAY_OF_MONTH));
 
-        Meal newMeal = new Meal(mealTime.getTimeInMillis(), Meal.MealType.LUNCH);
+        // get settings for 'guessed' meal
+        Settings settings = Settings.getInstance();
+
+        Meal newMeal = new Meal(mealTime.getTimeInMillis(), settings.getCurrentMeal());
         adapter.add(newMeal);
         //TODO save meal to device here
         return newMeal;

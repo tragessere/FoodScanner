@@ -9,8 +9,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,10 +23,9 @@ import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
 
 import java.io.File;
-import java.util.Calendar;
 
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.fragments.FoodActionFragment;
+import senior_project.foodscanner.fragments.FoodDensityFragment;
 import senior_project.foodscanner.fragments.FoodInfoFragment;
 
 /**
@@ -52,29 +49,18 @@ import senior_project.foodscanner.fragments.FoodInfoFragment;
  * Back Button - return to Meal Calendar
  */
 public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener,
-        FoodInfoFragment.FoodInfoDialogListener, FoodActionFragment.FoodActionDialogListener {
+        FoodInfoFragment.FoodInfoDialogListener, FoodDensityFragment.FoodDensityDialogListener {
 
     private Meal meal;
     private static final int REQUEST_FOODSCANNER = 0;
     private static final int NEW_FOOD_ITEM = 1;
     private static final int REPLACE_FOOD_ITEM = 2;
-    private static final int OPEN_ACTION_MENU = 3;
 
     private String[] meals;
     private Spinner mealSpinner;
     private FoodItem removedFood;
 
     // TODO add ui to display date of meal (Settings class has some useful functions to format a date)
-
-    // region Times that meal spinner will start defaulting to each meal (in min, 24-hour format)
-    // TODO: Allow user to set these times
-    public int breakfastTime = 240; // 3:00 (am)
-    public int brunchTime = 600;    // 10:00 (am)
-    public int lunchTime = 720;     // 12:00 (am)
-    public int snackTime = 900;     // 15:00 (3:00pm)
-    public int dinnerTime = 1080;   // 18:00 (6:00pm)
-    public int dessertTime = 1260;  // 21:00 (9:00pm)
-    // endregion
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,35 +90,11 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                 android.R.layout.simple_spinner_item, meals);
         mealAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mealSpinner.setAdapter(mealAdapter);
+        mealSpinner.setSelection(mealAdapter.getPosition(meal.getType().getName()));
 
+        // Doesn't do anything now, left in just in case.
         if (meal.isNew()) {
             meal.setIsNew(false);
-
-            // Set default meal, based on time of day
-            Calendar cal = Calendar.getInstance();
-            int minute = cal.get(Calendar.MINUTE);
-            int hour = cal.get(Calendar.HOUR_OF_DAY); //24-hour format
-            int time = minute + (hour * 60);
-            Meal.MealType defaultMeal;
-
-            if (time >= breakfastTime && time < brunchTime) {
-                defaultMeal = Meal.MealType.BREAKFAST;
-            } else if (time >= brunchTime && time < lunchTime) {
-                defaultMeal = Meal.MealType.BRUNCH;
-            } else if (time >= lunchTime && time < snackTime) {
-                defaultMeal = Meal.MealType.LUNCH;
-            } else if (time >= snackTime && time < dinnerTime) {
-                defaultMeal = Meal.MealType.SNACK;
-            } else if (time >= dinnerTime && time < dessertTime) {
-                defaultMeal = Meal.MealType.DINNER;
-            } else {
-                defaultMeal = Meal.MealType.DESSERT;
-            }
-
-            mealSpinner.setSelection(mealAdapter.getPosition(defaultMeal.getName()));
-            meal.setType(defaultMeal);
-        } else {
-            mealSpinner.setSelection(mealAdapter.getPosition(meal.getType().getName()));
         }
 
         // Set up what meal selection does
@@ -175,10 +137,10 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         // Set up what happens when you click a list item
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Bring up dialog to get density, open FoodScanner, etc.
+                //Bring up dialog to get density
                 FoodItem food = meal.getFoodItem(position);
-                DialogFragment dialog = FoodActionFragment.newInstance(food);
-                dialog.show(getFragmentManager(), "FoodActionFragment");
+                DialogFragment dialog = FoodDensityFragment.newInstance(food);
+                dialog.show(getFragmentManager(), "FoodDensityFragment");
             }
         });
 
@@ -328,14 +290,14 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     // This is for the food action dialog
     @Override
-    public void onActionDialogPositiveClick(DialogFragment dialog) {
+    public void onDensityDialogPositiveClick(DialogFragment dialog) {
         // User touched the dialog's positive button - "Scan Food"
-        //do nothing
+        // TODO: Start FoodScanner for result. Save volume to selected FoodItem.
     }
 
     // This is for the food action dialog
     @Override
-    public void onActionDialogNeutralClick(DialogFragment dialog) {
+    public void onDensityDialogNeutralClick(DialogFragment dialog) {
         // User touched the dialog's neutral button - "Cancel"
         // Do nothing, besides exit dialog.
     }

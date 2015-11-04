@@ -4,22 +4,15 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.util.Map;
-import java.util.Set;
 
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.R;
@@ -29,29 +22,24 @@ import senior_project.foodscanner.R;
  *
  * Dialog that appears if mass needs to be calculated.
  */
-public class FoodActionFragment extends DialogFragment {
+public class FoodDensityFragment extends DialogFragment {
 
     public FoodItem food;
     private View view;
 
-//    final TextView densityValue = (TextView) view.findViewById(R.id.densityValue);
-//    final TextView densityEntry = (TextView) view.findViewById(R.id.densityEntry);
-//    final AutoCompleteTextView autoView = (AutoCompleteTextView)view.findViewById(R.id.densitySearch);
-
-
-    public static FoodActionFragment newInstance(FoodItem food) {
-        FoodActionFragment frag = new FoodActionFragment();
+    public static FoodDensityFragment newInstance(FoodItem food) {
+        FoodDensityFragment frag = new FoodDensityFragment();
         frag.food = food;
         return frag;
     }
 
-    public interface FoodActionDialogListener {
-        public void onActionDialogPositiveClick(DialogFragment dialog);
-        public void onActionDialogNeutralClick(DialogFragment dialog);
+    public interface FoodDensityDialogListener {
+        public void onDensityDialogPositiveClick(DialogFragment dialog);
+        public void onDensityDialogNeutralClick(DialogFragment dialog);
     }
 
-    // Use this instance of the interface to deliver action events
-    FoodActionDialogListener mListener;
+    // Use this instance of the interface to deliver Density events
+    FoodDensityDialogListener mListener;
 
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
     @Override
@@ -60,7 +48,7 @@ public class FoodActionFragment extends DialogFragment {
         // Verify that the host activity implements the callback interface
         try {
             // Instantiate the NoticeDialogListener so we can send events to the host
-            mListener = (FoodActionDialogListener) activity;
+            mListener = (FoodDensityDialogListener) activity;
         } catch (ClassCastException e) {
             // The activity doesn't implement the interface, throw exception
             throw new ClassCastException(activity.toString()
@@ -77,20 +65,20 @@ public class FoodActionFragment extends DialogFragment {
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        view = inflater.inflate(R.layout.food_action_dialog, null);
+        view = inflater.inflate(R.layout.food_density_dialog, null);
 
         builder.setView(view)
                 //.setTitle(food.toString())
-                // Add action buttons
+                // Add Density buttons
                 .setPositiveButton("Scan Food", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener.onActionDialogPositiveClick(FoodActionFragment.this);
+                        mListener.onDensityDialogPositiveClick(FoodDensityFragment.this);
                     }
                 })
                 .setNeutralButton("Dismiss", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener.onActionDialogNeutralClick(FoodActionFragment.this);
+                        mListener.onDensityDialogNeutralClick(FoodDensityFragment.this);
                     }
                 });
 

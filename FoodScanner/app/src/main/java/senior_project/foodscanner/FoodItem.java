@@ -32,6 +32,7 @@ public class FoodItem extends Nutritious implements Serializable {
     private Density density;
     private List<Portion> portions;  //list of individual items, e.g. 3 pieces of chicken that we
     //want to calculate individually will each have a portion.
+    private double numServings;  //number of servings user has entered, after calculation.
 
     private static Map<String, Double> densities = null;
 
@@ -232,6 +233,13 @@ public class FoodItem extends Nutritious implements Serializable {
         return calculateVol;
     }
 
+    public double getNumServings() {
+        return numServings;
+    }
+
+    public void setNumServings(double numServings) {
+        this.numServings = numServings;
+    }
 
     //endregion
 
@@ -331,6 +339,10 @@ public class FoodItem extends Nutritious implements Serializable {
             totalVolume += p.getVolume();
         }
         return totalVolume;
+    }
+
+    public void calculateNumServings() {
+        //TODO: add together all portions to get total number of servings
     }
 
     private class Density implements Serializable {
