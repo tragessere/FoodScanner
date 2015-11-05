@@ -19,12 +19,17 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
+
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
 
 import java.io.File;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import senior_project.foodscanner.R;
+import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.fragments.FoodDensityFragment;
 import senior_project.foodscanner.fragments.FoodInfoFragment;
 
@@ -68,7 +73,15 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
         // Query density database, if necessary
         if (FoodItem.getDensityKeys() == null) {
-            new DensityListQuery(this).execute();
+
+            EndpointsHelper helper = EndpointsHelper.initEndpoints(null);
+            try {
+                List<DensityEntry> densityEntries = helper.new GetAllDensityEntriesTask().execute().get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+
+            //new DensityListQuery(this).execute();
         }
 
         meal = (Meal) getIntent().getSerializableExtra("meal");

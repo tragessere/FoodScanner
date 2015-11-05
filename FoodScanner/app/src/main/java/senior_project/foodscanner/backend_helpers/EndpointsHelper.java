@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
+import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
 import com.example.backend.foodScannerBackendAPI.model.FoodItem;
 import com.example.backend.foodScannerBackendAPI.model.Meal;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
@@ -18,7 +19,8 @@ import java.util.List;
 /**
  * Created by Evan on 10/3/2015.
  */
-public class EndpointsHelper {
+public class EndpointsHelper
+{
 	public static EndpointsHelper mEndpoints;
 	public FoodScannerBackendAPI mAPI;
 
@@ -46,8 +48,6 @@ public class EndpointsHelper {
 		mEndpoints.mAPI = null;
 		mEndpoints = null;
 	}
-
-
 
 	/**
 	 * Google Endpoints uses <code>AsyncTask</code> to make network calls to the backend server
@@ -80,42 +80,19 @@ public class EndpointsHelper {
 		}
 	}
 
-	public class GetAllDensityFoodItemsTask extends AsyncTask<Void, Void, List<FoodItem>> {
-		private TaskCompletionListener mListener;
-
-		public GetAllDensityFoodItemsTask(TaskCompletionListener listener) {
-			mListener = listener;
-		}
-
+	public class GetAllDensityEntriesTask extends AsyncTask<Void, Void, List<DensityEntry>> {
 		@Override
-		protected List<FoodItem> doInBackground(Void... params) {
+		protected List<DensityEntry> doInBackground(Void... params) {
 			try {
-				return mAPI.getAllFoodItems().execute().getItems();
+				return mAPI.getAllDensityEntries().execute().getItems();
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;
 			}
 		}
-
-		@Override
-		protected void onPostExecute(List<FoodItem> foodItems) {
-			if(!isCancelled()) {
-				Bundle b = new Bundle();
-				if(!foodItems.isEmpty()) {
-					//b.putString("test", testBean.getData());
-				}
-				mListener.onTaskCompleted(b);
-			}
-		}
 	}
 
 	public class SaveMealTask extends AsyncTask<Meal, Void, Meal> {
-		private TaskCompletionListener mListener;
-
-		public SaveMealTask(TaskCompletionListener listener) {
-			mListener = listener;
-		}
-
 		@Override
 		protected Meal doInBackground(Meal... meals) {
 			try {
@@ -126,26 +103,9 @@ public class EndpointsHelper {
 				return null;
 			}
 		}
-
-		@Override
-		protected void onPostExecute(Meal meal) {
-			if(!isCancelled()) {
-				Bundle b = new Bundle();
-//				if(!foodItems.isEmpty()) {
-//					//b.putString("test", testBean.getData());
-//				}
-				mListener.onTaskCompleted(b);
-			}
-		}
 	}
 
 	public class GetMealsWithinDates extends AsyncTask<Date, Void, List<Meal>> {
-		private TaskCompletionListener mListener;
-
-		public GetMealsWithinDates(TaskCompletionListener listener) {
-			mListener = listener;
-		}
-
 		@Override
 		protected List<Meal> doInBackground(Date... dates) {
 			try {
@@ -157,19 +117,7 @@ public class EndpointsHelper {
 				return null;
 			}
 		}
-
-		@Override
-		protected void onPostExecute(List<Meal> meals) {
-			if(!isCancelled()) {
-				Bundle b = new Bundle();
-//				if(!foodItems.isEmpty()) {
-//					//b.putString("test", testBean.getData());
-//				}
-				mListener.onTaskCompleted(b);
-			}
-		}
 	}
-
 
 	/**
 	 * Callback for API calls finishing.
