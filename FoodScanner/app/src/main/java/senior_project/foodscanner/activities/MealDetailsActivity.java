@@ -74,9 +74,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         // Query density database, if necessary
         if (FoodItem.getDensityKeys() == null) {
 
-            EndpointsHelper helper = EndpointsHelper.initEndpoints(null);
             try {
-                List<DensityEntry> densityEntries = helper.new GetAllDensityEntriesTask().execute().get();
+                List<DensityEntry> densityEntries = EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask().execute().get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
