@@ -76,6 +76,12 @@
             android:screenOrientation="portrait" >
         </activity>
 
+        <activity
+            android:name=".activities.FoodDensityActivity"
+            android:label="@string/title_activity_food_density"
+            android:screenOrientation="portrait" >
+        </activity>
+
     </application>
 
 </manifest>

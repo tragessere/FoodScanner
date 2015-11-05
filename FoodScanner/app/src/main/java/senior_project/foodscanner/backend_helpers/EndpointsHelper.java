@@ -126,10 +126,17 @@ public class EndpointsHelper
 				return false;
 			}
 
+			if (results == null) {
+				return false;
+			}
+
 			// Save results to density map
 			for (DensityEntry entry : results) {
-				senior_project.foodscanner.FoodItem.addDensity(entry.getName(),
-						(double)(entry.getDensity()));
+				// TODO: Fix database so no entries should have null density values
+				if (entry.getDensity() != null) {
+					senior_project.foodscanner.FoodItem.addDensity(entry.getName(),
+							(double) (entry.getDensity()));
+				}
 			}
 
 			// TODO: Save densities locally, in case a later query fails

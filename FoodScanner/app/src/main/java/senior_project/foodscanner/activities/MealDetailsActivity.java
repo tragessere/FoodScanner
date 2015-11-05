@@ -63,10 +63,12 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     private static final int REQUEST_FOODSCANNER = 0;
     private static final int NEW_FOOD_ITEM = 1;
     private static final int REPLACE_FOOD_ITEM = 2;
+    private static final int REQUEST_DENSITY = 3;
 
     private String[] meals;
     private Spinner mealSpinner;
     private FoodItem removedFood;
+    private FoodItem lastClickedFood;
 
     // TODO add ui to display date of meal (Settings class has some useful functions to format a date)
 
@@ -146,8 +148,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Open appropriate dialog for this food item
-                FoodItem food = meal.getFoodItem(position);
-                if (food.needDisplayMass()) {
+                lastClickedFood = meal.getFoodItem(position);
+                if (lastClickedFood.needDisplayMass()) {
                     // Bring up density dialog
                     // Check that densities have been successfully retrieved
                     if (FoodItem.getDensityKeys() == null) {
@@ -155,16 +157,20 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                                 "Error: Cannot set density at this time.", Toast.LENGTH_LONG);
                         butteredToast.show();
                     } else {
-                        DialogFragment dialog = FoodDensityFragment.newInstance(food);
-                        dialog.show(getFragmentManager(), "FoodDensityFragment");
+                        //DialogFragment dialog = FoodDensityFragment.newInstance(food);
+                        //dialog.show(getFragmentManager(), "FoodDensityFragment");
+                        Intent intent = new Intent(MealDetailsActivity.this, FoodDensityActivity.class);
+                        intent.putExtra("food", lastClickedFood);
+                        intent.putExtra("meal", meal);
+                        startActivityForResult(intent, REQUEST_DENSITY);
                     }
-                } else if (food.needCalculateVol()) {
+                } else if (lastClickedFood.needCalculateVol()) {
                     // Bring up (temporary) volume dialog
-                    DialogFragment dialog = FoodVolumeFragment.newInstance(food);
+                    DialogFragment dialog = FoodVolumeFragment.newInstance(lastClickedFood);
                     dialog.show(getFragmentManager(), "FoodVolumeFragment");
                 } else {
                     // Bring up servings dialog
-                    DialogFragment dialog = FoodServingFragment.newInstance(food);
+                    DialogFragment dialog = FoodServingFragment.newInstance(lastClickedFood);
                     dialog.show(getFragmentManager(), "FoodServingFragment");
                 }
             }
@@ -233,6 +239,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                     }
                 }
                 break;
+            case REQUEST_DENSITY:
+                //fall through
             case NEW_FOOD_ITEM:
                 //fall through
             case REPLACE_FOOD_ITEM:
@@ -350,4 +358,5 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     }
 
     //endregion
+
 }
