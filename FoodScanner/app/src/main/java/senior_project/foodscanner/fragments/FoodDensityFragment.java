@@ -68,7 +68,6 @@ public class FoodDensityFragment extends DialogFragment {
         view = inflater.inflate(R.layout.food_density_dialog, null);
 
         builder.setView(view)
-                //.setTitle(food.toString())
                 // Add Density buttons
                 .setPositiveButton("Scan Food", new DialogInterface.OnClickListener() {
                     @Override

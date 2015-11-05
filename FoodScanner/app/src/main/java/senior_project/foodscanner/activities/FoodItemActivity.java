@@ -143,11 +143,11 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         if (replacedFood == null) {
             // Add food item to meal
             meal.addFoodItem(frag.food);
-            displayToast("Added to meal", this);
+            displayToast("Added to meal.", this);
         } else {
             // Replace previously added food item
             meal.replaceFoodItem(replacedFood, frag.food);
-            displayToast("Replaced food item", this);
+            displayToast("Replaced food item.", this);
         }
 
         Intent resultIntent = new Intent();

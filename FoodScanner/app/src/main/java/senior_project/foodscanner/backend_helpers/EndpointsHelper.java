@@ -1,7 +1,10 @@
 package senior_project.foodscanner.backend_helpers;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
@@ -80,15 +83,58 @@ public class EndpointsHelper
 		}
 	}
 
-	public class GetAllDensityEntriesTask extends AsyncTask<Void, Void, List<DensityEntry>> {
+	public class GetAllDensityEntriesTask extends AsyncTask<Void, Void, Boolean> {
+		private ProgressDialog dialog;
+		private Activity act;
+
+		public GetAllDensityEntriesTask(Activity act) {
+			this.act = act;
+		}
+
 		@Override
-		protected List<DensityEntry> doInBackground(Void... params) {
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(act);
+			dialog.setMessage("Loading...");
+			dialog.setCanceledOnTouchOutside(false);
+			dialog.show();
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			if (dialog.isShowing()) {
+				dialog.dismiss();
+			}
+
+			if (result == false) {
+				act.runOnUiThread(new Runnable() {
+					public void run() {
+						Toast butteredToast = Toast.makeText(act.getApplicationContext(),
+								"Error: Could not retrieve densities.", Toast.LENGTH_LONG);
+						butteredToast.show();
+					}
+				});
+			}
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			List<DensityEntry> results;
 			try {
-				return mAPI.getAllDensityEntries().execute().getItems();
+				results = mAPI.getAllDensityEntries().execute().getItems();
 			} catch (IOException e) {
 				e.printStackTrace();
-				return null;
+				return false;
 			}
+
+			// Save results to density map
+			for (DensityEntry entry : results) {
+				senior_project.foodscanner.FoodItem.addDensity(entry.getName(),
+						(double)(entry.getDensity()));
+			}
+
+			// TODO: Save densities locally, in case a later query fails
+
+			return true;
 		}
 	}
 

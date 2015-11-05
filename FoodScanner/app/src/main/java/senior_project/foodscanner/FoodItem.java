@@ -72,6 +72,8 @@ public class FoodItem extends Nutritious implements Serializable {
 
         density = new Density();
         density.value = 0.0;  //for clarity
+
+        numServings = 0.0;  //for clarity
     }
 
     public void setField(String field, Double value) {

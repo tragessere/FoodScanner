@@ -32,6 +32,8 @@ import senior_project.foodscanner.R;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.fragments.FoodDensityFragment;
 import senior_project.foodscanner.fragments.FoodInfoFragment;
+import senior_project.foodscanner.fragments.FoodServingFragment;
+import senior_project.foodscanner.fragments.FoodVolumeFragment;
 
 /**
  * Shows details of the meal and allows editing.
@@ -54,7 +56,8 @@ import senior_project.foodscanner.fragments.FoodInfoFragment;
  * Back Button - return to Meal Calendar
  */
 public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener,
-        FoodInfoFragment.FoodInfoDialogListener, FoodDensityFragment.FoodDensityDialogListener {
+        FoodInfoFragment.FoodInfoDialogListener, FoodDensityFragment.FoodDensityDialogListener,
+        FoodVolumeFragment.FoodVolumeDialogListener, FoodServingFragment.FoodServingDialogListener {
 
     private Meal meal;
     private static final int REQUEST_FOODSCANNER = 0;
@@ -73,14 +76,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
         // Query density database, if necessary
         if (FoodItem.getDensityKeys() == null) {
-
-            try {
-                List<DensityEntry> densityEntries = EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask().execute().get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-
-            //new DensityListQuery(this).execute();
+            EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask(this).execute();
         }
 
         meal = (Meal) getIntent().getSerializableExtra("meal");
@@ -141,7 +137,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         ListView lv = (ListView) findViewById(R.id.food_list);
         ArrayAdapter<FoodItem> arrayAdapter = new ArrayAdapter<>(
                 getApplicationContext(),
-                R.layout.list_layout,
+                R.layout.list_layout_added_food,
                 R.id.foodListText,
                 meal.getFood());
         lv.setAdapter(arrayAdapter);
@@ -149,10 +145,28 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         // Set up what happens when you click a list item
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Bring up dialog to get density
+                // Open appropriate dialog for this food item
                 FoodItem food = meal.getFoodItem(position);
-                DialogFragment dialog = FoodDensityFragment.newInstance(food);
-                dialog.show(getFragmentManager(), "FoodDensityFragment");
+                if (food.needDisplayMass()) {
+                    // Bring up density dialog
+                    // Check that densities have been successfully retrieved
+                    if (FoodItem.getDensityKeys() == null) {
+                        Toast butteredToast = Toast.makeText(getApplicationContext(),
+                                "Error: Cannot set density at this time.", Toast.LENGTH_LONG);
+                        butteredToast.show();
+                    } else {
+                        DialogFragment dialog = FoodDensityFragment.newInstance(food);
+                        dialog.show(getFragmentManager(), "FoodDensityFragment");
+                    }
+                } else if (food.needCalculateVol()) {
+                    // Bring up (temporary) volume dialog
+                    DialogFragment dialog = FoodVolumeFragment.newInstance(food);
+                    dialog.show(getFragmentManager(), "FoodVolumeFragment");
+                } else {
+                    // Bring up servings dialog
+                    DialogFragment dialog = FoodServingFragment.newInstance(food);
+                    dialog.show(getFragmentManager(), "FoodServingFragment");
+                }
             }
         });
 
@@ -231,6 +245,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    //region Dialog click handlers
 
     // This is for the food info dialog
     @Override
@@ -271,14 +286,13 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                 ListView lv = (ListView) findViewById(R.id.food_list);
                 ArrayAdapter<FoodItem> arrayAdapter = new ArrayAdapter<>(
                         getApplicationContext(),
-                        R.layout.list_layout,
+                        R.layout.list_layout_added_food,
                         R.id.foodListText,
                         meal.getFood());
                 lv.setAdapter(arrayAdapter);
 
-                Toast butteredToast = Toast.makeText(getApplicationContext(), "Removed from meal",
+                Toast butteredToast = Toast.makeText(getApplicationContext(), "Removed from meal.",
                         Toast.LENGTH_SHORT);
-                //butteredToast.setGravity(Gravity.CENTER, 0, 0);
                 butteredToast.show();
             }
         });
@@ -300,61 +314,40 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         // Do nothing, besides exit dialog.
     }
 
-    // This is for the food action dialog
+    // This is for the food density dialog
     @Override
     public void onDensityDialogPositiveClick(DialogFragment dialog) {
         // User touched the dialog's positive button - "Scan Food"
         // TODO: Start FoodScanner for result. Save volume to selected FoodItem.
     }
 
-    // This is for the food action dialog
+    // This is for the food density dialog
     @Override
     public void onDensityDialogNeutralClick(DialogFragment dialog) {
         // User touched the dialog's neutral button - "Cancel"
         // Do nothing, besides exit dialog.
     }
 
-
-    // Class for querying density database, runs once per app session
-
-    private class DensityListQuery extends AsyncTask<String, Void, Boolean> {
-
-        private Activity act;
-        private ProgressDialog dialog;
-
-        DensityListQuery(Activity act) {
-            this.act = act;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            dialog = new ProgressDialog(act);
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.setMessage("Loading...");
-            dialog.show();
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-            // TODO: MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT
-            // TODO: MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT
-            // TODO: MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT MATT
-            // TODO: Query database for entire density list
-            // (see below examples of how to enter values)
-            FoodItem.addDensity("beef", 15.4);
-            FoodItem.addDensity("fish", 12.1);
-            FoodItem.addDensity("rice", 5.2);
-            // etc....
-
-            return true;
-        }
-
+    // This is for the food volume dialog
+    @Override
+    public void onVolumeDialogPositiveClick(DialogFragment dialog) {
+        // User touched the dialog's positive button - "Scan Food"
+        // TODO: Start FoodScanner for result. Save volume to selected FoodItem.
     }
+
+    // This is for the food volume dialog
+    @Override
+    public void onVolumeDialogNeutralClick(DialogFragment dialog) {
+        // User touched the dialog's neutral button - "Cancel"
+        // Do nothing, besides exit dialog.
+    }
+
+    // This is for the food serving dialog
+    @Override
+    public void onServingDialogNeutralClick(DialogFragment dialog) {
+        // User touched the dialog's neutral button - "Cancel"
+        // Do nothing, besides exit dialog.
+    }
+
+    //endregion
 }
