@@ -1,4 +1,4 @@
-package SeniorProject.foodscanner;
+package senior_project.foodscanner;
 
 import android.content.Context;
 import android.graphics.Bitmap;

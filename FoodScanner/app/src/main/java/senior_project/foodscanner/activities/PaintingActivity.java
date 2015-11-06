@@ -21,8 +21,8 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.Serializable;
 
-import SeniorProject.foodscanner.DrawView;
-import SeniorProject.foodscanner.PaintingView;
+import senior_project.foodscanner.DrawView;
+import senior_project.foodscanner.PaintingView;
 import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.ui.components.ImageBrowser;

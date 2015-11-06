@@ -36,6 +36,7 @@
     <string name="title_activity_food_adder">Add Food</string>
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_settings_set_times">Set Meal Times</string>
+    <string name="title_activity_food_density">Density Information</string>
 
     <string name="settings_24_hour">Use 24-hour format</string>
     <string name="settings_meal_time">Set meal times</string>

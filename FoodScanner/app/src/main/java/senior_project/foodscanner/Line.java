@@ -1,4 +1,4 @@
-package SeniorProject.foodscanner;
+package senior_project.foodscanner;
 
 /**
  * Created by Jacob on 10/4/2015.

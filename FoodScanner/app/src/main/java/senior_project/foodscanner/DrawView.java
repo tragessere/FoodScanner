@@ -1,4 +1,4 @@
-package SeniorProject.foodscanner;
+package senior_project.foodscanner;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -10,8 +10,6 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
-import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -25,9 +23,9 @@ import android.widget.RelativeLayout;
 import java.io.File;
 import java.util.ArrayList;
 
+import senior_project.foodscanner.ColorBall;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.activities.PaintingActivity;
-
 /**
  * Created by Jacob on 10/3/2015.
  */
@@ -47,7 +45,7 @@ public class DrawView extends View
 
     private boolean moving = false;
 
-    private ArrayList< ColorBall > colorballs = new ArrayList < ColorBall > ();
+    private ArrayList<ColorBall> colorballs = new ArrayList < ColorBall > ();
 
     int groupId = -1;
     private int balID = 0;

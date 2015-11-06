@@ -1,4 +1,4 @@
-package SeniorProject.foodscanner;
+package senior_project.foodscanner;
 
 import android.app.Activity;
 import android.content.Context;
@@ -24,6 +24,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import senior_project.foodscanner.DrawView;
+import senior_project.foodscanner.Line;
 import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.activities.PaintingActivity;
@@ -50,7 +52,7 @@ public class PaintingView extends View
     private Bitmap          background;
     private Bitmap          previousBitmap;
     private DisplayMetrics  d;
-    private DrawView        rectangle;
+    private DrawView rectangle;
 
     private File        imageDirectory;
     private Resources   res;
