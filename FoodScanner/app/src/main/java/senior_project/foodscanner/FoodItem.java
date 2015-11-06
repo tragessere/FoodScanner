@@ -34,6 +34,8 @@ public class FoodItem extends Nutritious implements Serializable {
     //want to calculate individually will each have a portion.
     private double numServings;  //number of servings user has entered, after calculation.
 
+    private double volume; //this is temporary, for Spring 2 demo
+
     private static Map<String, Double> densities = null;
 
     public FoodItem() {
@@ -74,6 +76,8 @@ public class FoodItem extends Nutritious implements Serializable {
         density.value = 0.0;  //for clarity
 
         numServings = 0.0;  //for clarity
+
+        volume = 0.0;   //temp, for clarity
     }
 
     public void setField(String field, Double value) {
@@ -405,4 +409,13 @@ public class FoodItem extends Nutritious implements Serializable {
         }
     }
 
+    // This is temporary, for Spring 2 demo
+
+    public double getVolume() {
+        return volume;
+    }
+
+    public void setVolume(double volume) {
+        this.volume = volume;
+    }
 }

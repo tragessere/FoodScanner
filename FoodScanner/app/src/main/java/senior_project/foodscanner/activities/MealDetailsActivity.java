@@ -217,9 +217,13 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.button_foodscanner) {
-            Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
-            intent.putExtra("pic_names", new String[]{"Top", "Side"});
-            startActivityForResult(intent, REQUEST_FOODSCANNER);
+//            Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
+//            intent.putExtra("pic_names", new String[]{"Top", "Side"});
+//            startActivityForResult(intent, REQUEST_FOODSCANNER);
+            Toast butteredToast = Toast.makeText(getApplicationContext(), "Please choose food item first.",
+                    Toast.LENGTH_SHORT);
+            butteredToast.show();
+
         } else if(v.getId() == R.id.button_addfood) {
             Intent intent = new Intent(MealDetailsActivity.this, FoodItemActivity.class);
             intent.putExtra("meal", meal);
@@ -239,7 +243,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                         //TODO delete files after they are not needed anymore. To do this use ImageDirectoryManager.clearImageDirectory()
                     }
 
-                    volume = data.getDoubleExtra(PhotoTakerActivity.RESULT_VOLUME, -1.0);
+                    lastClickedFood.setVolume(data.getDoubleExtra(PhotoTakerActivity.RESULT_VOLUME, -1.0));
                 }
                 break;
             case REQUEST_DENSITY:
@@ -343,7 +347,9 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onVolumeDialogPositiveClick(DialogFragment dialog) {
         // User touched the dialog's positive button - "Scan Food"
-        // TODO: Start FoodScanner for result. Save volume to selected FoodItem.
+        Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
+        intent.putExtra("pic_names", new String[]{"Top", "Side"});
+        startActivityForResult(intent, REQUEST_FOODSCANNER);
     }
 
     // This is for the food volume dialog
