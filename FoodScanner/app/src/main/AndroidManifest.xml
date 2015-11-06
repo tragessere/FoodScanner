@@ -39,6 +39,11 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity
+            android:name=".activities.PaintingActivity"
+            android:label="@string/title_activity_painting"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
             android:name=".activities.MealDetailsActivity"
             android:label="@string/title_activity_meal_details"
             android:screenOrientation="portrait" >
