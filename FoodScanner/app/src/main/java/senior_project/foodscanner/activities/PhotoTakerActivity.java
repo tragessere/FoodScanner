@@ -48,13 +48,15 @@ import senior_project.foodscanner.ui.components.ImageBrowser;
 public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialogFragment.ErrorDialogListener, ImageBrowser.ActionButtonListener, ImageBrowser.FinishButtonListener {
     public static final String EXTRA_PIC_NAMES = "pic_names";
     public static final String RESULT_IMAGE_FILES = "image_files";
-
+    public static final String RESULT_VOLUME = "volume";
     private static final int RESULT_CAMERA = 0;
+    public static final int RESULT_FOOD_SCANNER = 1;
     private static final String SAVEINST_FILES = "picFiles";
     private static final String SAVEINST_INDEX = "current_index";
     private String[] picNames = {"Picture"};
     private ImageBrowser picBrowser;
     private File[] picFiles;
+    private double volume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,12 +114,16 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
 
     @Override
     public void onFinishButton() {
+        //put the pic files as a return.
         Intent intent = new Intent();
         intent.putExtra(RESULT_IMAGE_FILES, picFiles);
-        setResult(Activity.RESULT_OK, intent);
-        finish();
-    }
 
+        //put the volume as a return result
+        Intent paintingIntent = new Intent(this, PaintingActivity.class);
+        startActivityForResult(paintingIntent, RESULT_FOOD_SCANNER);
+        intent.putExtra(RESULT_VOLUME, volume);
+        setResult(RESULT_OK, intent);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -176,6 +182,9 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
                     }
                 }
                 break;
+            case RESULT_FOOD_SCANNER:
+                if(resultCode == RESULT_OK)
+                    volume = data.getDoubleExtra(RESULT_VOLUME, -1.0);
             default:
                 break;
         }
