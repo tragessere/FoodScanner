@@ -93,8 +93,8 @@ public class Meal extends Nutritious implements Serializable {
 
     public void replaceFoodItem(FoodItem oldFood, FoodItem newFood) {
         newFood.replacePortions(oldFood.getPortions());
-        this.addFoodItem(newFood);
         this.removeFoodItem(oldFood);
+        this.addFoodItem(newFood);
         setIsChanged(true);
     }
 

@@ -3,12 +3,12 @@ package senior_project.foodscanner.activities;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,14 +19,21 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
+
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
 
 import java.io.File;
-import java.util.Calendar;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import senior_project.foodscanner.R;
+import senior_project.foodscanner.backend_helpers.EndpointsHelper;
+import senior_project.foodscanner.fragments.FoodDensityFragment;
 import senior_project.foodscanner.fragments.FoodInfoFragment;
+import senior_project.foodscanner.fragments.FoodServingFragment;
+import senior_project.foodscanner.fragments.FoodVolumeFragment;
 
 /**
  * Shows details of the meal and allows editing.
@@ -49,32 +56,30 @@ import senior_project.foodscanner.fragments.FoodInfoFragment;
  * Back Button - return to Meal Calendar
  */
 public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener,
-        FoodInfoFragment.FoodInfoDialogListener{
+        FoodInfoFragment.FoodInfoDialogListener, FoodDensityFragment.FoodDensityDialogListener,
+        FoodVolumeFragment.FoodVolumeDialogListener, FoodServingFragment.FoodServingDialogListener {
 
     private Meal meal;
     private static final int REQUEST_FOODSCANNER = 0;
     private static final int NEW_FOOD_ITEM = 1;
     private static final int REPLACE_FOOD_ITEM = 2;
+    private static final int REQUEST_DENSITY = 3;
 
     private String[] meals;
     private Spinner mealSpinner;
     private FoodItem removedFood;
+    private FoodItem lastClickedFood;
 
     // TODO add ui to display date of meal (Settings class has some useful functions to format a date)
-
-    // region Times that meal spinner will start defaulting to each meal (in min, 24-hour format)
-    // TODO: Allow user to set these times
-    public int breakfastTime = 240; // 3:00 (am)
-    public int brunchTime = 600;    // 10:00 (am)
-    public int lunchTime = 720;     // 12:00 (am)
-    public int snackTime = 900;     // 15:00 (3:00pm)
-    public int dinnerTime = 1080;   // 18:00 (6:00pm)
-    public int dessertTime = 1260;  // 21:00 (9:00pm)
-    // endregion
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Query density database, if necessary
+        if (FoodItem.getDensityKeys() == null) {
+            EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask(this).execute();
+        }
 
         meal = (Meal) getIntent().getSerializableExtra("meal");
 
@@ -95,35 +100,11 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                 android.R.layout.simple_spinner_item, meals);
         mealAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mealSpinner.setAdapter(mealAdapter);
+        mealSpinner.setSelection(mealAdapter.getPosition(meal.getType().getName()));
 
+        // Doesn't do anything now, left in just in case.
         if (meal.isNew()) {
             meal.setIsNew(false);
-
-            // Set default meal, based on time of day
-            Calendar cal = Calendar.getInstance();
-            int minute = cal.get(Calendar.MINUTE);
-            int hour = cal.get(Calendar.HOUR_OF_DAY); //24-hour format
-            int time = minute + (hour * 60);
-            Meal.MealType defaultMeal;
-
-            if (time >= breakfastTime && time < brunchTime) {
-                defaultMeal = Meal.MealType.BREAKFAST;
-            } else if (time >= brunchTime && time < lunchTime) {
-                defaultMeal = Meal.MealType.BRUNCH;
-            } else if (time >= lunchTime && time < snackTime) {
-                defaultMeal = Meal.MealType.LUNCH;
-            } else if (time >= snackTime && time < dinnerTime) {
-                defaultMeal = Meal.MealType.SNACK;
-            } else if (time >= dinnerTime && time < dessertTime) {
-                defaultMeal = Meal.MealType.DINNER;
-            } else {
-                defaultMeal = Meal.MealType.DESSERT;
-            }
-
-            mealSpinner.setSelection(mealAdapter.getPosition(defaultMeal.getName()));
-            meal.setType(defaultMeal);
-        } else {
-            mealSpinner.setSelection(mealAdapter.getPosition(meal.getType().getName()));
         }
 
         // Set up what meal selection does
@@ -158,18 +139,51 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         ListView lv = (ListView) findViewById(R.id.food_list);
         ArrayAdapter<FoodItem> arrayAdapter = new ArrayAdapter<>(
                 getApplicationContext(),
-                R.layout.list_layout,
+                R.layout.list_layout_added_food,
                 R.id.foodListText,
                 meal.getFood());
         lv.setAdapter(arrayAdapter);
 
-        // set up happens when you click a list item
+        // Set up what happens when you click a list item
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //View nutrition info
+                // Open appropriate dialog for this food item
+                lastClickedFood = meal.getFoodItem(position);
+                if (lastClickedFood.needDisplayMass()) {
+                    // Bring up density dialog
+                    // Check that densities have been successfully retrieved
+                    if (FoodItem.getDensityKeys() == null) {
+                        Toast butteredToast = Toast.makeText(getApplicationContext(),
+                                "Error: Cannot set density at this time.", Toast.LENGTH_LONG);
+                        butteredToast.show();
+                    } else {
+                        //DialogFragment dialog = FoodDensityFragment.newInstance(food);
+                        //dialog.show(getFragmentManager(), "FoodDensityFragment");
+                        Intent intent = new Intent(MealDetailsActivity.this, FoodDensityActivity.class);
+                        intent.putExtra("food", lastClickedFood);
+                        intent.putExtra("meal", meal);
+                        startActivityForResult(intent, REQUEST_DENSITY);
+                    }
+                } else if (lastClickedFood.needCalculateVol()) {
+                    // Bring up (temporary) volume dialog
+                    DialogFragment dialog = FoodVolumeFragment.newInstance(lastClickedFood);
+                    dialog.show(getFragmentManager(), "FoodVolumeFragment");
+                } else {
+                    // Bring up servings dialog
+                    DialogFragment dialog = FoodServingFragment.newInstance(lastClickedFood);
+                    dialog.show(getFragmentManager(), "FoodServingFragment");
+                }
+            }
+        });
+
+        // Set up what happens when you long click a list item
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                //View nutrition info & give option to replace or delete
                 FoodItem food = meal.getFoodItem(position);
                 DialogFragment dialog = FoodInfoFragment.newInstance(food, true);
                 dialog.show(getFragmentManager(), "FoodInfoFragment");
+                return true;
             }
         });
 
@@ -225,6 +239,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                     }
                 }
                 break;
+            case REQUEST_DENSITY:
+                //fall through
             case NEW_FOOD_ITEM:
                 //fall through
             case REPLACE_FOOD_ITEM:
@@ -237,6 +253,9 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    //region Dialog click handlers
+
+    // This is for the food info dialog
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         // User touched the dialog's positive button - "Replace"
@@ -252,6 +271,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         startActivityForResult(intent, REPLACE_FOOD_ITEM);
     }
 
+    // This is for the food info dialog
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         // User touched the dialog's negative button - "Delete"
@@ -274,14 +294,13 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                 ListView lv = (ListView) findViewById(R.id.food_list);
                 ArrayAdapter<FoodItem> arrayAdapter = new ArrayAdapter<>(
                         getApplicationContext(),
-                        R.layout.list_layout,
+                        R.layout.list_layout_added_food,
                         R.id.foodListText,
                         meal.getFood());
                 lv.setAdapter(arrayAdapter);
 
-                Toast butteredToast = Toast.makeText(getApplicationContext(), "Removed from meal",
+                Toast butteredToast = Toast.makeText(getApplicationContext(), "Removed from meal.",
                         Toast.LENGTH_SHORT);
-                //butteredToast.setGravity(Gravity.CENTER, 0, 0);
                 butteredToast.show();
             }
         });
@@ -296,10 +315,48 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         confirmDialog.show();
     }
 
+    // This is for the food info dialog
     @Override
     public void onDialogNeutralClick(DialogFragment dialog) {
         // User touched the dialog's neutral button - "Cancel"
         // Do nothing, besides exit dialog.
     }
+
+    // This is for the food density dialog
+    @Override
+    public void onDensityDialogPositiveClick(DialogFragment dialog) {
+        // User touched the dialog's positive button - "Scan Food"
+        // TODO: Start FoodScanner for result. Save volume to selected FoodItem.
+    }
+
+    // This is for the food density dialog
+    @Override
+    public void onDensityDialogNeutralClick(DialogFragment dialog) {
+        // User touched the dialog's neutral button - "Cancel"
+        // Do nothing, besides exit dialog.
+    }
+
+    // This is for the food volume dialog
+    @Override
+    public void onVolumeDialogPositiveClick(DialogFragment dialog) {
+        // User touched the dialog's positive button - "Scan Food"
+        // TODO: Start FoodScanner for result. Save volume to selected FoodItem.
+    }
+
+    // This is for the food volume dialog
+    @Override
+    public void onVolumeDialogNeutralClick(DialogFragment dialog) {
+        // User touched the dialog's neutral button - "Cancel"
+        // Do nothing, besides exit dialog.
+    }
+
+    // This is for the food serving dialog
+    @Override
+    public void onServingDialogNeutralClick(DialogFragment dialog) {
+        // User touched the dialog's neutral button - "Cancel"
+        // Do nothing, besides exit dialog.
+    }
+
+    //endregion
 
 }

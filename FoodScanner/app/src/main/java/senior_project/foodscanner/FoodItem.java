@@ -3,6 +3,7 @@ package senior_project.foodscanner;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,8 +29,12 @@ public class FoodItem extends Nutritious implements Serializable {
     private Set<String> massUnits;
     private int maxMassLen;
     private int maxVolLen;
+    private Density density;
     private List<Portion> portions;  //list of individual items, e.g. 3 pieces of chicken that we
     //want to calculate individually will each have a portion.
+    private double numServings;  //number of servings user has entered, after calculation.
+
+    private static Map<String, Double> densities = null;
 
     public FoodItem() {
         //LinkedHashMap used to ensure insertion order is maintained, for iteration.
@@ -64,6 +69,11 @@ public class FoodItem extends Nutritious implements Serializable {
             }
         }
         massUnits = new HashSet<>(Arrays.asList(mass_values));
+
+        density = new Density();
+        density.value = 0.0;  //for clarity
+
+        numServings = 0.0;  //for clarity
     }
 
     public void setField(String field, Double value) {
@@ -217,6 +227,22 @@ public class FoodItem extends Nutritious implements Serializable {
         this.calculateMass = calculateMass;
     }
 
+    public boolean needDisplayMass() {
+        return calculateMass;
+    }
+
+    public boolean needDisplayVolume() {
+        return calculateVol;
+    }
+
+    public double getNumServings() {
+        return numServings;
+    }
+
+    public void setNumServings(double numServings) {
+        this.numServings = numServings;
+    }
+
     //endregion
 
     @Override
@@ -315,6 +341,68 @@ public class FoodItem extends Nutritious implements Serializable {
             totalVolume += p.getVolume();
         }
         return totalVolume;
+    }
+
+    public void calculateNumServings() {
+        //TODO: add together all portions to get total number of servings
+    }
+
+    private class Density implements Serializable {
+        private double value;
+        private String name;
+        private String id;
+    }
+
+    public double getDensity() {
+        return density.value;
+    }
+
+    public void setDensity(double value) {
+        this.density.value = value;
+    }
+
+    public String getDensityName() {
+        return density.name;
+    }
+
+    public void setDensityName(String name) {
+        density.name = name;
+    }
+
+    public String getDensityId() {
+        return density.id;
+    }
+
+    public void setDensityId(String id) {
+        density.id = id;
+    }
+
+
+    // Methods for saving & retrieving densities from database (may be moved)
+
+    public static void addDensity(String name, Double value) {
+        if (densities == null) {
+            densities = new HashMap<>();
+        }
+        densities.put(name, value);
+    }
+
+    public static String[] getDensityKeys() {
+        if (densities == null) {
+            return null;
+        } else {
+            Set<String> densitySet = densities.keySet();
+            String[] retArray = densitySet.toArray(new String[densitySet.size()]);
+            return retArray;
+        }
+    }
+
+    public static Double getDensityValue(String name) {
+        if (densities == null) {
+            return null;
+        } else {
+            return densities.get(name);
+        }
     }
 
 }

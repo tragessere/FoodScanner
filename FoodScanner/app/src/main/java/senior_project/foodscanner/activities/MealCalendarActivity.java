@@ -1,5 +1,7 @@
 package senior_project.foodscanner.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -9,8 +11,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
@@ -134,7 +138,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         // update time of meal with currently selected date
         mealTime.set(currentDate.get(GregorianCalendar.YEAR), currentDate.get(GregorianCalendar.MONTH), currentDate.get(GregorianCalendar.DAY_OF_MONTH));
 
-        Meal newMeal = new Meal(mealTime.getTimeInMillis(), Meal.MealType.LUNCH);
+        // get settings for 'guessed' meal
+        Settings settings = Settings.getInstance();
+
+        Meal newMeal = new Meal(mealTime.getTimeInMillis(), settings.getCurrentMeal());
         adapter.add(newMeal);
         //TODO save meal to device here
         return newMeal;
@@ -237,11 +244,39 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
     @Override
     public void onDelete(MealArrayAdapter adapter, int position) {
-        //TODO confirm dialog
-        //TODO delete from device
-        //TODO somehow delete from backend and handle case of no connection
-        adapter.remove(adapter.getItem(position));
-        updateDayTotal();
+        final MealArrayAdapter tempAdapter = adapter;
+        final int tempPostion = position;
+
+        // Create deletion confirmation dialog
+        Meal selectedMeal = adapter.getItem(position);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to delete this " +
+                selectedMeal.getType().getName() + " meal entry?")
+                .setTitle("Confirm Meal Deletion");
+        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked 'Delete' button
+                // Remove meal from calendar
+                tempAdapter.remove(tempAdapter.getItem(tempPostion));
+                updateDayTotal();
+
+                //TODO delete from device
+                //TODO somehow delete from backend and handle case of no connection
+
+                Toast butteredToast = Toast.makeText(getApplicationContext(), "Removed from calendar.",
+                        Toast.LENGTH_SHORT);
+                butteredToast.show();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
+
+        // Create the AlertDialog
+        AlertDialog confirmDialog = builder.create();
+        confirmDialog.show();
     }
 
     @Override

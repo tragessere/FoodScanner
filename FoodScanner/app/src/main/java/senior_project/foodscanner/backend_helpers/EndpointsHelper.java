@@ -1,9 +1,13 @@
 package senior_project.foodscanner.backend_helpers;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
+import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
 import com.example.backend.foodScannerBackendAPI.model.FoodItem;
 import com.example.backend.foodScannerBackendAPI.model.Meal;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
@@ -18,7 +22,8 @@ import java.util.List;
 /**
  * Created by Evan on 10/3/2015.
  */
-public class EndpointsHelper {
+public class EndpointsHelper
+{
 	public static EndpointsHelper mEndpoints;
 	public FoodScannerBackendAPI mAPI;
 
@@ -46,8 +51,6 @@ public class EndpointsHelper {
 		mEndpoints.mAPI = null;
 		mEndpoints = null;
 	}
-
-
 
 	/**
 	 * Google Endpoints uses <code>AsyncTask</code> to make network calls to the backend server
@@ -80,42 +83,69 @@ public class EndpointsHelper {
 		}
 	}
 
-	public class GetAllDensityFoodItemsTask extends AsyncTask<Void, Void, List<FoodItem>> {
-		private TaskCompletionListener mListener;
+	public class GetAllDensityEntriesTask extends AsyncTask<Void, Void, Boolean> {
+		private ProgressDialog dialog;
+		private Activity act;
 
-		public GetAllDensityFoodItemsTask(TaskCompletionListener listener) {
-			mListener = listener;
+		public GetAllDensityEntriesTask(Activity act) {
+			this.act = act;
 		}
 
 		@Override
-		protected List<FoodItem> doInBackground(Void... params) {
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(act);
+			dialog.setMessage("Loading...");
+			dialog.setCanceledOnTouchOutside(false);
+			dialog.show();
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			if (dialog.isShowing()) {
+				dialog.dismiss();
+			}
+
+			if (result == false) {
+				act.runOnUiThread(new Runnable() {
+					public void run() {
+						Toast butteredToast = Toast.makeText(act.getApplicationContext(),
+								"Error: Could not retrieve densities.", Toast.LENGTH_LONG);
+						butteredToast.show();
+					}
+				});
+			}
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			List<DensityEntry> results;
 			try {
-				return mAPI.getAllFoodItems().execute().getItems();
+				results = mAPI.getAllDensityEntries().execute().getItems();
 			} catch (IOException e) {
 				e.printStackTrace();
-				return null;
+				return false;
 			}
-		}
 
-		@Override
-		protected void onPostExecute(List<FoodItem> foodItems) {
-			if(!isCancelled()) {
-				Bundle b = new Bundle();
-				if(!foodItems.isEmpty()) {
-					//b.putString("test", testBean.getData());
-				}
-				mListener.onTaskCompleted(b);
+			if (results == null) {
+				return false;
 			}
+
+			// Save results to density map
+			for (DensityEntry entry : results) {
+				// TODO: Fix database so no entries should have null density values
+				if (entry.getDensity() != null) {
+					senior_project.foodscanner.FoodItem.addDensity(entry.getName(),
+							(double) (entry.getDensity()));
+				}
+			}
+
+			// TODO: Save densities locally, in case a later query fails
+
+			return true;
 		}
 	}
 
 	public class SaveMealTask extends AsyncTask<Meal, Void, Meal> {
-		private TaskCompletionListener mListener;
-
-		public SaveMealTask(TaskCompletionListener listener) {
-			mListener = listener;
-		}
-
 		@Override
 		protected Meal doInBackground(Meal... meals) {
 			try {
@@ -126,26 +156,9 @@ public class EndpointsHelper {
 				return null;
 			}
 		}
-
-		@Override
-		protected void onPostExecute(Meal meal) {
-			if(!isCancelled()) {
-				Bundle b = new Bundle();
-//				if(!foodItems.isEmpty()) {
-//					//b.putString("test", testBean.getData());
-//				}
-				mListener.onTaskCompleted(b);
-			}
-		}
 	}
 
 	public class GetMealsWithinDates extends AsyncTask<Date, Void, List<Meal>> {
-		private TaskCompletionListener mListener;
-
-		public GetMealsWithinDates(TaskCompletionListener listener) {
-			mListener = listener;
-		}
-
 		@Override
 		protected List<Meal> doInBackground(Date... dates) {
 			try {
@@ -157,19 +170,7 @@ public class EndpointsHelper {
 				return null;
 			}
 		}
-
-		@Override
-		protected void onPostExecute(List<Meal> meals) {
-			if(!isCancelled()) {
-				Bundle b = new Bundle();
-//				if(!foodItems.isEmpty()) {
-//					//b.putString("test", testBean.getData());
-//				}
-				mListener.onTaskCompleted(b);
-			}
-		}
 	}
-
 
 	/**
 	 * Callback for API calls finishing.
