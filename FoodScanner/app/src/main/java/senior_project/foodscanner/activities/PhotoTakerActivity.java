@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -184,8 +185,14 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
                 }
                 break;
             case RESULT_FOOD_SCANNER:
-                if(resultCode == RESULT_OK)
-                    volume = data.getDoubleExtra(RESULT_VOLUME, -1.0);
+                if(resultCode == RESULT_OK) {
+                    Intent intent = new Intent();
+                    intent.putExtra(RESULT_VOLUME, data.getDoubleExtra(RESULT_VOLUME, -1.0));
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
+                break;
+
             default:
                 break;
         }

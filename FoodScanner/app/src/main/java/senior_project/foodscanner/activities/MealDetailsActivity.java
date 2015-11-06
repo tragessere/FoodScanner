@@ -65,6 +65,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     private static final int REPLACE_FOOD_ITEM = 2;
     private static final int REQUEST_DENSITY = 3;
 
+    private double volume;
     private String[] meals;
     private Spinner mealSpinner;
     private FoodItem removedFood;
@@ -237,6 +238,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                         //TODO go to food drawing activity with these file, or you can find them with ImageDirectoryManager.getImageDirectory().list()
                         //TODO delete files after they are not needed anymore. To do this use ImageDirectoryManager.clearImageDirectory()
                     }
+
+                    volume = data.getDoubleExtra(PhotoTakerActivity.RESULT_VOLUME, -1.0);
                 }
                 break;
             case REQUEST_DENSITY:
