@@ -20,6 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.io.File;
+
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
@@ -32,6 +34,8 @@ public class FoodDensityActivity extends AppCompatActivity implements View.OnCli
     private FoodItem oldFood;  //not modified until onBackPressed
     private FoodItem newFood;
     private Meal meal;
+
+    private static final int REQUEST_FOODSCANNER = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,13 +132,29 @@ public class FoodDensityActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.button_foodscanner) {
-//            Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
-//            intent.putExtra("pic_names", new String[]{"Top", "Side"});
-//            startActivityForResult(intent, REQUEST_FOODSCANNER);
-            //TODO: start FoodScanner
-            Toast butteredToast = Toast.makeText(getApplicationContext(),
-                    "Error: FoodScanner not available at this time.", Toast.LENGTH_LONG);
-            butteredToast.show();
+            Intent intent = new Intent(FoodDensityActivity.this, PhotoTakerActivity.class);
+            intent.putExtra("pic_names", new String[]{"Top", "Side"});
+            startActivityForResult(intent, REQUEST_FOODSCANNER);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+            case REQUEST_FOODSCANNER:
+                if(resultCode == Activity.RESULT_OK) {
+                    if(data.hasExtra(PhotoTakerActivity.RESULT_IMAGE_FILES)) {
+                        File[] imgFiles = (File[]) data.getSerializableExtra(PhotoTakerActivity.RESULT_IMAGE_FILES);
+                        //TODO go to food drawing activity with these file, or you can find them with ImageDirectoryManager.getImageDirectory().list()
+                        //TODO delete files after they are not needed anymore. To do this use ImageDirectoryManager.clearImageDirectory()
+                    }
+
+                    // This is temporary, for Spring 2 demo
+                    newFood.setVolume(data.getDoubleExtra(PhotoTakerActivity.RESULT_VOLUME, -1.0));
+                }
+                break;
+            default:
+                break;
         }
     }
 
