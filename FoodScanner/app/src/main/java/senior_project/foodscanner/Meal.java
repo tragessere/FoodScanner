@@ -37,10 +37,9 @@ public class Meal extends Nutritious implements Serializable {
         }
     }
 
-    //Database ID
-    private long id;
 
     // Data Management
+    private long id;    //Database ID
     private boolean isChanged = true;// Flag that is set to false whenever meal details are changed. Must be manually set to false when meal is uploaded to backend.
     private boolean isNew; // Flag determining whether or not the Meal was just created.
 
@@ -57,12 +56,13 @@ public class Meal extends Nutritious implements Serializable {
         setIsNew(true);
     }
 
-    public Meal(long id, long date, MealType type, ArrayList<FoodItem> foodItems) {
+    public Meal(long id, long date, String type, ArrayList<FoodItem> foodItems, boolean isChanged, boolean isNew) {
         this.id = id;
-        this.date = (GregorianCalendar) GregorianCalendar.getInstance();
-        this.date.setTimeInMillis(date);
-        this.type = type;
+        this.date = date;
+        this.type = MealType.valueOf(type);
         food = foodItems;
+        this.isChanged = isChanged;
+        this.isNew = isNew;
         setIsNew(false);
     }
 
@@ -148,23 +148,15 @@ public class Meal extends Nutritious implements Serializable {
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
         cv.put(SQLHelper.COLUMN_MEAL_TYPE, type.toString());
-        cv.put(SQLHelper.COLUMN_TIME, date.getTimeInMillis());
+        cv.put(SQLHelper.COLUMN_TIME, date);
         cv.put(SQLHelper.COLUMN_FOOD_LIST, SQLQueryHelper.foodListToBytes(food));
+        cv.put(SQLHelper.COLUMN_NEW, isNew);
+        cv.put(SQLHelper.COLUMN_CHANGED, isChanged);
         return cv;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(": id=");
-        sb.append(id);
-        sb.append(", type=");
-        sb.append(type);
-        sb.append(", time=");
-        sb.append(date.toString());
-        sb.append(", food item count=");
-        sb.append(food.size());
-        return sb.toString();
+        return getClass().getSimpleName() + ": id=" + id + ", type=" + type + ", time=" + date + ", food item count=" + food.size();
     }
 }

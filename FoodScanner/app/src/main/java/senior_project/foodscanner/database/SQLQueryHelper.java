@@ -2,7 +2,6 @@ package senior_project.foodscanner.database;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -11,7 +10,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import senior_project.foodscanner.FoodItem;
@@ -23,6 +21,11 @@ import senior_project.foodscanner.Meal;
 public class SQLQueryHelper {
 
 	private SQLQueryHelper() { }
+
+	private static final String[] ALL_COLUMNS = new String[] {
+			SQLHelper.COLUMN_ID, SQLHelper.COLUMN_MEAL_TYPE,
+			SQLHelper.COLUMN_TIME, SQLHelper.COLUMN_FOOD_LIST,
+			SQLHelper.COLUMN_NEW, SQLHelper.COLUMN_CHANGED};
 
 	/**
 	 * Insert a meal object into the database
@@ -38,6 +41,12 @@ public class SQLQueryHelper {
 		return meal.getId();
 	}
 
+	/**
+	 * Update an existing <code>Meal</code> object in the database. The <code>Meal</code> should
+	 * have a valid ID set.
+	 *
+	 * @param meal	<code>Meal</code> object to update
+	 */
 	public static void updateMeal(Meal meal) {
 		SQLiteDatabase db = SQLHelper.getInstance().getWritableDatabase();
 
@@ -54,14 +63,12 @@ public class SQLQueryHelper {
 	public static Meal getMeal(long mealId) {
 		SQLiteDatabase db = SQLHelper.getInstance().getReadableDatabase();
 
-		Cursor c = db.query(SQLHelper.TABLE_MEALS, new String[]{SQLHelper.COLUMN_ID, SQLHelper.COLUMN_MEAL_TYPE, SQLHelper.COLUMN_TIME, SQLHelper.COLUMN_FOOD_LIST},
+		Cursor c = db.query(SQLHelper.TABLE_MEALS, ALL_COLUMNS,
 				SQLHelper.COLUMN_ID + " = ?", new String[]{String.valueOf(mealId)},
 				null, null, null);
 
 		if(c != null && c.moveToFirst()) {
-			Meal.MealType type = Meal.MealType.valueOf(c.getString(1));
-
-			Meal meal = new Meal(c.getLong(0), c.getLong(2), type, (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)));
+			Meal meal = new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5) == 1);
 
 			c.close();
 
@@ -101,13 +108,40 @@ public class SQLQueryHelper {
 		List<Meal> mealList = new ArrayList<>();
 		SQLiteDatabase db = SQLHelper.getInstance().getReadableDatabase();
 
-		Cursor c = db.query(SQLHelper.TABLE_MEALS, new String[]{SQLHelper.COLUMN_ID, SQLHelper.COLUMN_MEAL_TYPE, SQLHelper.COLUMN_TIME, SQLHelper.COLUMN_FOOD_LIST},
+		Cursor c = db.query(SQLHelper.TABLE_MEALS, ALL_COLUMNS,
 				SQLHelper.COLUMN_TIME + " >= " + startDay.getTimeInMillis() + " AND " + SQLHelper.COLUMN_TIME + " <= " + endDay.getTimeInMillis(),
 				null, null, null, SQLHelper.COLUMN_TIME);
 
 		if(c != null && c.moveToFirst()) {
 			while(!c.isAfterLast()) {
-				mealList.add(new Meal(c.getLong(0), c.getLong(2), Meal.MealType.valueOf(c.getString(1)), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3))));
+				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5) == 1));
+				c.moveToNext();
+			}
+			c.close();
+
+			return mealList;
+		} else if(c != null) {
+			c.close();
+			return mealList;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get all of the meals that have not been uploaded to the backend.
+	 *
+	 * @return List of <code>Meal</code> objects
+	 */
+	public static List<Meal> getChangedMeals() {
+		List<Meal> mealList = new ArrayList<>();
+		SQLiteDatabase db = SQLHelper.getInstance().getReadableDatabase();
+
+		Cursor c = db.query(SQLHelper.TABLE_MEALS, ALL_COLUMNS, SQLHelper.COLUMN_CHANGED + " = 1", null, null, null, SQLHelper.COLUMN_TIME);
+
+		if(c != null && c.moveToFirst()) {
+			while(!c.isAfterLast()) {
+				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5) == 1));
 				c.moveToNext();
 			}
 			c.close();
