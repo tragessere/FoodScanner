@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Map;
 
 import senior_project.foodscanner.FoodItem;
@@ -87,13 +89,21 @@ public class FoodInfoFragment extends DialogFragment {
         }
 
         // TEMP: Display whether volume, mass, or neither need to be calculated.
-        info.append("<br><b>Calculate:</b> ");
-        if (food.needCalculateMass()) {
-            info.append("mass");
-        } else if(food.needCalculateVol()) {
-            info.append("volume");
-        } else {
-            info.append("nothing");
+//        info.append("<br><b>Calculate:</b> ");
+//        if (food.needCalculateMass()) {
+//            info.append("mass");
+//        } else if(food.needCalculateVol()) {
+//            info.append("volume");
+//        } else {
+//            info.append("nothing");
+//        }
+
+        // TEMP: Display volume
+        if (food.needCalculateVol() && food.getVolume() != 0.0) {
+            info.append("<br><b>Volume:</b> ");
+            NumberFormat formatter = new DecimalFormat("#0.00");
+            info.append(formatter.format(food.getVolume()) +
+                    " in<sup><small><small>2</small></small></sup>");
         }
 
         Spanned nutritionInfo = Html.fromHtml(info.toString());
@@ -108,7 +118,7 @@ public class FoodInfoFragment extends DialogFragment {
                             mListener.onDialogPositiveClick(FoodInfoFragment.this);
                         }
                     })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             mListener.onDialogNeutralClick(FoodInfoFragment.this);
                         }

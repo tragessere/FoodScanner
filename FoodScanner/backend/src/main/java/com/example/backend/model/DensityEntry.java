@@ -8,10 +8,7 @@ import com.googlecode.objectify.annotation.Index;
  * Created by mlenarto on 11/3/15.
  */
 @Entity
-public class FoodItem {
-
-    // TEMPORARY PLACEHOLDER
-    //TODO: IMPLEMENT REAL FOODITEM OBJECT
+public class DensityEntry {
 
     @Id
     private Long id;
@@ -29,9 +26,9 @@ public class FoodItem {
     public void setName(String name) { this.name = name; }
     public void setDensity(Float density) { this.density = density; }
 
-    public FoodItem() {}
+    public DensityEntry() {}
 
-    public FoodItem(String name, Float density) {
+    public DensityEntry(String name, Float density) {
         this.name = name;
         this.density = density;
     }

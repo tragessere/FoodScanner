@@ -37,7 +37,7 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
-                    android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"/>
+                    android:src="@drawable/arrow_left"/>
 
                 <Button
                     android:id="@+id/button_calendar"
@@ -59,17 +59,10 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
                     android:focusableInTouchMode="false"
-                    android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"/>
+                    android:src="@drawable/arrow_right"/>
 
             </RelativeLayout>
 
-
-            <CalendarView
-                android:id="@+id/calendarView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#e8e8e8"
-                android:visibility="visible"/>
 
         </LinearLayout>
 
@@ -89,7 +82,8 @@
             android:layout_alignParentStart="true"
             android:layout_gravity="center_horizontal"
             android:orientation="horizontal"
-            >
+            android:background="#ebebeb"
+            android:padding="3dp">
 
             <TextView
                 android:id="@+id/textView_total"
@@ -124,5 +118,6 @@
                 android:text="Day: 0 Cal"/>
 
         </LinearLayout>
+
     </RelativeLayout>
 </RelativeLayout>

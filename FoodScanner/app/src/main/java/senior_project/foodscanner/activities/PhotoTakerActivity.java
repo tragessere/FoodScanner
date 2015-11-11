@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,13 +49,15 @@ import senior_project.foodscanner.ui.components.ImageBrowser;
 public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialogFragment.ErrorDialogListener, ImageBrowser.ActionButtonListener, ImageBrowser.FinishButtonListener {
     public static final String EXTRA_PIC_NAMES = "pic_names";
     public static final String RESULT_IMAGE_FILES = "image_files";
-
+    public static final String RESULT_VOLUME = "volume";
     private static final int RESULT_CAMERA = 0;
+    public static final int RESULT_FOOD_SCANNER = 1;
     private static final String SAVEINST_FILES = "picFiles";
     private static final String SAVEINST_INDEX = "current_index";
     private String[] picNames = {"Picture"};
     private ImageBrowser picBrowser;
     private File[] picFiles;
+    private double volume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +69,7 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
         picFiles = new File[picNames.length];
 
         setContentView(R.layout.activity_photo_taker);
-        Bitmap defbmp = BitmapFactory.decodeResource(getResources(), R.drawable.camera512);
+        Bitmap defbmp = BitmapFactory.decodeResource(getResources(), R.drawable.camera);
         Drawable defPic = new BitmapDrawable(getResources(), defbmp);
         picBrowser = new ImageBrowser(this, picNames, defPic);
         picBrowser.setActionButtonListener(this);
@@ -106,23 +109,21 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_photo_taker, menu);
-        return true;
-    }
-
-    @Override
     public void onActionButton() {
         openCamera();
     }
 
     @Override
     public void onFinishButton() {
+        //put the pic files as a return.
         Intent intent = new Intent();
         intent.putExtra(RESULT_IMAGE_FILES, picFiles);
-        setResult(Activity.RESULT_OK, intent);
-        finish();
+
+        //put the volume as a return result
+        Intent paintingIntent = new Intent(this, PaintingActivity.class);
+        startActivityForResult(paintingIntent, RESULT_FOOD_SCANNER);
+        intent.putExtra(RESULT_VOLUME, volume);
+        setResult(RESULT_OK, intent);
     }
 
 
@@ -183,6 +184,15 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
                     }
                 }
                 break;
+            case RESULT_FOOD_SCANNER:
+                if(resultCode == RESULT_OK) {
+                    Intent intent = new Intent();
+                    intent.putExtra(RESULT_VOLUME, data.getDoubleExtra(RESULT_VOLUME, -1.0));
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
+                break;
+
             default:
                 break;
         }

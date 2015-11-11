@@ -3,6 +3,7 @@ package senior_project.foodscanner;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.Set;
 /**
  * Represents a single item of food.
  */
-public class FoodItem implements Serializable {
+public class FoodItem extends Nutritious implements Serializable {
 
     private Map<String, Double> fields;  //holds all nutrition info
+
+    public static final String KEY_CAL = "Calories";
 
     private String name;
     private String brand;
@@ -26,8 +29,14 @@ public class FoodItem implements Serializable {
     private Set<String> massUnits;
     private int maxMassLen;
     private int maxVolLen;
+    private Density density;
     private List<Portion> portions;  //list of individual items, e.g. 3 pieces of chicken that we
-                                     //want to calculate individually will each have a portion.
+    //want to calculate individually will each have a portion.
+    private double numServings;  //number of servings user has entered, after calculation.
+
+    private double volume; //this is temporary, for Spring 2 demo
+
+    private static Map<String, Double> densities = null;
 
     public FoodItem() {
         //LinkedHashMap used to ensure insertion order is maintained, for iteration.
@@ -41,27 +50,34 @@ public class FoodItem implements Serializable {
         //'s' at the end of the word, if necessary.
 
         //Create list of volume units, and find max length
-        String[] vol_values = new String[] { "cup", "quart", "pt", "pint", "ml", "milliliter",
+        String[] vol_values = new String[]{"cup", "quart", "pt", "pint", "ml", "milliliter",
                 "millilitre", "l", "liter", "litre", "tsp", "teaspoon", "tbsp", "tbl",
-                "tablespoon" };
+                "tablespoon"};
         maxVolLen = Integer.MIN_VALUE;
-        for (String s : vol_values) {
-            if (s.length() > maxVolLen) {
+        for(String s : vol_values) {
+            if(s.length() > maxVolLen) {
                 maxVolLen = s.length();
             }
         }
         volUnits = new HashSet<>(Arrays.asList(vol_values));
 
         //Create list of mass units, and find max length
-        String[] mass_values = new String[] { "oz", "ounce", "fl oz", "fl. oz", "fluid ounce", "g",
-                "gram", "mg", "milligram" };
+        String[] mass_values = new String[]{"oz", "ounce", "fl oz", "fl. oz", "fluid ounce", "g",
+                "gram", "mg", "milligram"};
         maxMassLen = Integer.MIN_VALUE;
-        for (String s : mass_values) {
-            if (s.length() > maxMassLen) {
+        for(String s : mass_values) {
+            if(s.length() > maxMassLen) {
                 maxMassLen = s.length();
             }
         }
         massUnits = new HashSet<>(Arrays.asList(mass_values));
+
+        density = new Density();
+        density.value = 0.0;  //for clarity
+
+        numServings = 0.0;  //for clarity
+
+        volume = 0.0;   //temp, for clarity
     }
 
     public void setField(String field, Double value) {
@@ -112,8 +128,8 @@ public class FoodItem implements Serializable {
     public void setServingSizeUnit(String servingSizeUnit) {
         //remove last '.' from unit, if necessary
         String formattedUnit = servingSizeUnit;
-        if (formattedUnit.charAt(formattedUnit.length()-1) == '.') {
-            formattedUnit = formattedUnit.substring(0, formattedUnit.length()-1);
+        if(formattedUnit.charAt(formattedUnit.length() - 1) == '.') {
+            formattedUnit = formattedUnit.substring(0, formattedUnit.length() - 1);
         }
 
         this.servingSizeUnit = formattedUnit;
@@ -121,15 +137,15 @@ public class FoodItem implements Serializable {
         //check if volume, mass, or neither is needed
 
         formattedUnit = formattedUnit.toLowerCase();
-        if (formattedUnit.charAt(formattedUnit.length()-1) == 's') {
+        if(formattedUnit.charAt(formattedUnit.length() - 1) == 's') {
             //remove last 's' for comparison
-            formattedUnit = formattedUnit.substring(0, formattedUnit.length()-1);
+            formattedUnit = formattedUnit.substring(0, formattedUnit.length() - 1);
         }
 
-        if (massUnits.contains(formattedUnit)) {
+        if(massUnits.contains(formattedUnit)) {
             setCalculateVol(true);
             setCalculateMass(true);
-        } else if (volUnits.contains(formattedUnit)) {
+        } else if(volUnits.contains(formattedUnit)) {
             setCalculateVol(true);
             setCalculateMass(false);
         } else {
@@ -137,34 +153,34 @@ public class FoodItem implements Serializable {
             boolean stopCheck = false;
 
             //check that substring is not in massUnits
-            for (int i = 1; i <= maxMassLen; i++) {
-                if (i > formattedUnit.length()) {
+            for(int i = 1; i <= maxMassLen; i++) {
+                if(i > formattedUnit.length()) {
                     break;
                 }
-                if (massUnits.contains(formattedUnit.substring(0, i))) {
+                if(massUnits.contains(formattedUnit.substring(0, i))) {
                     stopCheck = true;
                     setCalculateVol(true);
                     setCalculateMass(true);
                     break;
                 }
             }
-            if (stopCheck) {
+            if(stopCheck) {
                 return;
             }
 
             //check that substring is not in volUnits
-            for (int i = 1; i <= maxVolLen; i++) {
-                if (i > formattedUnit.length()) {
+            for(int i = 1; i <= maxVolLen; i++) {
+                if(i > formattedUnit.length()) {
                     break;
                 }
-                if (volUnits.contains(formattedUnit.substring(0, i))) {
+                if(volUnits.contains(formattedUnit.substring(0, i))) {
                     stopCheck = true;
                     setCalculateVol(true);
                     setCalculateMass(false);
                     break;
                 }
             }
-            if (stopCheck) {
+            if(stopCheck) {
                 return;
             }
 
@@ -175,13 +191,13 @@ public class FoodItem implements Serializable {
     }
 
     public boolean needCalculateVol() {
-        if (!calculateVol) {
+        if(!calculateVol) {
             return false;
         }
 
         // Check if all portions have been calculated
         for(Portion p : portions) {
-            if (p.getVolume() == 0.0) {
+            if(p.getVolume() == 0.0) {
                 // Has not yet been calculated
                 return true;
             }
@@ -196,12 +212,12 @@ public class FoodItem implements Serializable {
     }
 
     public boolean needCalculateMass() {
-        if (!calculateMass) {
+        if(!calculateMass) {
             return false;
         }
         // Check if all portions have been calculated
         for(Portion p : portions) {
-            if (p.getMass() == 0.0) {
+            if(p.getMass() == 0.0) {
                 // Has not yet been calculated
                 return true;
             }
@@ -215,6 +231,22 @@ public class FoodItem implements Serializable {
         this.calculateMass = calculateMass;
     }
 
+    public boolean needDisplayMass() {
+        return calculateMass;
+    }
+
+    public boolean needDisplayVolume() {
+        return calculateVol;
+    }
+
+    public double getNumServings() {
+        return numServings;
+    }
+
+    public void setNumServings(double numServings) {
+        this.numServings = numServings;
+    }
+
     //endregion
 
     @Override
@@ -224,10 +256,10 @@ public class FoodItem implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (getClass() != o.getClass()) {
+        if(getClass() != o.getClass()) {
             return false;
         }
-        FoodItem fi = (FoodItem)o;
+        FoodItem fi = (FoodItem) o;
         if(fi.getName().equals(this.getName()) &&
                 fi.getBrand().equals(this.getBrand()) &&
                 fi.getServingSizeUnit().equals(this.getServingSizeUnit())) {
@@ -292,16 +324,16 @@ public class FoodItem implements Serializable {
         portions = newPortions;
     }
 
-    //returns a set, which can be iterated through
-    public Set<Map.Entry<String, Double>> getTotalNutrition() {
+    @Override
+    public Map<String, Double> getNutrition() {
+        Map<String, Double> nutr = new LinkedHashMap<>(fields);
         //TODO: create & return total nutrition info, based on calculations
-        //For now, simply return nutrition info set, same as getSet()
-        return fields.entrySet();
+        return nutr;
     }
 
     public double getTotalMass() {
         double totalMass = 0.0;
-        for (Portion p : portions) {
+        for(Portion p : portions) {
             totalMass += p.getMass();
         }
         return totalMass;
@@ -309,11 +341,81 @@ public class FoodItem implements Serializable {
 
     public double getTotalVolume() {
         double totalVolume = 0.0;
-        for (Portion p : portions) {
+        for(Portion p : portions) {
             totalVolume += p.getVolume();
         }
         return totalVolume;
     }
 
+    public void calculateNumServings() {
+        //TODO: add together all portions to get total number of servings
+    }
 
+    private class Density implements Serializable {
+        private double value;
+        private String name;
+        private String id;
+    }
+
+    public double getDensity() {
+        return density.value;
+    }
+
+    public void setDensity(double value) {
+        this.density.value = value;
+    }
+
+    public String getDensityName() {
+        return density.name;
+    }
+
+    public void setDensityName(String name) {
+        density.name = name;
+    }
+
+    public String getDensityId() {
+        return density.id;
+    }
+
+    public void setDensityId(String id) {
+        density.id = id;
+    }
+
+
+    // Methods for saving & retrieving densities from database (may be moved)
+
+    public static void addDensity(String name, Double value) {
+        if (densities == null) {
+            densities = new HashMap<>();
+        }
+        densities.put(name, value);
+    }
+
+    public static String[] getDensityKeys() {
+        if (densities == null) {
+            return null;
+        } else {
+            Set<String> densitySet = densities.keySet();
+            String[] retArray = densitySet.toArray(new String[densitySet.size()]);
+            return retArray;
+        }
+    }
+
+    public static Double getDensityValue(String name) {
+        if (densities == null) {
+            return null;
+        } else {
+            return densities.get(name);
+        }
+    }
+
+    // This is temporary, for Spring 2 demo
+
+    public double getVolume() {
+        return volume;
+    }
+
+    public void setVolume(double volume) {
+        this.volume = volume;
+    }
 }

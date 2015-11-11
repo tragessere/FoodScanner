@@ -4,10 +4,8 @@ import android.content.ContentValues;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import senior_project.foodscanner.database.SQLHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
@@ -15,26 +13,26 @@ import senior_project.foodscanner.database.SQLQueryHelper;
 /**
  * This class represents a meal.
  */
-public class Meal implements Serializable {
+public class Meal extends Nutritious implements Serializable {
 
     private static final long serialVersionUID = 418772005483570552L;
 
-    public enum MealType{
-        BREAKFAST ("Breakfast"),
-        BRUNCH ("Brunch"),
-        LUNCH ("Lunch"),
-        SNACK ("Snack"),
-        DINNER ("Dinner"),
-        DESSERT ("Dessert");
+    public enum MealType {
+        BREAKFAST("Breakfast"),
+        BRUNCH("Brunch"),
+        LUNCH("Lunch"),
+        SNACK("Snack"),
+        DINNER("Dinner"),
+        DESSERT("Dessert");
 
 
         private final String name;
 
-        MealType(String name){
+        MealType(String name) {
             this.name = name;
         }
 
-        public String getName(){
+        public String getName() {
             return name;
         }
     }
@@ -42,13 +40,16 @@ public class Meal implements Serializable {
     //Database ID
     private long id;
 
+    // Data Management
+    private boolean isChanged = true;// Flag that is set to false whenever meal details are changed. Must be manually set to false when meal is uploaded to backend.
+    private boolean isNew; // Flag determining whether or not the Meal was just created.
+
     // Meal Details
     private MealType type;
-    private GregorianCalendar date;
+    private long date;
     private List<FoodItem> food;
-    private boolean isNew;
 
-    public Meal(GregorianCalendar date, MealType type){
+    public Meal(long date, MealType type) {
         id = -1;
         this.date = date;
         this.type = type;
@@ -72,23 +73,26 @@ public class Meal implements Serializable {
     public long getId() {
         return id;
     }
-
-    public void setType(MealType type){
-        this.type = type;
+    
+    public void setType(MealType type) {
+        if(!this.type.equals(type)) {
+            this.type = type;
+            setIsChanged(true);
+        }
     }
 
-    public MealType getType(){
+    public MealType getType() {
         return type;
     }
 
-    public GregorianCalendar getDate(){
+    public long getDate() {
         return date;
     }
 
-    public void addFoodItem(FoodItem item){
+    public void addFoodItem(FoodItem item) {
         // Check if food item has already been added
-        for (FoodItem fi : food) {
-            if (fi.equals(item)) {
+        for(FoodItem fi : food) {
+            if(fi.equals(item)) {
                 // Add one more portion of food item
                 fi.addPortion();
                 return;
@@ -97,10 +101,12 @@ public class Meal implements Serializable {
 
         // Food item hasn't already been added
         food.add(item);
+        setIsChanged(true);
     }
 
     public void removeFoodItem(FoodItem item) {
         food.remove(item);
+        setIsChanged(true);
     }
 
     public FoodItem getFoodItem(int index) {
@@ -113,8 +119,9 @@ public class Meal implements Serializable {
 
     public void replaceFoodItem(FoodItem oldFood, FoodItem newFood) {
         newFood.replacePortions(oldFood.getPortions());
-        this.addFoodItem(newFood);
         this.removeFoodItem(oldFood);
+        this.addFoodItem(newFood);
+        setIsChanged(true);
     }
 
     public boolean isNew() {
@@ -125,11 +132,17 @@ public class Meal implements Serializable {
         this.isNew = isNew;
     }
 
-    //returns a set, which can be iterated through
-    public Set<Map.Entry<String, Double>> getTotalNutrition() {
-        //TODO: create & return total nutrition info, based on calculations of all FoodItems
-        //For now, simply return null
-        return null;
+    public boolean isChanged() {
+        return isChanged;
+    }
+
+    public void setIsChanged(boolean isChanged) {
+        this.isChanged = isChanged;
+    }
+
+    @Override
+    public Map<String, Double> getNutrition() {
+        return calculateTotalNutrition(food);
     }
 
     public ContentValues toContentValues() {

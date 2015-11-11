@@ -43,6 +43,8 @@
         android:layout_below="@+id/spinner_meal"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_above="@+id/button_foodscanner" />
+        android:layout_above="@+id/button_foodscanner"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp" />
 
 </RelativeLayout>
