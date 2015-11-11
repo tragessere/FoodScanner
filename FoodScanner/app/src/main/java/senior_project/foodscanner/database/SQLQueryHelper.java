@@ -1,5 +1,6 @@
 package senior_project.foodscanner.database;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -40,6 +41,43 @@ public class SQLQueryHelper {
 
 		return meal.getId();
 	}
+
+	
+	/**
+	 * Insert a list of meals into the database at one time
+	 *
+	 * @param meals	List of <code>Meal</code> objects to insert
+	 *
+	 * @return	number of rows inserted into the database
+	 */
+	public static int insertMeals(List<Meal> meals) {
+		ContentValues[] cvs = new ContentValues[meals.size()];
+
+		for(int i = 0; i < meals.size(); i++) {
+			cvs[i] = meals.get(i).toContentValues();
+		}
+
+		return SQLHelper.bulkInsert(SQLHelper.TABLE_MEALS, cvs);
+	}
+
+
+	/**
+	 * Insert an array of meals into the database at one time
+	 *
+	 * @param meals	Array of <code>Meal</code> objects to insert
+	 *
+	 * @return	number of rows inserted into the database
+	 */
+	public static int insertMeals(Meal[] meals) {
+		ContentValues[] cvs = new ContentValues[meals.length];
+
+		for(int i = 0; i < meals.length; i++) {
+			cvs[i] = meals[i].toContentValues();
+		}
+
+		return SQLHelper.bulkInsert(SQLHelper.TABLE_MEALS, cvs);
+	}
+
 
 	/**
 	 * Update an existing <code>Meal</code> object in the database. The <code>Meal</code> should
@@ -128,6 +166,7 @@ public class SQLQueryHelper {
 		return null;
 	}
 
+
 	/**
 	 * Get all of the meals that have not been uploaded to the backend.
 	 *
@@ -154,6 +193,7 @@ public class SQLQueryHelper {
 
 		return null;
 	}
+
 
 	public static byte[] foodListToBytes(List<FoodItem> foodItems) {
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();

@@ -84,23 +84,27 @@ public class SQLHelper extends SQLiteOpenHelper {
 	 * @param tableName		Name of the table where the records will be inserted
 	 * @param vals			Array of ContentValues to be inserted
 	 */
-	public static void bulkInsert(@NonNull String tableName, @NonNull ContentValues[] vals) {
+	public static int bulkInsert(@NonNull String tableName, @NonNull ContentValues[] vals) {
 		if(tableName == null)
 			throw new NullPointerException("SQLHelper:bulkInsert() - table name cannot be null");
 		if(vals == null)
 			throw new NullPointerException("SQLHelper:bulkInsert() - ContentValues cannot be null");
 
+		int inserted = 0;
 
 		SQLiteDatabase mDb = mDbHelper.getWritableDatabase();
 		mDb.beginTransaction();
 		try {
 			for (ContentValues val : vals) {
-				mDb.insert(tableName, null, val);
+				mDb.insertWithOnConflict(tableName, null, val, SQLiteDatabase.CONFLICT_REPLACE);
+				inserted++;
 			}
 			mDb.setTransactionSuccessful();
 		} finally {
 			mDb.endTransaction();
 		}
+
+		return inserted;
 	}
 
 
