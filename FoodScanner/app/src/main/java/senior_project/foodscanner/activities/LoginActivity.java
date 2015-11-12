@@ -3,12 +3,14 @@ package senior_project.foodscanner.activities;
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -22,6 +24,7 @@ import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLHelper;
+import senior_project.foodscanner.database.SQLQueryHelper;
 
 /**
  * Created by Evan on 9/16/2015.
@@ -128,7 +131,25 @@ public class LoginActivity extends AppCompatActivity {
 
 	}
 
-	public static void logout(AppCompatActivity activity) {
+	public static void logout(final AppCompatActivity activity) {
+		if(SQLQueryHelper.getChangedMeals().size() > 0) {
+			new AlertDialog.Builder(activity)
+					.setTitle(activity.getString(R.string.action_logout_unsynced_warning_title))
+					.setMessage(activity.getString(R.string.action_logout_unsynced_warning_subtitle))
+					.setPositiveButton(activity.getString(R.string.delete_button), new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							finishLogout(activity);
+						}
+					})
+					.setNegativeButton(activity.getString(android.R.string.cancel).toUpperCase(), null)
+					.show();
+		} else {
+			finishLogout(activity);
+		}
+	}
+
+	private static void finishLogout(AppCompatActivity activity) {
 		SQLHelper.clear();
 		EndpointsHelper.clearInstance();
 		SharedPreferences.Editor editor = activity.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
