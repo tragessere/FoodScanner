@@ -165,7 +165,7 @@ public class SQLQueryHelper {
 			return mealList;
 		}
 
-		return null;
+		return mealList;
 	}
 
 
@@ -193,7 +193,7 @@ public class SQLQueryHelper {
 			return mealList;
 		}
 
-		return null;
+		return mealList;
 	}
 
 	/**
