@@ -32,12 +32,13 @@ public class SQLQueryHelper {
 	 * Insert a meal object into the database
 	 *
 	 * @param meal	<code>Meal</code> object to insert
+	 *
 	 * @return		Id of the newly inserted <code>Meal</code>
 	 */
 	public static long insertMeal(Meal meal) {
 		SQLiteDatabase db = SQLHelper.getInstance().getWritableDatabase();
 
-		meal.setId(db.insert(SQLHelper.TABLE_MEALS, null, meal.toContentValues()));
+		meal.setId(db.insertWithOnConflict(SQLHelper.TABLE_MEALS, null, meal.toContentValues(), SQLiteDatabase.CONFLICT_REPLACE));
 
 		return meal.getId();
 	}
@@ -96,6 +97,7 @@ public class SQLQueryHelper {
 	 * Retrieve a <code>Meal</code> object from the database
 	 *
 	 * @param mealId	Database ID representing the desired <code>Meal</code> object
+	 *
 	 * @return			Meal object from the database or null if the ID is not found
 	 */
 	public static Meal getMeal(long mealId) {
@@ -192,6 +194,39 @@ public class SQLQueryHelper {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Delete a meal from the database
+	 *
+	 * @param meal	Meal to be deleted
+	 */
+	public static void deleteMeal(Meal meal) {
+		SQLHelper.getInstance().getWritableDatabase().delete(SQLHelper.TABLE_MEALS, SQLHelper.COLUMN_ID + " = " + meal.getId(), null);
+	}
+
+
+	/**
+	 * Delete several meals from the database at once
+	 *
+	 * @param meals	<code>List</code> of meals to be deleted.
+	 */
+	public static int deleteMeals(List<Meal> meals) {
+		int deleted = 0;
+		SQLiteDatabase mDb = SQLHelper.getInstance().getWritableDatabase();
+
+		mDb.beginTransaction();
+		try {
+			for (Meal meal : meals) {
+				mDb.delete(SQLHelper.TABLE_MEALS, SQLHelper.COLUMN_ID + " = " + meal.getId(), null);
+				deleted++;
+			}
+			mDb.setTransactionSuccessful();
+		} finally {
+			mDb.endTransaction();
+		}
+
+		return deleted;
 	}
 
 
