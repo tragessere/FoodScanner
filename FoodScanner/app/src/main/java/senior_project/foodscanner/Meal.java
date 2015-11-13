@@ -1,9 +1,14 @@
 package senior_project.foodscanner;
 
+import android.content.ContentValues;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import senior_project.foodscanner.database.SQLHelper;
+import senior_project.foodscanner.database.SQLQueryHelper;
 
 /**
  * This class represents a meal.
@@ -32,7 +37,9 @@ public class Meal extends Nutritious implements Serializable {
         }
     }
 
+
     // Data Management
+    private long id;    //Database ID
     private boolean isChanged = true;// Flag that is set to false whenever meal details are changed. Must be manually set to false when meal is uploaded to backend.
     private boolean isNew; // Flag determining whether or not the Meal was just created.
 
@@ -42,12 +49,31 @@ public class Meal extends Nutritious implements Serializable {
     private List<FoodItem> food;
 
     public Meal(long date, MealType type) {
+        id = -1;
         this.date = date;
         this.type = type;
         food = new ArrayList<>();
         setIsNew(true);
     }
 
+    public Meal(long id, long date, String type, ArrayList<FoodItem> foodItems, boolean isChanged, boolean isNew) {
+        this.id = id;
+        this.date = date;
+        this.type = MealType.valueOf(type);
+        food = foodItems;
+        this.isChanged = isChanged;
+        this.isNew = isNew;
+        setIsNew(false);
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public long getId() {
+        return id;
+    }
+    
     public void setType(MealType type) {
         if(!this.type.equals(type)) {
             this.type = type;
@@ -117,5 +143,20 @@ public class Meal extends Nutritious implements Serializable {
     @Override
     public Map<String, Double> getNutrition() {
         return calculateTotalNutrition(food);
+    }
+
+    public ContentValues toContentValues() {
+        ContentValues cv = new ContentValues();
+        cv.put(SQLHelper.COLUMN_MEAL_TYPE, type.toString());
+        cv.put(SQLHelper.COLUMN_TIME, date);
+        cv.put(SQLHelper.COLUMN_FOOD_LIST, SQLQueryHelper.foodListToBytes(food));
+        cv.put(SQLHelper.COLUMN_NEW, isNew);
+        cv.put(SQLHelper.COLUMN_CHANGED, isChanged);
+        return cv;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + ": id=" + id + ", type=" + type + ", time=" + date + ", food item count=" + food.size();
     }
 }

@@ -15,7 +15,7 @@ public class SQLHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "foodScanner.db";
 	//Update database version whenever changing tables or columns
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 	private static final String DROP = "DROP TABLE IF EXISTS ";
 
 	public static final String TABLE_MEALS = "table_meals";
@@ -26,30 +26,35 @@ public class SQLHelper extends SQLiteOpenHelper {
 	public static final String COLUMN_ID = "_id";
 
 
+	public static final String COLUMN_MEAL_TYPE = "meal_type";
 	public static final String COLUMN_TIME = "time";
-	public static final String COLUMN_IMAGE_TOP_PATH = "image_top_path";
-	public static final String COLUMN_IMAGE_SIDE_PATH = "image_side_path";
-	public static final String COLUMN_FINISHED = "finished";
+	public static final String COLUMN_FOOD_LIST = "food_list";
+	public static final String COLUMN_NEW = "new";
+	public static final String COLUMN_CHANGED = "finished";
 
 	private static final String TABLE_MEALS_CREATE = "CREATE TABLE IF NOT EXISTS "
 			+ TABLE_MEALS + "("
 			+ COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+			+ COLUMN_MEAL_TYPE + " TEXT, "
 			+ COLUMN_TIME + " INT, "
-			+ COLUMN_IMAGE_TOP_PATH + " TEXT, "
-			+ COLUMN_IMAGE_SIDE_PATH + " TEXT, "
-			+ COLUMN_FINISHED + " INT);";
+			+ COLUMN_FOOD_LIST + " BLOB, "
+			+ COLUMN_NEW + " INT, "
+			+ COLUMN_CHANGED + " INT);";
 
 
 	public static final String COLUMN_MEAL_ID = "meal_id";
 	public static final String COLUMN_FOOD_NAME = "food_name";
-	public static final String COLUMN_VOLUME = "volume";
+	public static final String COLUMN_BRAND = "brand";
+	public static final String COLUMN_SERVING_SIZE = "serving_size";
+	public static final String COLUMN_SERVING_UNIT = "serving_size_unit";
 
 	private static final String TABLE_FOOD_ITEM_CREATE = "CREATE TABLE IF NOT EXISTS "
 			+ TABLE_FOOD_ITEMS + "("
 			+ COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
 			+ "FOREIGN KEY(" + COLUMN_MEAL_ID + ") REFERENCES " + TABLE_MEALS + "(" + COLUMN_ID + "), "
 			+ COLUMN_FOOD_NAME + " TEXT, "
-			+ COLUMN_VOLUME + " INT);";
+			+ COLUMN_BRAND + " TEXT, "
+			+ COLUMN_SERVING_SIZE + " REAL);";
 
 
 
@@ -57,10 +62,18 @@ public class SQLHelper extends SQLiteOpenHelper {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
-	public static SQLHelper getInstance(Context context) {
+	public static void initialize(Context context) {
 		if(mDbHelper == null)
 			mDbHelper = new SQLHelper(context.getApplicationContext());
+	}
 
+	public static void clear() {
+		mDbHelper.clearDatabase(mDbHelper.getWritableDatabase());
+		mDbHelper.close();
+		mDbHelper = null;
+	}
+
+	public static SQLHelper getInstance() {
 		return mDbHelper;
 	}
 
@@ -71,30 +84,34 @@ public class SQLHelper extends SQLiteOpenHelper {
 	 * @param tableName		Name of the table where the records will be inserted
 	 * @param vals			Array of ContentValues to be inserted
 	 */
-	public static void bulkInsert(@NonNull String tableName, @NonNull ContentValues[] vals) {
+	public static int bulkInsert(@NonNull String tableName, @NonNull ContentValues[] vals) {
 		if(tableName == null)
 			throw new NullPointerException("SQLHelper:bulkInsert() - table name cannot be null");
 		if(vals == null)
 			throw new NullPointerException("SQLHelper:bulkInsert() - ContentValues cannot be null");
 
+		int inserted = 0;
 
 		SQLiteDatabase mDb = mDbHelper.getWritableDatabase();
 		mDb.beginTransaction();
 		try {
 			for (ContentValues val : vals) {
-				mDb.insert(tableName, null, val);
+				mDb.insertWithOnConflict(tableName, null, val, SQLiteDatabase.CONFLICT_REPLACE);
+				inserted++;
 			}
 			mDb.setTransactionSuccessful();
 		} finally {
 			mDb.endTransaction();
 		}
+
+		return inserted;
 	}
 
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(TABLE_MEALS_CREATE);
-		db.execSQL(TABLE_FOOD_ITEM_CREATE);
+//		db.execSQL(TABLE_FOOD_ITEM_CREATE);
 	}
 
 	/**

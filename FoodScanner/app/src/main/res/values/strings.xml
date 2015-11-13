@@ -10,6 +10,9 @@
     <string name="action_logout">Log Out</string>
     <string name="action_logout_confirm">Are you sure you want to logout?</string>
     <string name="logout_button">LOG OUT</string>
+    <string name="action_logout_unsynced_warning_title">You have un-synced meals</string>
+    <string name="action_logout_unsynced_warning_subtitle">Any meals that have not been synced with the server will be deleted.</string>
+    <string name="delete_button">DELETE</string>
 
     <string name="login_food_scanner">Login with FoodScanner account</string>
     <string name="login_google_plus">Login with Google+</string>
