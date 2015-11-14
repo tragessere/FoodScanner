@@ -55,7 +55,7 @@ public class FoodItem extends Nutritious implements Serializable {
         //Create list of volume units, and find max length
         String[] vol_values = new String[]{"cup", "quart", "pt", "pint", "ml", "milliliter",
                 "millilitre", "l", "liter", "litre", "tsp", "teaspoon", "tbsp", "tbl",
-                "tablespoon"};
+                "tablespoon", "fl oz", "fl. oz", "fluid ounce"};
         maxVolLen = Integer.MIN_VALUE;
         for(String s : vol_values) {
             if(s.length() > maxVolLen) {
@@ -65,8 +65,7 @@ public class FoodItem extends Nutritious implements Serializable {
         volUnits = new HashSet<>(Arrays.asList(vol_values));
 
         //Create list of mass units, and find max length
-        String[] mass_values = new String[]{"oz", "ounce", "fl oz", "fl. oz", "fluid ounce", "g",
-                "gram", "mg", "milligram"};
+        String[] mass_values = new String[]{"oz", "ounce",  "g", "gram", "mg", "milligram"};
         maxMassLen = Integer.MIN_VALUE;
         for(String s : mass_values) {
             if(s.length() > maxMassLen) {
@@ -78,8 +77,6 @@ public class FoodItem extends Nutritious implements Serializable {
         density = new Density();
         density.value = 0.0;
         numServings = 0.0;
-        needConvertVol = true;
-        needConvertMass = true;
         volume = 0.0;   //temp, for clarity
     }
 
@@ -148,10 +145,14 @@ public class FoodItem extends Nutritious implements Serializable {
         if(massUnits.contains(formattedUnit)) {
             setCalculateVol(true);
             setCalculateMass(true);
+            setNeedConvertVol(true);
+            setNeedConvertMass(true);
             actualServingSizeUnit = formattedUnit;
         } else if(volUnits.contains(formattedUnit)) {
             setCalculateVol(true);
             setCalculateMass(false);
+            setNeedConvertVol(true);
+            setNeedConvertMass(false);
             actualServingSizeUnit = formattedUnit;
         } else {
             //check that each substring is not in either, e.g. 'cups (chopped)'
@@ -166,6 +167,8 @@ public class FoodItem extends Nutritious implements Serializable {
                     stopCheck = true;
                     setCalculateVol(true);
                     setCalculateMass(true);
+                    setNeedConvertVol(true);
+                    setNeedConvertMass(true);
                     actualServingSizeUnit = formattedUnit.substring(0, i);
                     break;
                 }
@@ -183,6 +186,8 @@ public class FoodItem extends Nutritious implements Serializable {
                     stopCheck = true;
                     setCalculateVol(true);
                     setCalculateMass(false);
+                    setNeedConvertVol(true);
+                    setNeedConvertMass(false);
                     break;
                 }
             }
@@ -193,6 +198,8 @@ public class FoodItem extends Nutritious implements Serializable {
             //not necessary; here for clarity
             setCalculateVol(false);
             setCalculateMass(false);
+            setNeedConvertVol(false);
+            setNeedConvertMass(false);
         }
     }
 

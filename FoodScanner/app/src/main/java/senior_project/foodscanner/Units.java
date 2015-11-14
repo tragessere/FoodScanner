@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class Units {
 
+    //region Constants for units conversion
     static final double ML_IN_CUBIC_INCH = 16.3871;
     static final double LITER_IN_CUBIC_INCH = 0.0163871;
     static final double CUP_IN_CUBIC_INCH = 0.0692641;
@@ -16,6 +17,12 @@ public class Units {
     static final double PINT_IN_CUBIC_INCH = 0.034632;
     static final double TSP_IN_CUBIC_INCH = 3.32468;
     static final double TBL_IN_CUBIC_INCH = 1.10823;
+    static final double FL_OZ_IN_CUBIC_INCH = 0.554113;
+
+    static final double OZ_IN_GRAM = 0.035274;
+    static final double GRAM_IN_GRAM = 1.0;
+    static final double MG_IN_GRAM = 1000.0;
+    //endregion
 
     /*
     Converts volume from scanner (cubic inches) to ml for mass FoodItems,
@@ -57,8 +64,10 @@ public class Units {
                 conversion = LITER_IN_CUBIC_INCH;
             } else if (unit.equals("tsp") ||  unit.equals("teaspoon")) {
                 conversion = TSP_IN_CUBIC_INCH;
-            } else {  //unit is tablespoon
+            } else if (unit.equals("tbsp") || unit.equals("tbl") || unit.equals("tablespoon")) {
                 conversion = TBL_IN_CUBIC_INCH;
+            } else {  //unit is fl oz
+                conversion = FL_OZ_IN_CUBIC_INCH;
             }
 
             for (int i = 0; i < numPortions; i++) {
@@ -72,6 +81,39 @@ public class Units {
         }
 
         // return food without changes, if none to make
+        return food;
+    }
+
+    /*
+    Converts mass (in grams, from density entries being g/ml) to needed mass unit.
+     */
+    public static FoodItem convertMass(FoodItem food) {
+        if (!food.needConvertMass()) {
+            // mass has already been converted
+            return food;
+        }
+
+        int numPortions = food.getNumPortions();
+        List<FoodItem.Portion> portions = food.getPortions();
+
+        String unit = food.getActualServingSizeUnit();
+        double conversion;
+
+        if (unit.equals("oz") || unit.equals("ounce")) {
+            conversion = OZ_IN_GRAM;
+        } else if (unit.equals("g") || unit.equals("gram")) {
+            conversion = GRAM_IN_GRAM;
+        } else {  //unit is mg
+            conversion = MG_IN_GRAM;
+        }
+
+        for (int i = 0; i < numPortions; i++) {
+            FoodItem.Portion tempPort = food.getPortion(i);
+            tempPort.setMass(tempPort.getMass() * conversion);
+            portions.set(i, tempPort);
+        }
+        food.replacePortions(portions);
+        food.setNeedConvertMass(false);
         return food;
     }
 

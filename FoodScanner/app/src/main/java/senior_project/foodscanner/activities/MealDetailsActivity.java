@@ -150,7 +150,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Open appropriate dialog for this food item
                 lastClickedFood = meal.getFoodItem(position);
-                if (lastClickedFood.needDisplayMass()) {
+                if (lastClickedFood.usesMass()) {
                     // Bring up density dialog
                     // Check that densities have been successfully retrieved
                     if (FoodItem.getDensityKeys() == null) {
@@ -165,7 +165,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                         intent.putExtra("meal", meal);
                         startActivityForResult(intent, REQUEST_DENSITY);
                     }
-                } else if (lastClickedFood.needCalculateVol()) {
+                } else if (lastClickedFood.usesVolume()) {
                     // Bring up (temporary) volume dialog
                     DialogFragment dialog = FoodVolumeFragment.newInstance(lastClickedFood);
                     dialog.show(getFragmentManager(), "FoodVolumeFragment");
