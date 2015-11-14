@@ -23,8 +23,11 @@ public class FoodItem extends Nutritious implements Serializable {
     private String brand;
     private double servingSize;
     private String servingSizeUnit;  //e.g. cup, grams, taco
-    private boolean calculateVol;
-    private boolean calculateMass;
+    private String actualServingSizeUnit; //e.g. convert "grams of flakes" to "grams"
+    private boolean calculateVol;   //might not be needed
+    private boolean calculateMass;  //might not be needed
+    private boolean needConvertVol;   //whether or not the volume needs to be converted
+    private boolean needConvertMass;  //whether or not the mass needs to be converted
     private Set<String> volUnits;
     private Set<String> massUnits;
     private int maxMassLen;
@@ -73,10 +76,10 @@ public class FoodItem extends Nutritious implements Serializable {
         massUnits = new HashSet<>(Arrays.asList(mass_values));
 
         density = new Density();
-        density.value = 0.0;  //for clarity
-
-        numServings = 0.0;  //for clarity
-
+        density.value = 0.0;
+        numServings = 0.0;
+        needConvertVol = true;
+        needConvertMass = true;
         volume = 0.0;   //temp, for clarity
     }
 
@@ -145,9 +148,11 @@ public class FoodItem extends Nutritious implements Serializable {
         if(massUnits.contains(formattedUnit)) {
             setCalculateVol(true);
             setCalculateMass(true);
+            actualServingSizeUnit = formattedUnit;
         } else if(volUnits.contains(formattedUnit)) {
             setCalculateVol(true);
             setCalculateMass(false);
+            actualServingSizeUnit = formattedUnit;
         } else {
             //check that each substring is not in either, e.g. 'cups (chopped)'
             boolean stopCheck = false;
@@ -161,6 +166,7 @@ public class FoodItem extends Nutritious implements Serializable {
                     stopCheck = true;
                     setCalculateVol(true);
                     setCalculateMass(true);
+                    actualServingSizeUnit = formattedUnit.substring(0, i);
                     break;
                 }
             }
@@ -188,6 +194,14 @@ public class FoodItem extends Nutritious implements Serializable {
             setCalculateVol(false);
             setCalculateMass(false);
         }
+    }
+
+    public String getActualServingSizeUnit() {
+        return actualServingSizeUnit;
+    }
+
+    public void setActualServingSizeUnit(String actualyServingSizeUnit) {
+        this.actualServingSizeUnit = actualyServingSizeUnit;
     }
 
     public boolean needCalculateVol() {
@@ -231,11 +245,11 @@ public class FoodItem extends Nutritious implements Serializable {
         this.calculateMass = calculateMass;
     }
 
-    public boolean needDisplayMass() {
+    public boolean usesMass() {
         return calculateMass;
     }
 
-    public boolean needDisplayVolume() {
+    public boolean usesVolume() {
         return calculateVol;
     }
 
@@ -245,6 +259,22 @@ public class FoodItem extends Nutritious implements Serializable {
 
     public void setNumServings(double numServings) {
         this.numServings = numServings;
+    }
+
+    public boolean needConvertVol() {
+        return needConvertVol;
+    }
+
+    public void setNeedConvertVol(boolean needConvertVol) {
+        this.needConvertVol = needConvertVol;
+    }
+
+    public boolean needConvertMass() {
+        return needConvertMass;
+    }
+
+    public void setNeedConvertMass(boolean needConvertMass) {
+        this.needConvertMass = needConvertMass;
     }
 
     //endregion
@@ -269,7 +299,7 @@ public class FoodItem extends Nutritious implements Serializable {
         }
     }
 
-    private class Portion implements Serializable {
+    public class Portion implements Serializable {
         private double volume = 0.0;
         private double mass = 0.0;
 
