@@ -1,14 +1,12 @@
 package senior_project.foodscanner.backend_helpers;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
-import com.example.backend.foodScannerBackendAPI.model.FoodItem;
 import com.example.backend.foodScannerBackendAPI.model.Meal;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -83,8 +81,14 @@ public class EndpointsHelper
 		}
 	}
 
+
+	private static densityDownloadObserver observer;
+
+	public static void registerDensityObserver(EndpointsHelper.densityDownloadObserver register) {
+		observer = register;
+	}
+
 	public class GetAllDensityEntriesTask extends AsyncTask<Void, Void, Boolean> {
-		private ProgressDialog dialog;
 		private Activity act;
 
 		public GetAllDensityEntriesTask(Activity act) {
@@ -92,18 +96,10 @@ public class EndpointsHelper
 		}
 
 		@Override
-		protected void onPreExecute() {
-			dialog = new ProgressDialog(act);
-			dialog.setMessage("Loading...");
-			dialog.setCanceledOnTouchOutside(false);
-			dialog.show();
-		}
-
-		@Override
 		protected void onPostExecute(Boolean result) {
-			if (dialog.isShowing()) {
-				dialog.dismiss();
-			}
+
+			if(observer != null)
+				observer.densityDownloaded();
 
 			if (result == false) {
 				act.runOnUiThread(new Runnable() {
@@ -179,5 +175,9 @@ public class EndpointsHelper
 	 */
 	public interface TaskCompletionListener {
 		void onTaskCompleted(Bundle b);
+	}
+
+	public interface densityDownloadObserver {
+		void densityDownloaded();
 	}
 }

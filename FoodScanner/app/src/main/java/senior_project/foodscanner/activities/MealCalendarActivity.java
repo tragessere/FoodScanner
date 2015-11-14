@@ -25,6 +25,7 @@ import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.Nutritious;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
+import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.ui.components.mealcalendar.CalendarDialog;
 import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
 import senior_project.foodscanner.ui.components.mealcalendar.TextDialog;
@@ -64,6 +65,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meal_calendar);
+
+        if (FoodItem.getDensityKeys() == null) {
+            EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask(this).execute();
+        }
 
         button_calendar = (Button) findViewById(R.id.button_calendar);
         button_totalDay = (Button) findViewById(R.id.button_total_day);
