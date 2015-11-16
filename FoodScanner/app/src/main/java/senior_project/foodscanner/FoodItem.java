@@ -16,6 +16,7 @@ import java.util.Set;
 public class FoodItem extends Nutritious implements Serializable {
 
     private Map<String, Double> fields;  //holds all nutrition info
+    private Map<String, Double> calculatedFields;  //holds all calculated nutrition info
 
     public static final String KEY_CAL = "Calories";
 
@@ -384,8 +385,53 @@ public class FoodItem extends Nutritious implements Serializable {
         return totalVolume;
     }
 
-    public void calculateNumServings() {
-        //TODO: add together all portions to get total number of servings
+    /**
+     * Calculates number of servings
+     * @return true is success, false if failure
+     */
+    public boolean calculateNumServings() {
+        FoodItem convertedFood = this;
+
+        if (usesMass()) {
+            if (getTotalVolume() == 0.0 || density.value == 0.0) {
+                return false;
+            }
+
+            if (needConvertVol()) {
+                convertedFood = Units.convertVolume(this);
+            }
+
+            int numPortions = convertedFood.getNumPortions();
+            List<FoodItem.Portion> tempPortions = convertedFood.getPortions();
+            for (int i = 0; i < numPortions; i++) {
+                Portion tempPort = convertedFood.getPortion(i);
+                tempPort.setMass(tempPort.getVolume() * density.value);
+                tempPortions.set(i, tempPort);
+            }
+            convertedFood.replacePortions(tempPortions);
+
+            if (needConvertMass()) {
+                convertedFood = Units.convertMass(convertedFood);
+            }
+
+            setNumServings((convertedFood.getTotalMass()) / getServingSize());
+            return true;
+
+        } else if (usesVolume()) {
+            if (getTotalVolume() == 0.0) {
+                return false;
+            }
+
+            if (needConvertVol()) {
+                convertedFood = Units.convertVolume(this);
+            }
+
+            setNumServings(convertedFood.getTotalVolume() / getServingSize());
+            return true;
+        }
+
+        // no need to calculate number of servings, user should enter manually
+        return true;
     }
 
     private class Density implements Serializable {
@@ -444,6 +490,22 @@ public class FoodItem extends Nutritious implements Serializable {
         } else {
             return densities.get(name);
         }
+    }
+
+    /**
+    Calculates & saves nutrition info, based on entered/scanned servings.
+    @return true if success, false if failure
+     */
+    public boolean calculateNutrition() {
+        if (!calculateNumServings()) {
+            return false;
+        }
+        double numServings = getNumServings();
+
+        for (Map.Entry<String, Double> field : getSet()) {
+            calculatedFields.put(field.getKey(), field.getValue() * numServings);
+        }
+        return true;
     }
 
     // This is temporary, for Spring 2 demo
