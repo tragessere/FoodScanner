@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import senior_project.foodscanner.Constants;
+
 
 /**
  * Created by Evan on 10/3/2015.
@@ -83,9 +85,14 @@ public class EndpointsHelper
 
 
 	private static densityDownloadObserver observer;
+	private static Integer densityDownloaded = Constants.DENSITY_NOT_DOWNLOADED;
 
 	public static void registerDensityObserver(EndpointsHelper.densityDownloadObserver register) {
 		observer = register;
+	}
+
+	public static int getDownloadStatus() {
+		return densityDownloaded;
 	}
 
 	public class GetAllDensityEntriesTask extends AsyncTask<Void, Void, Boolean> {
@@ -96,19 +103,29 @@ public class EndpointsHelper
 		}
 
 		@Override
+		protected void onPreExecute() {
+			densityDownloaded = Constants.DENSITY_DOWNLOADING;
+		}
+
+		@Override
 		protected void onPostExecute(Boolean result) {
+			synchronized (mEndpoints) {
+				if (result) {
+					densityDownloaded = Constants.DENSITY_DOWNLOADED;
+				} else {
+					densityDownloaded = Constants.DENSITY_NOT_DOWNLOADED;
 
-			if(observer != null)
-				observer.densityDownloaded();
+					act.runOnUiThread(new Runnable() {
+						public void run() {
+							Toast butteredToast = Toast.makeText(act.getApplicationContext(),
+									"Error: Could not retrieve densities.", Toast.LENGTH_LONG);
+							butteredToast.show();
+						}
+					});
+				}
 
-			if (result == false) {
-				act.runOnUiThread(new Runnable() {
-					public void run() {
-						Toast butteredToast = Toast.makeText(act.getApplicationContext(),
-								"Error: Could not retrieve densities.", Toast.LENGTH_LONG);
-						butteredToast.show();
-					}
-				});
+				if (observer != null)
+					observer.densityDownloaded();
 			}
 		}
 

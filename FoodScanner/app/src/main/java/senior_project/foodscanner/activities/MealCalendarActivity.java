@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.Map;
 
+import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.Nutritious;
@@ -66,7 +67,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meal_calendar);
 
-        if (FoodItem.getDensityKeys() == null) {
+        if (EndpointsHelper.getDownloadStatus() == Constants.DENSITY_NOT_DOWNLOADED) {
             EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask(this).execute();
         }
 

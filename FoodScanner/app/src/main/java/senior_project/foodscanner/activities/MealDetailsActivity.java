@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
 
+import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
 
@@ -135,19 +136,23 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         super.onResume();
 
         // Query density database, if necessary
-        if (FoodItem.getDensityKeys() == null) {
+        synchronized (EndpointsHelper.mEndpoints) {
+            if (EndpointsHelper.getDownloadStatus() == Constants.DENSITY_NOT_DOWNLOADED || EndpointsHelper.getDownloadStatus() == Constants.DENSITY_DOWNLOADING) {
+                dialog.setMessage("Loading...");
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
 
-            EndpointsHelper.registerDensityObserver(new EndpointsHelper.densityDownloadObserver() {
-                @Override
-                public void densityDownloaded() {
-                    EndpointsHelper.registerDensityObserver(null);
-                    dialog.dismiss();
-                }
-            });
+                EndpointsHelper.registerDensityObserver(new EndpointsHelper.densityDownloadObserver() {
+                    @Override
+                    public void densityDownloaded() {
+                        EndpointsHelper.registerDensityObserver(null);
+                        dialog.dismiss();
+                    }
+                });
 
-            dialog.setMessage("Loading...");
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.show();
+                if (EndpointsHelper.getDownloadStatus() == Constants.DENSITY_NOT_DOWNLOADED)
+                    EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask(this);
+            }
         }
 
         // Set up list of food items
