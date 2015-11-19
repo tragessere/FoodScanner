@@ -4,6 +4,12 @@
     tools:context="senior_project.foodscanner.activities.MealCalendarActivity">
 
     <item
+        android:id="@+id/action_tutorial"
+        android:title="@string/action_tutorial"
+        android:icon="@drawable/ic_help"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:icon="@drawable/ic_settings_white"

@@ -28,6 +28,8 @@ import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.ui.components.mealcalendar.CalendarDialog;
 import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
 import senior_project.foodscanner.ui.components.mealcalendar.TextDialog;
+import senior_project.foodscanner.ui.components.tutorial.TutorialCard;
+import senior_project.foodscanner.ui.components.tutorial.TutorialSequence;
 
 /**
  * Displays list or calendar of meals.
@@ -119,10 +121,15 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if(id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
+        switch (id)  {
+            case R.id.action_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.action_tutorial:
+                showTutorial();
+                return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -302,6 +309,15 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
             default:
                 break;
         }
+    }
+
+    private void showTutorial() {
+        TutorialSequence sequence = new TutorialSequence(this);
+
+        TutorialCard page = new TutorialCard(button_totalDay, "test title", "subtitle", "some text to put into the body of the message for someone to read which will make them understand");
+        sequence.addCard(page);
+
+        sequence.Start();
     }
 
 }

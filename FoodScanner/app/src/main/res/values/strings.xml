@@ -56,6 +56,10 @@
     <string name="settings_time_overlap_subtitle">Some meals have overlapping time intervals. Going back now will reset your changes.</string>
     <string name="reset_changes">RESET CHANGES</string>
 
+    <string name="action_tutorial">Help</string>
+    <string name="tutorial_back">BACK</string>
+    <string name="tutorial_next">NEXT</string>
+
     <string name="network_error">Error: Network connection failed.</string>
     <string name="generic_error">Error: Please try again.</string>
 
