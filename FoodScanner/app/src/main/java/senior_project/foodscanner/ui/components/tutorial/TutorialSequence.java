@@ -23,14 +23,15 @@ import senior_project.foodscanner.R;
  * Created by Evan on 11/18/2015.
  */
 public class TutorialSequence implements SpringListener {
-	private static final int SPRING_TENSION = 145;
-	private static final int SPRING_FRICTION = 17;
+	public static final int SPRING_TENSION = 145;
+	public static final int SPRING_FRICTION = 18;
 	private Spring mSpring;
 
 	private AppCompatActivity mActivity;
 
 	private ViewGroup activityRoot;
-	private View background;
+	View view;
+	private HighlightView background;
 	private CardView tutorialCard;
 	private View cardContents;
 	private TextView title;
@@ -82,7 +83,7 @@ public class TutorialSequence implements SpringListener {
 	/**
 	 * Adds another page of information to the tutorial
 	 *
-	 * @param newPage
+	 * @param newPage	<code>TutorialCard</code> that details the function of a view
 	 */
 	public void addCard(TutorialCard newPage) {
 		allPages.add(newPage);
@@ -98,18 +99,18 @@ public class TutorialSequence implements SpringListener {
 		activityRoot.getLocationOnScreen(position);
 		parentTop = position[1];
 
-		background = View.inflate(mActivity, R.layout.tutorial_page, activityRoot);
+		view = View.inflate(mActivity, R.layout.tutorial_page, activityRoot);
 
-		tutorialCard = (CardView) background.findViewById(R.id.tutorial_card);
-		cardContents = background.findViewById(R.id.card_contents);
-		title = (TextView) background.findViewById(R.id.title);
-		subTitle = (TextView) background.findViewById(R.id.subtitle);
-		message = (TextView) background.findViewById(R.id.message);
-		buttonBack = (Button) background.findViewById(R.id.button_back);
-		buttonNext = (Button) background.findViewById(R.id.button_next);
+		background = (HighlightView) view.findViewById(R.id.background);
+		tutorialCard = (CardView) view.findViewById(R.id.tutorial_card);
+		cardContents = view.findViewById(R.id.card_contents);
+		title = (TextView) view.findViewById(R.id.title);
+		subTitle = (TextView) view.findViewById(R.id.subtitle);
+		message = (TextView) view.findViewById(R.id.message);
+		buttonBack = (Button) view.findViewById(R.id.button_back);
+		buttonNext = (Button) view.findViewById(R.id.button_next);
 
 		margin = ((FrameLayout.LayoutParams) tutorialCard.getLayoutParams()).leftMargin;
-
 
 		buttonBack.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -172,13 +173,17 @@ public class TutorialSequence implements SpringListener {
 
 		float screenHeight = activityRoot.getHeight();
 		float screenWidth = activityRoot.getWidth();
+		float viewHalfHeight = currentPage.getHighlightView().getHeight() / 2;
+		float viewHalfWidth = currentPage.getHighlightView().getWidth() / 2;
 
-		int[] viewPos = new int[2];
-		currentPage.getHighlightView().getLocationOnScreen(viewPos);
+		int[] viewCenter = new int[2];
+		currentPage.getHighlightView().getLocationOnScreen(viewCenter);
+		viewCenter[0] += viewHalfWidth;
+		viewCenter[1] += viewHalfHeight;
 
 		//Set center of the dialog box to be the center of the view being highlighted
-		startPosX = viewPos[0] + currentPage.getHighlightView().getWidth() / 2 - endSize[0] / 2;
-		startPosY = viewPos[1] + currentPage.getHighlightView().getHeight() / 2 - parentTop - endSize[1] / 2;
+		startPosX = viewCenter[0] - endSize[0] / 2;
+		startPosY = viewCenter[1] - endSize[1] / 2;
 
 		tutorialCard.setX(startPosX);
 		tutorialCard.setY(startPosY);
@@ -190,7 +195,7 @@ public class TutorialSequence implements SpringListener {
 		else	//Check where the highlighted view is and choose to put the tutorial card on the opposite side
 			positionTop = startPosY > screenHeight / 2;
 
-		endPosX = (activityRoot.getWidth() / 2) - (endSize[0] / 2) + margin;
+		endPosX = (screenWidth / 2) - (endSize[0] / 2) + margin;
 		if(positionTop)
 			endPosY = margin;
 		else
@@ -205,6 +210,13 @@ public class TutorialSequence implements SpringListener {
 		cardAlpha.setDuration(100);
 		cardAlpha.setFillAfter(true);
 		tutorialCard.startAnimation(cardAlpha);
+
+		float radius = (float) Math.sqrt(
+				viewHalfWidth * viewHalfWidth +
+				viewHalfHeight * viewHalfHeight);
+
+		viewCenter[1] -= parentTop;
+		background.enter(viewCenter, radius);
 
 		mSpring.setCurrentValue(0);
 		mSpring.setEndValue(1);
@@ -223,9 +235,7 @@ public class TutorialSequence implements SpringListener {
 		subTitle.setText(currentPage.getSubTitle());
 		message.setText(currentPage.getMessage());
 
-		cardContents.measure(View.MeasureSpec.makeMeasureSpec(background.getWidth(), View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(background.getHeight(), View.MeasureSpec.AT_MOST));
-//		nextHeight = cardContents.getMeasuredHeight();
-//		nextWidth = cardContents.getMeasuredWidth();
+		cardContents.measure(View.MeasureSpec.makeMeasureSpec(activityRoot.getWidth(), View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(activityRoot.getHeight(), View.MeasureSpec.AT_MOST));
 		return new int[]{cardContents.getMeasuredWidth(), cardContents.getMeasuredHeight()};
 	}
 

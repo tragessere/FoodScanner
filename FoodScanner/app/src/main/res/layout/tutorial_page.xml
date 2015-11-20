@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<senior_project.foodscanner.ui.components.tutorial.HighlightView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/background"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/black_overlay"
-    android:visibility="visible">
+    android:layout_height="match_parent">
 
     <android.support.v7.widget.CardView
         android:id="@+id/tutorial_card"
@@ -85,4 +85,4 @@
         </LinearLayout>
     </android.support.v7.widget.CardView>
 
-</FrameLayout>
+</senior_project.foodscanner.ui.components.tutorial.HighlightView>
