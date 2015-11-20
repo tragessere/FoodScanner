@@ -7,8 +7,6 @@ import android.view.View;
  * Created by Evan on 11/18/2015.
  */
 public class TutorialCard {
-	private Context mContext;
-
 	public static final int DEFAULT_CARD_MARGIN_DP = 15;
 	public static final int DEFAULT_HIGHLIGHT_PADDING_DP = 10;
 

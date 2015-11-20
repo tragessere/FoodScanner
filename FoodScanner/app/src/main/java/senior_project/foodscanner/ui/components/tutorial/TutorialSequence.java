@@ -5,6 +5,7 @@ import android.support.v7.widget.CardView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -155,7 +156,7 @@ public class TutorialSequence implements SpringListener {
 			if(currentPosition == 0)
 				animateStart(currentPage);
 			else
-				animateBetween();
+				animateBetween(currentPage);
 		}
 
 	}
@@ -188,18 +189,13 @@ public class TutorialSequence implements SpringListener {
 		tutorialCard.setX(startPosX);
 		tutorialCard.setY(startPosY);
 
-		boolean positionTop;
-		//Use the overridden screen location if set
-		if(currentPage.getPosition() != TutorialCard.POSITION_DEFAULT)
-			positionTop = currentPage.getPosition() == TutorialCard.POSITION_TOP;
-		else	//Check where the highlighted view is and choose to put the tutorial card on the opposite side
-			positionTop = startPosY > screenHeight / 2;
+		boolean positionTop = showTutorialInTopHalf(viewCenter[1], screenHeight, currentPage.getPosition());
 
 		endPosX = (screenWidth / 2) - (endSize[0] / 2) + margin;
 		if(positionTop)
 			endPosY = margin;
 		else
-			endPosY = screenHeight - endSize[1] - margin;
+			endPosY = screenHeight - endSize[1] - margin - parentTop;
 
 		startScaleX = 0;
 		startScaleY = 0;
@@ -226,8 +222,72 @@ public class TutorialSequence implements SpringListener {
 
 	}
 
-	private void animateBetween() {
+	private void animateBetween(final TutorialCard currentPage) {
+		AlphaAnimation cardTextAlpha = new AlphaAnimation(1, 0);
+		cardTextAlpha.setDuration(100);
+		cardTextAlpha.setFillAfter(true);
+		cardTextAlpha.setAnimationListener(new Animation.AnimationListener() {
+			@Override
+			public void onAnimationStart(Animation animation) {
 
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				float screenHeight = activityRoot.getHeight();
+				float screenWidth = activityRoot.getWidth();
+
+				int[] viewCenter = new int[2];
+				currentPage.getHighlightView().getLocationOnScreen(viewCenter);
+
+				float viewHalfHeight = currentPage.getHighlightView().getHeight() / 2;
+				float viewHalfWidth = currentPage.getHighlightView().getWidth() / 2;
+				viewCenter[0] += viewHalfWidth;
+				viewCenter[1] += viewHalfHeight;
+
+				float startWidth = tutorialCard.getWidth();
+				float startHeight = tutorialCard.getHeight();
+
+				int[] endSize = setCardViews(currentPage);
+
+				startScaleX = startWidth / endSize[0];
+				startScaleY = startHeight / endSize[1];
+
+				endScaleX = 1;
+				endScaleY = 1;
+
+				startPosX = endPosX;
+				startPosY = endPosY;
+
+				boolean positionTop = showTutorialInTopHalf(viewCenter[1], screenHeight, currentPage.getPosition());
+
+				endPosX = (screenWidth / 2) - (endSize[0] / 2) + margin;
+				if (positionTop)
+					endPosY = margin;
+				else
+					endPosY = screenHeight - endSize[1] - margin - parentTop;
+
+				AlphaAnimation cardAlpha = new AlphaAnimation(0, 1);
+				cardAlpha.setDuration(100);
+				cardAlpha.setFillAfter(true);
+				cardContents.startAnimation(cardAlpha);
+
+				float radius = (float) Math.sqrt(
+						viewHalfWidth * viewHalfWidth +
+								viewHalfHeight * viewHalfHeight);
+
+				viewCenter[1] -= parentTop;
+				background.move(viewCenter, radius);
+
+				mSpring.setCurrentValue(0, false);
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+
+			}
+		});
+		cardContents.startAnimation(cardTextAlpha);
 	}
 
 	private int[] setCardViews(TutorialCard currentPage) {
@@ -237,6 +297,17 @@ public class TutorialSequence implements SpringListener {
 
 		cardContents.measure(View.MeasureSpec.makeMeasureSpec(activityRoot.getWidth(), View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(activityRoot.getHeight(), View.MeasureSpec.AT_MOST));
 		return new int[]{cardContents.getMeasuredWidth(), cardContents.getMeasuredHeight()};
+	}
+
+	private boolean showTutorialInTopHalf(float viewY, float screenHeight, int positionValue) {
+		boolean positionTop;
+		//Use the overridden screen location if set
+		if(positionValue != TutorialCard.POSITION_DEFAULT)
+			positionTop = positionValue == TutorialCard.POSITION_TOP;
+		else	//Check where the highlighted view is and choose to put the tutorial card on the opposite side
+			positionTop = viewY > screenHeight / 2;
+
+		return positionTop;
 	}
 
 

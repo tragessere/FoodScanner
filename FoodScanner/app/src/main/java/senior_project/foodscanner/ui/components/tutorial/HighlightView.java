@@ -26,8 +26,10 @@ public class HighlightView extends FrameLayout implements SpringListener {
 
 	private static final int BACKGROUND_ALPHA_FINAL = 128;
 
-	public static final int SPRING_TENSION = 250;
-	public static final int SPRING_FRICTION = 20;
+	public static final int SPRING_TENSION_START = 225;
+	public static final int SPRING_FRICTION_START = 20;
+	private static final int SPRING_TENSION_MOVING = 110;
+	private static final int SPRING_FRICTION_MOVING = 15;
 	private boolean hasBounced;
 	private Spring mSpring;
 
@@ -58,7 +60,7 @@ public class HighlightView extends FrameLayout implements SpringListener {
 
 		mSpring = SpringSystem.create().createSpring();
 		mSpring.addListener(this);
-		mSpring.setSpringConfig(new SpringConfig(SPRING_TENSION, SPRING_FRICTION));
+		mSpring.setSpringConfig(new SpringConfig(SPRING_TENSION_START, SPRING_FRICTION_START));
 	}
 
 	@Override
@@ -91,6 +93,10 @@ public class HighlightView extends FrameLayout implements SpringListener {
 		prevRadius = destRadius;
 		destCenter = newCenter;
 		destRadius = newRadius;
+
+		mSpring.setSpringConfig(new SpringConfig(SPRING_TENSION_MOVING, SPRING_FRICTION_MOVING));
+
+		mSpring.setCurrentValue(0, false);
 	}
 
 
@@ -131,6 +137,11 @@ public class HighlightView extends FrameLayout implements SpringListener {
 
 				break;
 			case DRAW_MODE_MOVE:
+				radiusStep = (destRadius - prevRadius) * value + prevRadius;
+
+				centerStep[0] = (int) ((destCenter[0] - prevCenter[0]) * value + prevCenter[0]);
+				centerStep[1] = (int) ((destCenter[1] - prevCenter[1]) * value + prevCenter[1]);
+
 				break;
 			case DRAW_MODE_EXIT:
 				break;
