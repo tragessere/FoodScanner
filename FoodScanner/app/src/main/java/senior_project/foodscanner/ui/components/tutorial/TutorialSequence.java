@@ -139,7 +139,7 @@ public class TutorialSequence implements SpringListener {
 
 	private void nextPosition() {
 		currentPosition++;
-		if(currentPosition == allPages.size()) {
+		if(currentPosition >= allPages.size()) {
 			animateEnd();
 		} else {
 			if(currentPosition != 0) {
@@ -148,10 +148,6 @@ public class TutorialSequence implements SpringListener {
 			}
 			
 			TutorialCard currentPage = allPages.get(currentPosition);
-
-			title.setText(currentPage.getTitle());
-			subTitle.setText(currentPage.getSubTitle());
-			message.setText(currentPage.getMessage());
 
 			if(currentPosition == 0)
 				animateStart(currentPage);
@@ -162,7 +158,15 @@ public class TutorialSequence implements SpringListener {
 	}
 
 	private void previousPosition() {
+		currentPosition--;
+		if(currentPosition <= -1) {
+			animateEnd();
+		} else {
+			previousWidth = tutorialCard.getWidth();
+			previousHeight = tutorialCard.getHeight();
 
+			animateBetween(allPages.get(currentPosition));
+		}
 	}
 
 	private void animateStart(TutorialCard currentPage) {
@@ -268,7 +272,7 @@ public class TutorialSequence implements SpringListener {
 					endPosY = screenHeight - endSize[1] - margin - parentTop;
 
 				AlphaAnimation cardAlpha = new AlphaAnimation(0, 1);
-				cardAlpha.setDuration(100);
+				cardAlpha.setDuration(150);
 				cardAlpha.setFillAfter(true);
 				cardContents.startAnimation(cardAlpha);
 
