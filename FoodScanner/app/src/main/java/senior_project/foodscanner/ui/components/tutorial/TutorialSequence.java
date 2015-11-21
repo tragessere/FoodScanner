@@ -1,5 +1,6 @@
 package senior_project.foodscanner.ui.components.tutorial;
 
+import android.graphics.Rect;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.view.View;
@@ -47,17 +48,11 @@ public class TutorialSequence implements SpringListener {
 	private float parentTop;
 	private float margin;
 
-	//Animation translation positions
+	//Animation positions for the tutorial card
 	private float startPosX;
 	private float startPosY;
 	private float endPosX;
 	private float endPosY;
-
-	//Animation scale values
-	private float previousHeight = 0;
-	private float previousWidth = 0;
-	private float nextHeight;
-	private float nextWidth;
 
 	private float startScaleX;
 	private float startScaleY;
@@ -139,14 +134,10 @@ public class TutorialSequence implements SpringListener {
 
 	private void nextPosition() {
 		currentPosition++;
+
 		if(currentPosition >= allPages.size()) {
-			animateEnd();
+			animateEnd(allPages.get(allPages.size() - 1));
 		} else {
-			if(currentPosition != 0) {
-				previousHeight = tutorialCard.getHeight();
-				previousWidth = tutorialCard.getWidth();
-			}
-			
 			TutorialCard currentPage = allPages.get(currentPosition);
 
 			if(currentPosition == 0)
@@ -159,17 +150,17 @@ public class TutorialSequence implements SpringListener {
 
 	private void previousPosition() {
 		currentPosition--;
-		if(currentPosition <= -1) {
-			animateEnd();
-		} else {
-			previousWidth = tutorialCard.getWidth();
-			previousHeight = tutorialCard.getHeight();
 
+		if(currentPosition <= -1)
+			animateEnd(allPages.get(0));
+		else
 			animateBetween(allPages.get(currentPosition));
-		}
 	}
 
 	private void animateStart(TutorialCard currentPage) {
+		Rect statusBarBorder = new Rect();
+		mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(statusBarBorder);
+		float statusBarHeight = statusBarBorder.top;
 
 		tutorialCard.setScaleY(0);
 		tutorialCard.setScaleX(0);
@@ -199,7 +190,7 @@ public class TutorialSequence implements SpringListener {
 		if(positionTop)
 			endPosY = margin;
 		else
-			endPosY = screenHeight - endSize[1] - margin - parentTop;
+			endPosY = screenHeight - endSize[1] - margin - statusBarHeight;
 
 		startScaleX = 0;
 		startScaleY = 0;
@@ -222,8 +213,45 @@ public class TutorialSequence implements SpringListener {
 		mSpring.setEndValue(1);
 	}
 
-	private void animateEnd() {
+	private void animateEnd(TutorialCard currentPage) {
+		float screenHeight = activityRoot.getHeight();
+		float screenWidth = activityRoot.getWidth();
 
+		float cardHeight = tutorialCard.getHeight();
+
+		startPosX = endPosX;
+		startPosY = endPosY;
+		endPosX = startPosX;
+
+		if(startPosY < screenHeight / 2)
+			endPosY = -cardHeight * 1.2f;
+		else
+			endPosY = screenHeight;
+
+
+		startScaleX = 1;
+		startScaleY = 1;
+		endScaleX = 1;
+		endScaleY = 1;
+
+
+		int[] viewCenter = new int[2];
+		currentPage.getHighlightView().getLocationOnScreen(viewCenter);
+		viewCenter[0] += currentPage.getHighlightView().getWidth() / 2;
+		viewCenter[1] += currentPage.getHighlightView().getHeight() / 2;
+
+		float radius;
+		if(currentPosition == -1)
+			radius = 0;
+		else
+			radius = (float) Math.sqrt(
+				screenWidth * screenWidth +
+				screenHeight * screenHeight);
+
+		viewCenter[1] -= parentTop;
+		background.exit(radius);
+
+		mSpring.setCurrentValue(0, false);
 	}
 
 	private void animateBetween(final TutorialCard currentPage) {
@@ -238,6 +266,10 @@ public class TutorialSequence implements SpringListener {
 
 			@Override
 			public void onAnimationEnd(Animation animation) {
+				Rect statusBarBorder = new Rect();
+				mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(statusBarBorder);
+				float statusBarHeight = statusBarBorder.top;
+
 				float screenHeight = activityRoot.getHeight();
 				float screenWidth = activityRoot.getWidth();
 
@@ -269,7 +301,7 @@ public class TutorialSequence implements SpringListener {
 				if (positionTop)
 					endPosY = margin;
 				else
-					endPosY = screenHeight - endSize[1] - margin - parentTop;
+					endPosY = screenHeight - endSize[1] - margin - statusBarHeight;
 
 				AlphaAnimation cardAlpha = new AlphaAnimation(0, 1);
 				cardAlpha.setDuration(150);

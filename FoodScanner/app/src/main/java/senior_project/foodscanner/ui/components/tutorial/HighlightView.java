@@ -24,7 +24,7 @@ public class HighlightView extends FrameLayout implements SpringListener {
 	public static final int DRAW_MODE_EXIT = 2;
 	private int drawMode;
 
-	private static final int BACKGROUND_ALPHA_FINAL = 128;
+	private static final int BACKGROUND_ALPHA_FINAL = 160;
 
 	public static final int SPRING_TENSION_START = 225;
 	public static final int SPRING_FRICTION_START = 20;
@@ -37,7 +37,7 @@ public class HighlightView extends FrameLayout implements SpringListener {
 	private Canvas mCanvas;
 	private PorterDuffXfermode cutout;
 	private Paint mPaint;
-
+	private Paint mEraser;
 
 	private int[] prevCenter;
 	private float prevRadius;
@@ -52,11 +52,16 @@ public class HighlightView extends FrameLayout implements SpringListener {
 		super(context, attrs);
 		setWillNotDraw(false);
 
+		cutout = new PorterDuffXfermode(PorterDuff.Mode.CLEAR);
+
 		mPaint = new Paint();
 		mPaint.setAntiAlias(true);
 		mPaint.setColor(Color.BLACK);
 
-		cutout = new PorterDuffXfermode(PorterDuff.Mode.CLEAR);
+		mEraser = new Paint();
+		mEraser.setColor(Color.BLACK);
+		mEraser.setStyle(Paint.Style.FILL);
+		mEraser.setXfermode(cutout);
 
 		mSpring = SpringSystem.create().createSpring();
 		mSpring.addListener(this);
@@ -82,9 +87,13 @@ public class HighlightView extends FrameLayout implements SpringListener {
 		mSpring.setEndValue(1);
 	}
 
-	public void exit() {
+	public void exit(float radius) {
 		drawMode = DRAW_MODE_EXIT;
 		hasBounced = false;
+		prevRadius = destRadius;
+		destRadius = radius;
+
+		mSpring.setCurrentValue(0, false);
 	}
 
 	public void move(int[] newCenter, float newRadius) {
@@ -103,6 +112,7 @@ public class HighlightView extends FrameLayout implements SpringListener {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		mCanvas.drawPaint(mEraser);
 
 		mPaint.setStyle(Paint.Style.FILL);
 		mCanvas.drawPaint(mPaint);
@@ -144,6 +154,20 @@ public class HighlightView extends FrameLayout implements SpringListener {
 
 				break;
 			case DRAW_MODE_EXIT:
+				if(value >= 1)
+					hasBounced = true;
+
+				if(destRadius == 0) {
+					if (hasBounced)
+						currentAlpha = 0;
+					else
+						currentAlpha = (int) ((1 - value) * BACKGROUND_ALPHA_FINAL);
+
+					mPaint.setAlpha(currentAlpha);
+				}
+
+				radiusStep = (destRadius - prevRadius) * value + prevRadius;
+
 				break;
 		}
 
