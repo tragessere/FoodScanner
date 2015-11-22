@@ -60,7 +60,6 @@ public class Settings {
 
     private static DateFormatSymbols format = new DateFormatSymbols();
     private static final String[] am_pm = {"am", "pm"};
-    private static final long msInDay = 24*60*60*1000;
 
     private Settings(Context context) {
         mContext = context.getApplicationContext();
@@ -253,11 +252,11 @@ public class Settings {
             if(day.get(GregorianCalendar.YEAR) == year && day.get(GregorianCalendar.MONTH) == month && day.get(GregorianCalendar.DAY_OF_MONTH) == dayOfMonth){
                 return "Today";
             }
-            day.setTimeInMillis(day.getTimeInMillis() + msInDay);
+            day.add(Calendar.DATE, 1);
             if(day.get(GregorianCalendar.YEAR) == year && day.get(GregorianCalendar.MONTH) == month && day.get(GregorianCalendar.DAY_OF_MONTH) == dayOfMonth){
                 return "Tomorrow";
             }
-            day.setTimeInMillis(day.getTimeInMillis()-2*msInDay);
+            day.add(Calendar.DATE, -1);
             if(day.get(GregorianCalendar.YEAR) == year && day.get(GregorianCalendar.MONTH) == month && day.get(GregorianCalendar.DAY_OF_MONTH) == dayOfMonth){
                 return "Yesterday";
             }
@@ -272,9 +271,12 @@ public class Settings {
             case dw_mw_dn:
                 String day = format.getWeekdays()[cal.get(GregorianCalendar.DAY_OF_WEEK)];
                 s = day + ", " + format.getShortMonths()[month] +" "+ dayOfMonth;
+                if(year != new GregorianCalendar().get(Calendar.YEAR)){
+                    s += ", " + year;
+                }
                 break;
             default:
-                s = "ERROR";//TODO handle error
+                s = "ERROR";
         }
 
         return s;

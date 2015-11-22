@@ -30,6 +30,7 @@ import senior_project.foodscanner.Nutritious;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
+import senior_project.foodscanner.database.SQLHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
 import senior_project.foodscanner.ui.components.ErrorDialogFragment;
 import senior_project.foodscanner.ui.components.mealcalendar.CalendarDialog;
@@ -53,7 +54,6 @@ import senior_project.foodscanner.ui.components.mealcalendar.TextDialog;
 public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, CalendarDialog.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
     private static final String SAVE_DATE = "currentDate";
     private static final int VIEW_MEAL = 0;
-    private static final long msInDay = 24 * 60 * 60 * 1000;
 
     private String username;
 
@@ -102,8 +102,22 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
         username = getIntent().getStringExtra(LoginActivity.EXTRA_ACCOUNT_NAME);
 
+        // delete Meals over 3 months old (28*3 days) if they are all synced with backend
+        GregorianCalendar day = new GregorianCalendar();
+        day.add(Calendar.DATE, -28 * 3);
+        List<Meal> meals = SQLQueryHelper.getMealsBefore(day, true);
+        boolean allSynced = true;
+        for(Meal meal:meals){
+            if(meal.isChanged()){
+                allSynced = false;
+                break;
+            }
+        }
+        if(allSynced) {
+            SQLQueryHelper.deleteMeals(meals);
+        }
+
         // TODO determine when to upload meals to server
-        // TODO indicator on meals that aren't uploaded
         // TODO account for space when downloading and storing locally
     }
 
@@ -275,12 +289,18 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 List<Meal> meals = SQLQueryHelper.getMeals(day1,day2,true);
                 TextDialog.show(this, Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)));
                 break;}
-            case R.id.imageButton_prev:
-                changeSelectedDay(currentDate - msInDay);
-                break;
-            case R.id.imageButton_next:
-                changeSelectedDay(currentDate + msInDay);
-                break;
+            case R.id.imageButton_prev:{
+                GregorianCalendar cal = new GregorianCalendar();
+                cal.setTimeInMillis(currentDate);
+                cal.add(Calendar.DATE, -1);
+                changeSelectedDay(cal.getTimeInMillis());
+                break;}
+            case R.id.imageButton_next:{
+                GregorianCalendar cal = new GregorianCalendar();
+                cal.setTimeInMillis(currentDate);
+                cal.add(Calendar.DATE, 1);
+                changeSelectedDay(cal.getTimeInMillis());
+                break;}
             default:
                 // Do nothing
         }
