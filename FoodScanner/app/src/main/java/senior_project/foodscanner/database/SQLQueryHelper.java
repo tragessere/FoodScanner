@@ -3,6 +3,7 @@ package senior_project.foodscanner.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -87,8 +88,7 @@ public class SQLQueryHelper {
 	 * @param meal	<code>Meal</code> object to update
 	 */
 	public static void updateMeal(Meal meal) {
-		SQLiteDatabase db = SQLHelper.getInstance().getWritableDatabase();
-
+        SQLiteDatabase db = SQLHelper.getInstance().getWritableDatabase();
 		db.update(SQLHelper.TABLE_MEALS, meal.toContentValues(), SQLHelper.COLUMN_ID + " = " + meal.getId(), null);
 	}
 
@@ -195,6 +195,33 @@ public class SQLQueryHelper {
 
 		return mealList;
 	}
+
+    /**
+     * Get all of the meals.
+     *
+     * @return List of <code>Meal</code> objects
+     */
+    public static List<Meal> getMeals() {
+        List<Meal> mealList = new ArrayList<>();
+        SQLiteDatabase db = SQLHelper.getInstance().getReadableDatabase();
+
+        Cursor c = db.query(SQLHelper.TABLE_MEALS, ALL_COLUMNS, null, null, null, null, SQLHelper.COLUMN_TIME);
+
+        if(c != null && c.moveToFirst()) {
+            while(!c.isAfterLast()) {
+                mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5) == 1));
+                c.moveToNext();
+            }
+            c.close();
+
+            return mealList;
+        } else if(c != null) {
+            c.close();
+            return mealList;
+        }
+
+        return mealList;
+    }
 
 	/**
 	 * Delete a meal from the database
