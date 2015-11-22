@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -61,12 +62,15 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private Button button_totalDay;
     private Button button_totalWeek;
     private Button button_totalMonth;
+    private View container_warning;
+
     private MealArrayAdapter adapter;
     private int lastClickedMealPos;
     private Meal lastClickedMeal;
 
     private long currentDate;
     private ArrayList<Meal> meals = new ArrayList<>();
+    private List<Meal> unsyncedMeals =  new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,11 +86,13 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         button_totalWeek = (Button) findViewById(R.id.button_total_week);
         button_totalMonth = (Button) findViewById(R.id.button_total_month);
         ListView mealListView = (ListView) findViewById(R.id.listView_meals);
+        container_warning = findViewById(R.id.container_warning);
 
         button_calendar.setOnClickListener(this);
         button_totalDay.setOnClickListener(this);
         button_totalWeek.setOnClickListener(this);
         button_totalMonth.setOnClickListener(this);
+        container_warning.setOnClickListener(this);
         findViewById(R.id.imageButton_prev).setOnClickListener(this);
         findViewById(R.id.imageButton_next).setOnClickListener(this);
         adapter = new MealArrayAdapter(MealCalendarActivity.this, meals);
@@ -117,7 +123,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
             SQLQueryHelper.deleteMeals(meals);
         }
 
-        // TODO determine when to upload meals to server
         // TODO account for space when downloading and storing locally
     }
 
@@ -135,6 +140,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     protected void onResume() {
         super.onResume();
         loadMeals();
+        uploadMeals();
     }
 
     @Override
@@ -241,6 +247,34 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         updateDayTotal();
     }
 
+    /**
+     * Uploads all unsynced meals to server.
+     */
+    private void uploadMeals(){
+        // TODO determine when to upload meals to server
+
+        unsyncedMeals =  SQLQueryHelper.getChangedMeals();
+
+        //TODO upload to backend
+        //TODO set is changed false for success only
+
+        for(Meal meal : unsyncedMeals) {
+            if(meal != null) {
+                meal.setIsChanged(false);
+                SQLQueryHelper.updateMeal(meal);
+            }
+        }
+        adapter.notifyDataSetChanged();
+
+        unsyncedMeals =  SQLQueryHelper.getChangedMeals();
+        if(unsyncedMeals.isEmpty()){
+            container_warning.setVisibility(View.GONE);
+        }
+        else{
+            container_warning.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void updateDayTotal() {
         Map<String, Double> nutr = Nutritious.calculateTotalNutrition(meals);
         int cal = 0;
@@ -301,8 +335,13 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 cal.add(Calendar.DATE, 1);
                 changeSelectedDay(cal.getTimeInMillis());
                 break;}
+            case R.id.container_warning:
+                Log.d("MealCalendar", "CLICKED WARNING BAR");
+                warningClick();
+                break;
             default:
                 // Do nothing
+                break;
         }
     }
 
@@ -363,17 +402,14 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         confirmDialog.show();
     }
 
+    public void warningClick(){
+        //TODO confirm dialog
+        uploadMeals();
+    }
+
     @Override
     public void onWarning(MealArrayAdapter adapter, int position) {
-        //TODO confirm dialog
-        //TODO upload to backend
-        for(Meal meal : meals) {
-            if(meal != null) {
-                meal.setIsChanged(false);
-                SQLQueryHelper.updateMeal(meal);
-            }
-        }
-        adapter.notifyDataSetChanged();
+        warningClick();
     }
 
     @Override
