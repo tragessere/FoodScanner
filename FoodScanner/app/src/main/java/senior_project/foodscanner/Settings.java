@@ -256,7 +256,7 @@ public class Settings {
             if(day.get(GregorianCalendar.YEAR) == year && day.get(GregorianCalendar.MONTH) == month && day.get(GregorianCalendar.DAY_OF_MONTH) == dayOfMonth){
                 return "Tomorrow";
             }
-            day.add(Calendar.DATE, -1);
+            day.add(Calendar.DATE, -2);
             if(day.get(GregorianCalendar.YEAR) == year && day.get(GregorianCalendar.MONTH) == month && day.get(GregorianCalendar.DAY_OF_MONTH) == dayOfMonth){
                 return "Yesterday";
             }
