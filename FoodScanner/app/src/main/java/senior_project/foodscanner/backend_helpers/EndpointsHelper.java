@@ -1,14 +1,12 @@
 package senior_project.foodscanner.backend_helpers;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
-import com.example.backend.foodScannerBackendAPI.model.FoodItem;
 import com.example.backend.foodScannerBackendAPI.model.Meal;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -17,6 +15,8 @@ import com.google.api.client.util.DateTime;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+
+import senior_project.foodscanner.Constants;
 
 
 /**
@@ -83,8 +83,19 @@ public class EndpointsHelper
 		}
 	}
 
+
+	private static densityDownloadObserver observer;
+	private static Integer densityDownloaded = Constants.DENSITY_NOT_DOWNLOADED;
+
+	public static void registerDensityObserver(EndpointsHelper.densityDownloadObserver register) {
+		observer = register;
+	}
+
+	public static int getDownloadStatus() {
+		return densityDownloaded;
+	}
+
 	public class GetAllDensityEntriesTask extends AsyncTask<Void, Void, Boolean> {
-		private ProgressDialog dialog;
 		private Activity act;
 
 		public GetAllDensityEntriesTask(Activity act) {
@@ -93,26 +104,28 @@ public class EndpointsHelper
 
 		@Override
 		protected void onPreExecute() {
-			dialog = new ProgressDialog(act);
-			dialog.setMessage("Loading...");
-			dialog.setCanceledOnTouchOutside(false);
-			dialog.show();
+			densityDownloaded = Constants.DENSITY_DOWNLOADING;
 		}
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			if (dialog.isShowing()) {
-				dialog.dismiss();
-			}
+			synchronized (mEndpoints) {
+				if (result) {
+					densityDownloaded = Constants.DENSITY_DOWNLOADED;
+				} else {
+					densityDownloaded = Constants.DENSITY_NOT_DOWNLOADED;
 
-			if (result == false) {
-				act.runOnUiThread(new Runnable() {
-					public void run() {
-						Toast butteredToast = Toast.makeText(act.getApplicationContext(),
-								"Error: Could not retrieve densities.", Toast.LENGTH_LONG);
-						butteredToast.show();
-					}
-				});
+					act.runOnUiThread(new Runnable() {
+						public void run() {
+							Toast butteredToast = Toast.makeText(act.getApplicationContext(),
+									"Error: Could not retrieve densities.", Toast.LENGTH_LONG);
+							butteredToast.show();
+						}
+					});
+				}
+
+				if (observer != null)
+					observer.densityDownloaded();
 			}
 		}
 
@@ -179,5 +192,9 @@ public class EndpointsHelper
 	 */
 	public interface TaskCompletionListener {
 		void onTaskCompleted(Bundle b);
+	}
+
+	public interface densityDownloadObserver {
+		void densityDownloaded();
 	}
 }
