@@ -40,7 +40,7 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         final Meal meal = getItem(position);
 
         // view inflation
-        if(convertView == null) {
+        if(convertView == null || ((TextView)convertView.findViewById(textViewId)).getText().equals("+")) { // create new view if convertView is null or is the "add button"
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(layoutId, parent, false);
         }
@@ -49,13 +49,12 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         final TextView text = (TextView) convertView.findViewById(textViewId);
         final TextView textNutr = (TextView) convertView.findViewById(textViewNutrId);
         if(meal != null) {
-            text.setGravity(Gravity.CENTER_VERTICAL);
             text.setText(mealString(meal));
             textNutr.setText(nutrString(meal));
-            textNutr.setVisibility(View.VISIBLE);
         } else {
             text.setGravity(Gravity.CENTER);
             text.setText("+");
+            text.setTextColor(getContext().getResources().getColor(R.color.Accent));
             textNutr.setVisibility(View.GONE);
         }
 
@@ -82,7 +81,6 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
             buttonDel.setVisibility(View.GONE);
             buttonWarn.setVisibility(View.GONE);
         } else {
-            buttonDel.setVisibility(View.VISIBLE);
             if(meal.isChanged()){
                 buttonWarn.setVisibility(View.VISIBLE);
             }
@@ -104,7 +102,7 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
     }
 
     private String mealString(Meal meal) {
-        return Settings.getInstance().formatTime(meal) + " - " + meal.getType().getName();
+        return meal.getType().getName();
     }
 
     @Override
