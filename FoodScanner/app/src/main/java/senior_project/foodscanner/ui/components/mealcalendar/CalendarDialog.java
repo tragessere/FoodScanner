@@ -23,7 +23,7 @@ public class CalendarDialog {
         final Dialog d = new Dialog(context);
         d.setContentView(R.layout.dialog_calendar);
         final CalendarView calendar = (CalendarView)d.findViewById(R.id.calendarView);
-        calendar.setDate(date);
+        calendar.setDate(date, false, true);
         calendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
