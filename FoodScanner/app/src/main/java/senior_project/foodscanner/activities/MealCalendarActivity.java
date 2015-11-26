@@ -63,6 +63,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private Button button_totalWeek;
     private Button button_totalMonth;
     private View container_warning;
+    private ListView mealListView;
 
     private MealArrayAdapter adapter;
     private int lastClickedMealPos;
@@ -85,7 +86,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         button_totalDay = (Button) findViewById(R.id.button_total_day);
         button_totalWeek = (Button) findViewById(R.id.button_total_week);
         button_totalMonth = (Button) findViewById(R.id.button_total_month);
-        ListView mealListView = (ListView) findViewById(R.id.listView_meals);
+        mealListView = (ListView) findViewById(R.id.listView_meals);
         container_warning = findViewById(R.id.container_warning);
 
         button_calendar.setOnClickListener(this);
@@ -190,8 +191,32 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
         // add meal to ui
         adapter.add(newMeal);
+        updateUI();
 
         return newMeal;
+    }
+
+    private void updateBackground(){
+        if(adapter.getCount() <= 1) {
+            GregorianCalendar day = new GregorianCalendar();
+            day.setTimeInMillis(currentDate);
+            if(day.get(Calendar.MONTH) == Calendar.APRIL && day.get(Calendar.DAY_OF_MONTH) == 1)
+            {
+                mealListView.setBackgroundResource(R.drawable.tap_add_meal_fool);// April Fool's Easter Egg
+            }
+            else
+            {
+                mealListView.setBackgroundResource(R.drawable.tap_add_meal);
+            }
+        }
+        else{
+            mealListView.setBackgroundResource(0);
+        }
+    }
+
+    private void updateUI(){
+        updateDayTotal();
+        updateBackground();
     }
 
     private void viewMeal(Meal meal) {
@@ -244,7 +269,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         //TODO load from local again
         //TODO make sure going to details and back updates data here
 
-        updateDayTotal();
+        updateUI();
     }
 
     /**
@@ -255,17 +280,19 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
         unsyncedMeals =  SQLQueryHelper.getChangedMeals();
 
-        //TODO upload to backend
+        //TODO upload to backend in background
+        //TODO hide warning buttons and bar during upload
         //TODO set is changed false for success only
 
+        // upload to backend
         for(Meal meal : unsyncedMeals) {
             if(meal != null) {
                 meal.setIsChanged(false);
                 SQLQueryHelper.updateMeal(meal);
             }
         }
-        adapter.notifyDataSetChanged();
 
+        // update warning bar visiblity
         unsyncedMeals =  SQLQueryHelper.getChangedMeals();
         if(unsyncedMeals.isEmpty()){
             container_warning.setVisibility(View.GONE);
@@ -273,6 +300,9 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         else{
             container_warning.setVisibility(View.VISIBLE);
         }
+
+        // reload to reflect changes in ui
+        loadMeals();
     }
 
     private void updateDayTotal() {
@@ -379,7 +409,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 // Remove meal from calendar
                 Meal meal = tempAdapter.getItem(tempPostion);
                 tempAdapter.remove(meal);
-                updateDayTotal();
+                updateUI();
 
                 // delete from local storage
                 SQLQueryHelper.deleteMeal(meal);
