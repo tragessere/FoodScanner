@@ -44,4 +44,6 @@ public class Constants {
 	public static final int MILLIS_IN_HOUR = 3600000;
 	public static final int MILLIS_IN_MIN = 60000;
 
+	public static final String LEGAL_LOGO_ATTRIBUTION_TEXT = "The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.";
+
 }

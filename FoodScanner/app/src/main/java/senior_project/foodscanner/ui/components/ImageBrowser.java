@@ -153,12 +153,6 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
         if(img == null){
             img = defaultImage;
         }
-        if(img == null){
-            Log.e("WTF","WTF");
-        }
-        if(imgSwitcher == null){
-            Log.e("WTasfdfdsF","WTasdsaF");
-        }
         imgSwitcher.setImageDrawable(img);
         textView_Name.setText(imgNames[currentIndex]);
         textView_Index.setText((currentIndex + 1) + "/" + imgNames.length);
