@@ -17,6 +17,10 @@ import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
 
+/**
+ * Contains a list of meals plus a null meal to represent the add button.
+ * As a result, iEmpty() will never return true and getCount() will always be > 0.
+ */
 public class MealArrayAdapter extends ArrayAdapter<Meal> {
     private static final int layoutId = R.layout.list_layout_meal;
     private static final int textViewId = R.id.meal_text;
@@ -116,6 +120,11 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
     public void clear() {
         super.clear();
         addAddItem();
+    }
+
+    @Override @Deprecated
+    public boolean isEmpty(){
+        return super.isEmpty();
     }
 
     public void setOnDeleteListener(MealArrayAdapterListener l) {

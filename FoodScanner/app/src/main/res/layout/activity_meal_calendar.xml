@@ -71,7 +71,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/container_warning"
-            android:layout_below="@+id/container_date"/>
+            android:layout_below="@+id/container_date"
+            android:background="@drawable/tap_add_meal"/>
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -81,7 +82,8 @@
             android:id="@+id/container_warning"
             android:layout_above="@+id/container_total"
             android:background="@color/Warning"
-            android:padding="10dp">
+            android:padding="10dp"
+            >
 
             <LinearLayout
                 android:orientation="horizontal"
