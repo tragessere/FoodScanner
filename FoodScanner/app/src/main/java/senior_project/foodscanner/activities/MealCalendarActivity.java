@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import android.support.v7.app.AppCompatActivity;
 
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,6 +35,7 @@ import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
+import senior_project.foodscanner.fragments.MessageDialogFragment;
 import senior_project.foodscanner.ui.components.ErrorDialogFragment;
 import senior_project.foodscanner.ui.components.mealcalendar.CalendarDialog;
 import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
@@ -326,9 +328,11 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
             case R.id.button_calendar:
                 CalendarDialog.show(this, this, currentDate);
                 break;
-            case R.id.button_total_day:
-                TextDialog.show(this, Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)));
-                break;
+            case R.id.button_total_day:{
+                String title = "<b>Total Daily Nutrition</b><br>"+Settings.getInstance().formatDate(currentDate, Settings.DateFormat.mn_dn_yn);
+                MessageDialogFragment dialog = MessageDialogFragment.newInstance(Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)), Html.fromHtml(title), 0);
+                dialog.show(getFragmentManager(), "Total Day");
+                break;}
             case R.id.button_total_week:{
                 GregorianCalendar day1 = new GregorianCalendar();
                 day1.setTimeInMillis(currentDate);
@@ -337,10 +341,13 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 GregorianCalendar day2 = new GregorianCalendar();
                 day2.setTimeInMillis(currentDate);// today
 
-                Log.d("MealCalendar", Settings.getInstance().formatDate(day1) + " to " + Settings.getInstance().formatDate(day2));
+                List<Meal> meals = SQLQueryHelper.getMeals(day1, day2, true);
 
-                List<Meal> meals = SQLQueryHelper.getMeals(day1,day2,true);
-                TextDialog.show(this, Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)));
+                day2.add(Calendar.DATE, -1);
+                String title = "<b>Total 7 Day Nutrition</b><br>"+Settings.getInstance().formatDate(day1, Settings.DateFormat.mn_dn_yn) + " - " + Settings.getInstance().formatDate(day2, Settings.DateFormat.mn_dn_yn);
+
+                MessageDialogFragment dialog = MessageDialogFragment.newInstance(Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)), Html.fromHtml(title), 0);
+                dialog.show(getFragmentManager(), "Total Week");
                 break;}
             case R.id.button_total_month:{
                 GregorianCalendar day1 = new GregorianCalendar();
@@ -350,10 +357,14 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 GregorianCalendar day2 = new GregorianCalendar();
                 day2.setTimeInMillis(currentDate);// today
 
-                Log.d("MealCalendar", Settings.getInstance().formatDate(day1)+" to "+Settings.getInstance().formatDate(day2));
+                List<Meal> meals = SQLQueryHelper.getMeals(day1, day2, true);
 
-                List<Meal> meals = SQLQueryHelper.getMeals(day1,day2,true);
-                TextDialog.show(this, Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)));
+                day2.add(Calendar.DATE, -1);
+
+                String title = "<b>Total 28 Day Nutrition</b><br>"+Settings.getInstance().formatDate(day1, Settings.DateFormat.mn_dn_yn) + " - " + Settings.getInstance().formatDate(day2, Settings.DateFormat.mn_dn_yn);
+
+                MessageDialogFragment dialog = MessageDialogFragment.newInstance(Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)), Html.fromHtml(title), 0);
+                dialog.show(getFragmentManager(), "Total Month");
                 break;}
             case R.id.imageButton_prev:{
                 GregorianCalendar cal = new GregorianCalendar();
