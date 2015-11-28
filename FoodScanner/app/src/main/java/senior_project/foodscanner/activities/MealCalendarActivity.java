@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -260,9 +261,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         adapter.clear();
 
         // load meals from local into ui
-        List<Meal> meals = SQLQueryHelper.getMeals(day1, day2, true);
-        for(Meal meal:meals){
-            adapter.add(meal);
+        Object[] meals = SQLQueryHelper.getMeals(day1, day2, true).toArray();
+        Arrays.sort(meals);
+        for(Object meal:meals){
+            adapter.add((Meal)meal);
         }
 
         //TODO if empty load from backend into local, handle no connection case
