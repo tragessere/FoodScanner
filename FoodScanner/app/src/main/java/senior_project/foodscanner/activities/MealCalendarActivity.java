@@ -53,7 +53,7 @@ import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
  * - Clicking this will log out the user
  * - Maybe a drop down menu for account settings
  */
-public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, DatePickerDialog.OnDateSetListener, CalendarDialogFragment.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
+public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, CalendarDialogFragment.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
     private static final String SAVE_DATE = "currentDate";
     private static final int VIEW_MEAL = 0;
 
@@ -394,15 +394,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
             changeSelectedDay(System.currentTimeMillis());
         }
         return true;
-    }
-
-    @Override
-    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-        GregorianCalendar date = new GregorianCalendar();
-        date.set(Calendar.YEAR, year);
-        date.set(Calendar.MONTH, monthOfYear);
-        date.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        changeSelectedDay(date);
     }
 
     @Override
