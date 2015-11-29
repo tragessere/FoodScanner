@@ -18,6 +18,7 @@ import android.view.Gravity;
 import android.view.Surface;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,6 +37,8 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
 
     // Public fields
     public static final String EXTRA_FILENAME = "filename";
+    public static final String EXTRA_IMAGE_NAME = "image_name"; //optional
+    public static final String EXTRA_IMAGE_DESCRIPTION = "image_desc"; //optional
     public static final String RESULT_IMAGE_FILE = "image_file";
 
     // Image file format
@@ -51,6 +54,8 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     private int cameraId;
     private FrameLayout cameraContainer;
     private CameraView cameraView;
+    private TextView textView_Image_Title;
+    private TextView textView_Image_Desc;
     private int shutterOrientation;
 
     @Override
@@ -64,8 +69,25 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         }
 
         setContentView(R.layout.activity_camera);
+        textView_Image_Title = (TextView)findViewById(R.id.textView_image_title);
+        textView_Image_Desc = (TextView)findViewById(R.id.textView_image_count);
         cameraContainer = ((FrameLayout) findViewById(R.id.container_camera));
         cameraContainer.findViewById(R.id.imageButton_takePicture).setOnClickListener(this);
+
+        if(getIntent().hasExtra(EXTRA_IMAGE_NAME)) {
+            textView_Image_Title.setText(getIntent().getCharSequenceExtra(EXTRA_IMAGE_NAME));
+        }
+        else {
+            textView_Image_Title.setVisibility(View.GONE);
+        }
+
+        if(getIntent().hasExtra(EXTRA_IMAGE_DESCRIPTION)) {
+            textView_Image_Desc.setText(getIntent().getCharSequenceExtra(EXTRA_IMAGE_DESCRIPTION));
+        }
+        else {
+            textView_Image_Desc.setVisibility(View.GONE);
+        }
+
     }
 
     @Override

@@ -13,4 +13,16 @@
             android:layout_gravity="center_horizontal|bottom"
             android:src="@drawable/abc_btn_radio_to_on_mtrl_015"/>
 
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        layout="@layout/textview_image_title"
+        android:layout_gravity="left|top"/>
+
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        layout="@layout/textview_image_count"
+        android:layout_gravity="right|top"/>
+
 </FrameLayout>

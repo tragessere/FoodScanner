@@ -39,7 +39,6 @@ public class ErrorDialogFragment extends DialogFragment {
             }
         });
         return builder.create();
-
     }
 
     public interface ErrorDialogListener {
