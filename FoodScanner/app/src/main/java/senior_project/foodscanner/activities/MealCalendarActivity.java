@@ -1,6 +1,7 @@
 package senior_project.foodscanner.activities;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,9 +14,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
+import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -33,13 +33,11 @@ import senior_project.foodscanner.Nutritious;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
-import senior_project.foodscanner.database.SQLHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
 import senior_project.foodscanner.fragments.MessageDialogFragment;
-import senior_project.foodscanner.ui.components.ErrorDialogFragment;
-import senior_project.foodscanner.ui.components.mealcalendar.CalendarDialog;
+import senior_project.foodscanner.fragments.ErrorDialogFragment;
+import senior_project.foodscanner.fragments.CalendarDialogFragment;
 import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
-import senior_project.foodscanner.ui.components.mealcalendar.TextDialog;
 
 /**
  * Displays list or calendar of meals.
@@ -55,7 +53,7 @@ import senior_project.foodscanner.ui.components.mealcalendar.TextDialog;
  * - Clicking this will log out the user
  * - Maybe a drop down menu for account settings
  */
-public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, CalendarDialog.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
+public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, DatePickerDialog.OnDateSetListener, CalendarDialogFragment.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
     private static final String SAVE_DATE = "currentDate";
     private static final int VIEW_MEAL = 0;
 
@@ -93,6 +91,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         container_warning = findViewById(R.id.container_warning);
 
         button_calendar.setOnClickListener(this);
+        button_calendar.setOnLongClickListener(this);
         button_totalDay.setOnClickListener(this);
         button_totalWeek.setOnClickListener(this);
         button_totalMonth.setOnClickListener(this);
@@ -326,7 +325,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.button_calendar:
-                CalendarDialog.show(this, this, currentDate);
+                CalendarDialogFragment d = CalendarDialogFragment.newInstance(currentDate);
+                d.show(getFragmentManager(), "Calendar");
                 break;
             case R.id.button_total_day:{
                 String title = "<b>Total Daily Nutrition</b><br>"+Settings.getInstance().formatDate(currentDate, Settings.DateFormat.mn_dn_yn);
@@ -386,6 +386,23 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 // Do nothing
                 break;
         }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if(v.getId() == R.id.button_calendar){
+            changeSelectedDay(System.currentTimeMillis());
+        }
+        return true;
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        GregorianCalendar date = new GregorianCalendar();
+        date.set(Calendar.YEAR, year);
+        date.set(Calendar.MONTH, monthOfYear);
+        date.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        changeSelectedDay(date);
     }
 
     @Override
