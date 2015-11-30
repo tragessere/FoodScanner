@@ -1,6 +1,7 @@
 package senior_project.foodscanner.ui.components.tutorial;
 
 import android.graphics.Rect;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.view.View;
@@ -161,7 +162,11 @@ public class TutorialSequence implements SpringListener {
 	private void animateStart(TutorialCard currentPage) {
 		Rect statusBarBorder = new Rect();
 		mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(statusBarBorder);
-		float statusBarHeight = statusBarBorder.top;
+		float statusBarHeight;
+		if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+			statusBarHeight = statusBarBorder.top;
+		else
+			statusBarHeight = 0;
 
 		tutorialCard.setScaleY(0);
 		tutorialCard.setScaleX(0);
@@ -187,7 +192,11 @@ public class TutorialSequence implements SpringListener {
 
 		boolean positionTop = showTutorialInTopHalf(viewCenter[1], screenHeight, currentPage.getPosition());
 
-		endPosX = (screenWidth / 2) - (endSize[0] / 2) + margin;
+		if(endSize[0] >= screenWidth)
+			endPosX = margin;
+		else
+			endPosX = (screenWidth / 2) - (endSize[0] / 2);
+
 		if(positionTop)
 			endPosY = margin;
 		else
@@ -270,7 +279,11 @@ public class TutorialSequence implements SpringListener {
 			public void onAnimationEnd(Animation animation) {
 				Rect statusBarBorder = new Rect();
 				mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(statusBarBorder);
-				float statusBarHeight = statusBarBorder.top;
+				float statusBarHeight;
+				if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+					statusBarHeight = statusBarBorder.top;
+				else
+					statusBarHeight = 0;
 
 				float screenHeight = activityRoot.getHeight();
 				float screenWidth = activityRoot.getWidth();
@@ -299,7 +312,11 @@ public class TutorialSequence implements SpringListener {
 
 				boolean positionTop = showTutorialInTopHalf(viewCenter[1], screenHeight, currentPage.getPosition());
 
-				endPosX = (screenWidth / 2) - (endSize[0] / 2) + margin;
+				if(endSize[0] >= screenWidth)
+					endPosX = margin;
+				else
+					endPosX = (screenWidth / 2) - (endSize[0] / 2);
+
 				if (positionTop)
 					endPosY = margin;
 				else
