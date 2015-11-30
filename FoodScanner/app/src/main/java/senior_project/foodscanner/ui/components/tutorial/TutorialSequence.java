@@ -32,7 +32,6 @@ public class TutorialSequence implements SpringListener {
 	private AppCompatActivity mActivity;
 
 	private ViewGroup activityRoot;
-	View view;
 	private HighlightView background;
 	private CardView tutorialCard;
 	private View cardContents;
@@ -58,6 +57,8 @@ public class TutorialSequence implements SpringListener {
 	private float startScaleY;
 	private float endScaleX;
 	private float endScaleY;
+
+	private boolean exitWhenFinished = false;
 
 
 	/**
@@ -95,7 +96,7 @@ public class TutorialSequence implements SpringListener {
 		activityRoot.getLocationOnScreen(position);
 		parentTop = position[1];
 
-		view = View.inflate(mActivity, R.layout.tutorial_page, activityRoot);
+		View view = View.inflate(mActivity, R.layout.tutorial_page, activityRoot);
 
 		background = (HighlightView) view.findViewById(R.id.background);
 		tutorialCard = (CardView) view.findViewById(R.id.tutorial_card);
@@ -251,6 +252,7 @@ public class TutorialSequence implements SpringListener {
 		viewCenter[1] -= parentTop;
 		background.exit(radius);
 
+		exitWhenFinished = true;
 		mSpring.setCurrentValue(0, false);
 	}
 
@@ -350,6 +352,12 @@ public class TutorialSequence implements SpringListener {
 	@Override
 	public void onSpringUpdate(Spring spring) {
 		float value = (float) spring.getCurrentValue();
+
+		if(exitWhenFinished && value >= 1) {
+			spring.setAtRest();
+			activityRoot.removeView(background);
+		}
+
 		tutorialCard.setScaleY((endScaleY - startScaleY) * value + startScaleY);
 		tutorialCard.setScaleX((endScaleX - startScaleX) * value + startScaleX);
 
