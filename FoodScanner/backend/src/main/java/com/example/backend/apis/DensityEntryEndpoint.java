@@ -61,4 +61,29 @@ public class DensityEntryEndpoint {
 
         return CollectionResponse.<DensityEntry>builder().setItems(results).build();
     }
+
+    /**
+     * Gets density entries with name similar to the name provided.
+     * @param name name of the density entry
+     * @return CollectionResponse of of density entries partially matching the provided name
+     */
+    @ApiMethod(name = "getDensitiesWithNameSimilarTo")
+    public CollectionResponse<DensityEntry> getDensitiesWithNameSimilarTo(@Named("name") String name) {
+
+        Query<DensityEntry> query = ofy().load().type(DensityEntry.class);
+        List<DensityEntry> results = new ArrayList<DensityEntry>();
+        QueryResultIterator<DensityEntry> iterator = query.iterator();
+
+        DensityEntry entry;
+        while (iterator.hasNext())
+        {
+            entry = iterator.next();
+            boolean contains = entry.getName().toLowerCase().matches(".*\\b" + name.toLowerCase() + "\\b.*");
+            if(contains) {
+                results.add(entry);
+            }
+        }
+
+        return CollectionResponse.<DensityEntry>builder().setItems(results).build();
+    }
 }
