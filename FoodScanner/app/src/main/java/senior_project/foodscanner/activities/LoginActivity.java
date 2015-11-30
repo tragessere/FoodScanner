@@ -14,7 +14,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -26,6 +25,7 @@ import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
+import senior_project.foodscanner.fragments.MessageDialogFragment;
 
 /**
  * Created by Evan on 9/16/2015.
@@ -179,11 +179,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 	@Override
 	public void onClick(View v) {
 		if(v.getId() == R.id.imageView_logo) {
-			AlertDialog.Builder d = new AlertDialog.Builder(this);
-			d.setMessage(Constants.LEGAL_LOGO_ATTRIBUTION_TEXT);
-			d.setTitle("FoodScanner Logo");
-			d.setIcon(R.drawable.ic_launcher);
-			d.show();
+			MessageDialogFragment dialog = MessageDialogFragment.newInstance(Constants.LEGAL_LOGO_ATTRIBUTION_TEXT, "FoodScanner Logo", R.drawable.ic_launcher);
+			dialog.show(getFragmentManager(), "Logo");
 		}
 	}
 
