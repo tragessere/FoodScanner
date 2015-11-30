@@ -13,27 +13,32 @@ import senior_project.foodscanner.database.SQLQueryHelper;
 /**
  * This class represents a meal.
  */
-public class Meal extends Nutritious implements Serializable {
+public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
 
     private static final long serialVersionUID = 418772005483570552L;
 
     public enum MealType {
-        BREAKFAST("Breakfast"),
-        BRUNCH("Brunch"),
-        LUNCH("Lunch"),
-        SNACK("Snack"),
-        DINNER("Dinner"),
-        DESSERT("Dessert");
+        BREAKFAST("Breakfast", 0),
+        BRUNCH("Brunch", 1),
+        LUNCH("Lunch", 2),
+        SNACK("Snack", 3),
+        DINNER("Dinner", 4),
+        DESSERT("Dessert", 5);
 
 
         private final String name;
+        private final int priority;
 
-        MealType(String name) {
+        MealType(String name, int priority) {
             this.name = name;
+            this.priority = priority;
         }
 
         public String getName() {
             return name;
+        }
+        public int getPriority() {
+            return priority;
         }
     }
 
@@ -158,5 +163,18 @@ public class Meal extends Nutritious implements Serializable {
     @Override
     public String toString() {
         return getClass().getSimpleName() + ": id=" + id + ", type=" + type + ", time=" + date + ", food item count=" + food.size();
+    }
+
+    @Override
+    public int compareTo(Meal another) {
+        int p1 = type.getPriority();
+        int p2 = another.getType().getPriority();
+        if(p1 > p2){
+            return 1;
+        }
+        else if(p1 < p2){
+            return -1;
+        }
+        return 0;
     }
 }

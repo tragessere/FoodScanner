@@ -1,24 +1,26 @@
 package senior_project.foodscanner.activities;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
 import android.support.v7.app.AppCompatActivity;
 
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
+import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -31,12 +33,11 @@ import senior_project.foodscanner.Nutritious;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
-import senior_project.foodscanner.database.SQLHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
-import senior_project.foodscanner.ui.components.ErrorDialogFragment;
-import senior_project.foodscanner.ui.components.mealcalendar.CalendarDialog;
+import senior_project.foodscanner.fragments.MessageDialogFragment;
+import senior_project.foodscanner.fragments.ErrorDialogFragment;
+import senior_project.foodscanner.fragments.CalendarDialogFragment;
 import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
-import senior_project.foodscanner.ui.components.mealcalendar.TextDialog;
 
 /**
  * Displays list or calendar of meals.
@@ -52,7 +53,7 @@ import senior_project.foodscanner.ui.components.mealcalendar.TextDialog;
  * - Clicking this will log out the user
  * - Maybe a drop down menu for account settings
  */
-public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, CalendarDialog.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
+public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, CalendarDialogFragment.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
     private static final String SAVE_DATE = "currentDate";
     private static final int VIEW_MEAL = 0;
 
@@ -90,6 +91,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         container_warning = findViewById(R.id.container_warning);
 
         button_calendar.setOnClickListener(this);
+        button_calendar.setOnLongClickListener(this);
         button_totalDay.setOnClickListener(this);
         button_totalWeek.setOnClickListener(this);
         button_totalMonth.setOnClickListener(this);
@@ -260,9 +262,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         adapter.clear();
 
         // load meals from local into ui
-        List<Meal> meals = SQLQueryHelper.getMeals(day1, day2, true);
-        for(Meal meal:meals){
-            adapter.add(meal);
+        Object[] meals = SQLQueryHelper.getMeals(day1, day2, true).toArray();
+        Arrays.sort(meals);
+        for(Object meal:meals){
+            adapter.add((Meal)meal);
         }
 
         //TODO if empty load from backend into local, handle no connection case
@@ -322,11 +325,14 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.button_calendar:
-                CalendarDialog.show(this, this, currentDate);
+                CalendarDialogFragment d = CalendarDialogFragment.newInstance(currentDate);
+                d.show(getFragmentManager(), "Calendar");
                 break;
-            case R.id.button_total_day:
-                TextDialog.show(this, Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)));
-                break;
+            case R.id.button_total_day:{
+                String title = "<b>Total Daily Nutrition</b><br>"+Settings.getInstance().formatDate(currentDate, Settings.DateFormat.mn_dn_yn);
+                MessageDialogFragment dialog = MessageDialogFragment.newInstance(Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)), Html.fromHtml(title), 0);
+                dialog.show(getFragmentManager(), "Total Day");
+                break;}
             case R.id.button_total_week:{
                 GregorianCalendar day1 = new GregorianCalendar();
                 day1.setTimeInMillis(currentDate);
@@ -335,10 +341,13 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 GregorianCalendar day2 = new GregorianCalendar();
                 day2.setTimeInMillis(currentDate);// today
 
-                Log.d("MealCalendar", Settings.getInstance().formatDate(day1) + " to " + Settings.getInstance().formatDate(day2));
+                List<Meal> meals = SQLQueryHelper.getMeals(day1, day2, true);
 
-                List<Meal> meals = SQLQueryHelper.getMeals(day1,day2,true);
-                TextDialog.show(this, Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)));
+                day2.add(Calendar.DATE, -1);
+                String title = "<b>Total 7 Day Nutrition</b><br>"+Settings.getInstance().formatDate(day1, Settings.DateFormat.mn_dn_yn) + " - " + Settings.getInstance().formatDate(day2, Settings.DateFormat.mn_dn_yn);
+
+                MessageDialogFragment dialog = MessageDialogFragment.newInstance(Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)), Html.fromHtml(title), 0);
+                dialog.show(getFragmentManager(), "Total Week");
                 break;}
             case R.id.button_total_month:{
                 GregorianCalendar day1 = new GregorianCalendar();
@@ -348,10 +357,14 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 GregorianCalendar day2 = new GregorianCalendar();
                 day2.setTimeInMillis(currentDate);// today
 
-                Log.d("MealCalendar", Settings.getInstance().formatDate(day1)+" to "+Settings.getInstance().formatDate(day2));
+                List<Meal> meals = SQLQueryHelper.getMeals(day1, day2, true);
 
-                List<Meal> meals = SQLQueryHelper.getMeals(day1,day2,true);
-                TextDialog.show(this, Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)));
+                day2.add(Calendar.DATE, -1);
+
+                String title = "<b>Total 28 Day Nutrition</b><br>"+Settings.getInstance().formatDate(day1, Settings.DateFormat.mn_dn_yn) + " - " + Settings.getInstance().formatDate(day2, Settings.DateFormat.mn_dn_yn);
+
+                MessageDialogFragment dialog = MessageDialogFragment.newInstance(Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)), Html.fromHtml(title), 0);
+                dialog.show(getFragmentManager(), "Total Month");
                 break;}
             case R.id.imageButton_prev:{
                 GregorianCalendar cal = new GregorianCalendar();
@@ -373,6 +386,14 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 // Do nothing
                 break;
         }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if(v.getId() == R.id.button_calendar){
+            changeSelectedDay(System.currentTimeMillis());
+        }
+        return true;
     }
 
     @Override

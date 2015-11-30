@@ -28,7 +28,7 @@ import java.io.Serializable;
 
 import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.ui.components.ErrorDialogFragment;
+import senior_project.foodscanner.fragments.ErrorDialogFragment;
 import senior_project.foodscanner.ui.components.camera.CameraView;
 
 /**

@@ -58,7 +58,7 @@ public class Settings {
     private int dinnerStartAuto;
     private int dinnerEndAuto;
 
-    private static DateFormatSymbols format = new DateFormatSymbols();
+    private static DateFormatSymbols dateFormatSymbols = new DateFormatSymbols();
     private static final String[] am_pm = {"am", "pm"};
 
     private Settings(Context context) {
@@ -221,30 +221,36 @@ public class Settings {
      * @return
      */
     public String formatDate(Meal meal){
-        return formatDate(meal.getDate());
+        return formatDate(meal.getDate(), getDateFormat());
+    }
+
+    public String formatDate(Meal meal, DateFormat format){
+        return formatDate(meal.getDate(), format);
     }
 
     public String formatDate(long date){
         GregorianCalendar cal = new GregorianCalendar();
         cal.setTimeInMillis(date);
-        return formatDate(cal);
+        return formatDate(cal, getDateFormat());
     }
 
-    /**
-     * Returns date as a string formatted according to current settings.
-     * @return
-     */
+    public String formatDate(long date, DateFormat format){
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTimeInMillis(date);
+        return formatDate(cal, format);
+    }
+
     public String formatDate(int year, int month, int dayOfMonth){
-        return formatDate(new GregorianCalendar(year,month,dayOfMonth));
+        return formatDate(new GregorianCalendar(year,month,dayOfMonth), getDateFormat());
     }
 
-    /**
-     * Returns date as a string formatted according to current settings.
-     * @return
-     */
     public String formatDate(GregorianCalendar cal){
+        return formatDate(cal, getDateFormat());
+    }
+
+    public String formatDate(GregorianCalendar cal, DateFormat format){
         int year = cal.get(GregorianCalendar.YEAR);
-        int month = cal.get(GregorianCalendar.MONTH);
+        int month = cal.get(GregorianCalendar.MONTH);// starting from 0
         int dayOfMonth = cal.get(GregorianCalendar.DAY_OF_MONTH);
 
         if(setting_DateFormat_TYT){
@@ -262,15 +268,15 @@ public class Settings {
             }
         }
 
-        String s = "";
-        switch(setting_DateFormat){
+        String s;
+        switch(format){
             case mn_dn_yn:
                 String y = ""+year;
-                s = month+"/"+dayOfMonth+"/"+y.substring(2);
+                s = (month+1)+"/"+dayOfMonth+"/"+y.substring(2);
                 break;
             case dw_mw_dn:
-                String day = format.getWeekdays()[cal.get(GregorianCalendar.DAY_OF_WEEK)];
-                s = day + ", " + format.getShortMonths()[month] +" "+ dayOfMonth;
+                String day = dateFormatSymbols.getWeekdays()[cal.get(GregorianCalendar.DAY_OF_WEEK)];
+                s = day + ", " + dateFormatSymbols.getShortMonths()[month] +" "+ dayOfMonth;
                 if(year != new GregorianCalendar().get(Calendar.YEAR)){
                     s += ", " + year;
                 }
