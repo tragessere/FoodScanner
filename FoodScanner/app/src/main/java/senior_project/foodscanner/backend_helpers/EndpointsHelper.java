@@ -158,6 +158,18 @@ public class EndpointsHelper
 		}
 	}
 
+	public class GetPartialMatchDensity extends AsyncTask<String, Void, List<DensityEntry>> {
+		@Override
+		protected  List<DensityEntry> doInBackground(String...strings) {
+			try {
+				return mAPI.getDensitiesWithNameSimilarTo(strings[0]).execute().getItems();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+	}
+
 	public class SaveMealTask extends AsyncTask<Meal, Void, Meal> {
 		@Override
 		protected Meal doInBackground(Meal... meals) {
