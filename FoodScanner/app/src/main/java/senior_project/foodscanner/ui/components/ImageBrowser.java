@@ -22,11 +22,14 @@ import senior_project.foodscanner.R;
  * Interactive view that allows browsing through a set number of images.
  */
 public class ImageBrowser extends FrameLayout implements View.OnClickListener {
+
+    public static int DIRECTION_PREVIOUS = 0;
+    public static int DIRECTION_NEXT = 1;
+
     private String[] imgNames;
     private ImageSwitcher imgSwitcher;
     private Context context;
-    private FinishButtonListener fbl;
-    private ActionButtonListener abl;
+    private ImageBrowserListener listener;
     private Drawable defaultImage;
     private Drawable[] images;
     private TextView textView_Name;
@@ -96,8 +99,8 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
     public void setIsCyclic(boolean b) {
         isCyclic = b;
         if(isCyclic) {
-            imgBt_Next.setEnabled(true);
-            imgBt_Prev.setEnabled(true);
+            setEnabledButton_Next(true);
+            setEnabledButton_Previous(true);
         }
     }
 
@@ -114,9 +117,9 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
     private void inflate() {
         LayoutInflater lf = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View browser = lf.inflate(R.layout.image_browser_layout, this, true);
-        textView_Name = ((TextView) browser.findViewById(R.id.textView_title));
+        textView_Name = ((TextView) browser.findViewById(R.id.textView_image_title));
         textView_Name.setText(imgNames[currentIndex]);
-        textView_Index = ((TextView) browser.findViewById(R.id.textView_count));
+        textView_Index = ((TextView) browser.findViewById(R.id.textView_image_count));
         textView_Index.setText((currentIndex + 1) + "/" + imgNames.length);
         imgBt_Next = (ImageButton) browser.findViewById(R.id.imageButton_next);
         imgBt_Next.setOnClickListener(this);
@@ -135,12 +138,53 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
        // imgSwitcher.setOutAnimation(context, android.R.anim.slide_out_right);
     }
 
+    private void setEnabledButton_Next(boolean enabled){
+        imgBt_Next.setEnabled(enabled);
+        if(enabled) {
+            imgBt_Next.setVisibility(View.VISIBLE);
+        }
+        else{
+            imgBt_Next.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void setEnabledButton_Previous(boolean enabled){
+        imgBt_Prev.setEnabled(enabled);
+        if(enabled) {
+            imgBt_Prev.setVisibility(View.VISIBLE);
+        }
+        else{
+            imgBt_Prev.setVisibility(View.INVISIBLE);
+        }
+    }
+
     public void setActionButtonText(String text) {
         button_Action.setText(text);
     }
 
-    public void setCurrentIndex(int index) {
-        currentIndex = index;
+    public void nextIndex(){
+        int newIndex = currentIndex + 1;
+        if(newIndex < getNumImages() || isCyclic) {
+            setCurrentIndex(currentIndex + 1);
+        }
+    }
+
+    public void previousIndex(){
+        int newIndex = currentIndex - 1;
+        if(newIndex >= 0 || isCyclic) {
+            setCurrentIndex(currentIndex - 1);
+        }
+    }
+
+    public int getNextIndex(){
+        return getCycledIndex(currentIndex+1);
+    }
+
+    public int getPreviousIndex(){
+        return getCycledIndex(currentIndex-1);
+    }
+
+    private int getCycledIndex(int index){
         if(isCyclic) {
             if(currentIndex < 0) {
                 currentIndex = getNumImages() + currentIndex % getNumImages();
@@ -148,6 +192,16 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
                 currentIndex = currentIndex % (getNumImages()-1);
             }
         }
+        return index;
+    }
+
+    /**
+     * Sets current index of image browser. If cyclic, then indexes out of bounds are cycled over.
+     * @param index
+     */
+    public void setCurrentIndex(int index) {
+        int oldIndex = currentIndex;
+        currentIndex = getCycledIndex(index);
 
         Drawable img = images[currentIndex];
         if(img == null){
@@ -159,15 +213,19 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
 
         if(!isCyclic) {
             if(currentIndex == 0) {
-                imgBt_Prev.setEnabled(false);
+                setEnabledButton_Previous(false);
             } else {
-                imgBt_Prev.setEnabled(true);
+                setEnabledButton_Previous(true);
             }
             if(currentIndex == getNumImages() - 1) {
-                imgBt_Next.setEnabled(false);
+                setEnabledButton_Next(false);
             } else {
-                imgBt_Next.setEnabled(true);
+                setEnabledButton_Next(true);
             }
+        }
+
+        if(listener != null) {
+            listener.onImageBrowserIndexChanged(oldIndex, currentIndex);
         }
     }
 
@@ -204,19 +262,19 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.imageButton_next:
-                setCurrentIndex(currentIndex + 1);
+                nextIndex();
                 break;
             case R.id.imageButton_prev:
-                setCurrentIndex(currentIndex - 1);
+                previousIndex();
                 break;
             case R.id.button_finish:
-                if(fbl != null) {
-                    fbl.onFinishButton();
+                if(listener != null) {
+                    listener.onImageBrowserFinish();
                 }
                 break;
             case R.id.button_action:
-                if(abl != null) {
-                    abl.onActionButton();
+                if(listener != null) {
+                    listener.onImageBrowserAction();
                 }
                 break;
             default:
@@ -224,19 +282,14 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
         }
     }
 
-    public void setFinishButtonListener(FinishButtonListener listener) {
-        fbl = listener;
+    public void setImageBrowserListener(ImageBrowserListener listener) {
+        this.listener = listener;
     }
 
-    public void setActionButtonListener(ActionButtonListener listener) {
-        abl = listener;
+    public interface ImageBrowserListener {
+        void onImageBrowserFinish();
+        void onImageBrowserAction();
+        void onImageBrowserIndexChanged(int oldIndex, int newIndex);
     }
 
-    public interface FinishButtonListener {
-        void onFinishButton();
-    }
-
-    public interface ActionButtonListener {
-        void onActionButton();
-    }
 }
