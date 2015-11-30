@@ -141,9 +141,7 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
 
     @Override
     public void onImageBrowserIndexChanged(int oldIndex, int newIndex) {
-        if(picBrowser.getCurrentImage() == null) {
-            //openCamera();
-        }
+        // Nothing
     }
 
     @Override
@@ -186,6 +184,7 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
         intent.putExtra(CameraActivity.EXTRA_FILENAME, picBrowser.getCurrentImageName());
         intent.putExtra(CameraActivity.EXTRA_IMAGE_NAME, picBrowser.getCurrentImageName());
         intent.putExtra(CameraActivity.EXTRA_IMAGE_DESCRIPTION, (picBrowser.getCurrentIndex() + 1) + "/" + picBrowser.getNumImages());
+        //TODO Evan: put Extra CameraActivity.CameraActivity_HelpActor
         startActivityForResult(intent, RESULT_CAMERA);
     }
 

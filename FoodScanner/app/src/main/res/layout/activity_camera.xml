@@ -25,4 +25,12 @@
         layout="@layout/textview_image_count"
         android:layout_gravity="right|top"/>
 
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageButton_help"
+        android:layout_gravity="right|bottom"
+        android:src="@android:drawable/ic_menu_help"
+        android:background="#00000000"/>
+
 </FrameLayout>

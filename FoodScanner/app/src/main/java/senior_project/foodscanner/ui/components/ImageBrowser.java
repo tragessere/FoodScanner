@@ -99,8 +99,8 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
     public void setIsCyclic(boolean b) {
         isCyclic = b;
         if(isCyclic) {
-            imgBt_Next.setEnabled(true);
-            imgBt_Prev.setEnabled(true);
+            setEnabledButton_Next(true);
+            setEnabledButton_Previous(true);
         }
     }
 
@@ -136,6 +136,26 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
         //TODO animations
        // imgSwitcher.setInAnimation(context, android.R.anim.slide_in_left);
        // imgSwitcher.setOutAnimation(context, android.R.anim.slide_out_right);
+    }
+
+    private void setEnabledButton_Next(boolean enabled){
+        imgBt_Next.setEnabled(enabled);
+        if(enabled) {
+            imgBt_Next.setVisibility(View.VISIBLE);
+        }
+        else{
+            imgBt_Next.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void setEnabledButton_Previous(boolean enabled){
+        imgBt_Prev.setEnabled(enabled);
+        if(enabled) {
+            imgBt_Prev.setVisibility(View.VISIBLE);
+        }
+        else{
+            imgBt_Prev.setVisibility(View.INVISIBLE);
+        }
     }
 
     public void setActionButtonText(String text) {
@@ -193,14 +213,14 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
 
         if(!isCyclic) {
             if(currentIndex == 0) {
-                imgBt_Prev.setEnabled(false);
+                setEnabledButton_Previous(false);
             } else {
-                imgBt_Prev.setEnabled(true);
+                setEnabledButton_Previous(true);
             }
             if(currentIndex == getNumImages() - 1) {
-                imgBt_Next.setEnabled(false);
+                setEnabledButton_Next(false);
             } else {
-                imgBt_Next.setEnabled(true);
+                setEnabledButton_Next(true);
             }
         }
 
