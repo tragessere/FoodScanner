@@ -117,11 +117,15 @@ public class HighlightView extends FrameLayout implements SpringListener {
 		mPaint.setStyle(Paint.Style.FILL);
 		mCanvas.drawPaint(mPaint);
 
-		mPaint.setXfermode(cutout);
-		mCanvas.drawCircle(centerStep[0], centerStep[1], radiusStep, mPaint);
-		mPaint.setXfermode(null);
+		if(centerStep == null) {
+			canvas.drawBitmap(mBitmap, 0, 0, mPaint);
+		} else {
+			mPaint.setXfermode(cutout);
+			mCanvas.drawCircle(centerStep[0], centerStep[1], radiusStep, mPaint);
+			mPaint.setXfermode(null);
 
-		canvas.drawBitmap(mBitmap, 0, 0, mPaint);
+			canvas.drawBitmap(mBitmap, 0, 0, mPaint);
+		}
 	}
 
 

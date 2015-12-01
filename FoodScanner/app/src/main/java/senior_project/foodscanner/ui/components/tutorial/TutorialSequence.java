@@ -43,7 +43,7 @@ public class TutorialSequence implements SpringListener {
 	private Button buttonNext;
 
 	private List<TutorialCard> allPages;
-	private int currentPosition = -1;
+	private int currentPosition;
 
 	private float parentTop;
 	private float margin;
@@ -59,6 +59,8 @@ public class TutorialSequence implements SpringListener {
 	private float endScaleX;
 	private float endScaleY;
 
+	private boolean isActive = false;
+	private boolean isAnimating = false;
 	private boolean exitWhenFinished = false;
 
 
@@ -92,6 +94,9 @@ public class TutorialSequence implements SpringListener {
 	 * Begin the tutorial process
 	 */
 	public void Start() {
+		isActive = true;
+		currentPosition = -1;
+
 		activityRoot = (ViewGroup) ((ViewGroup) mActivity.findViewById(android.R.id.content)).getChildAt(0);
 		int[] position = new int[2];
 		activityRoot.getLocationOnScreen(position);
@@ -134,7 +139,24 @@ public class TutorialSequence implements SpringListener {
 		nextPosition();
 	}
 
-	private void nextPosition() {
+	/**
+	 * Check whether the tutorial is currently running or not.
+	 *
+	 * @return	True if the tutorial is currently showing, false otherwise.
+	 */
+	public boolean isActive() {
+		return isActive;
+	}
+
+	/**
+	 * Advance the tutorial by one page.
+	 */
+	public void nextPosition() {
+		if(isAnimating)
+			return;
+
+		isAnimating = true;
+
 		currentPosition++;
 
 		if(currentPosition >= allPages.size()) {
@@ -150,13 +172,33 @@ public class TutorialSequence implements SpringListener {
 
 	}
 
-	private void previousPosition() {
+	/**
+	 * Move the tutorial back to the previous page.
+	 */
+	public void previousPosition() {
+		if(isAnimating)
+			return;
+
+		isAnimating = true;
+
 		currentPosition--;
 
 		if(currentPosition <= -1)
 			animateEnd(allPages.get(0));
 		else
 			animateBetween(allPages.get(currentPosition));
+	}
+
+	/**
+	 * Exit the tutorial with whatever page is currently showing.
+	 */
+	public void exitTutorial() {
+		if(isAnimating)
+			return;
+
+		isAnimating = true;
+
+		animateEnd(allPages.get(currentPosition));
 	}
 
 	private void animateStart(TutorialCard currentPage) {
@@ -373,6 +415,11 @@ public class TutorialSequence implements SpringListener {
 		if(exitWhenFinished && value >= 1) {
 			spring.setAtRest();
 			activityRoot.removeView(background);
+			isActive = false;
+			exitWhenFinished = false;
+		} else if (value >= 1) {
+			//Turn off the button lock slightly before finishing the animation so the buttons don't feel unresponsive.
+			isAnimating = false;
 		}
 
 		tutorialCard.setScaleY((endScaleY - startScaleY) * value + startScaleY);

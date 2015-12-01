@@ -63,6 +63,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private long currentDate;
     private ArrayList<Meal> meals = new ArrayList<>();
 
+    private TutorialSequence sequence;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +95,15 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         }
 
         username = getIntent().getStringExtra(LoginActivity.EXTRA_ACCOUNT_NAME);
+
+
+
+        sequence = new TutorialSequence(this);
+
+        TutorialCard page = new TutorialCard(button_totalDay, "test title", "subtitle", "some text to put into the body of the message for someone to read which will make them understand");
+        TutorialCard page2 = new TutorialCard(button_calendar, "Calendar stuff", "it's cool", "Currently under construction, sorry.");
+        sequence.addCard(page);
+        sequence.addCard(page2);
 
         // TODO determine when to upload meals to server
         // TODO indicator on meals that aren't uploaded
@@ -129,15 +140,29 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
         switch (id)  {
             case R.id.action_settings:
+                if(sequence.isActive())
+                    sequence.exitTutorial();
+
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             case R.id.action_tutorial:
-                showTutorial();
+                if(sequence.isActive())
+                    sequence.exitTutorial();
+                else
+                    sequence.Start();
                 return true;
         }
 
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(sequence.isActive())
+            sequence.previousPosition();
+        else
+            super.onBackPressed();
     }
 
     private Meal createMeal() {
@@ -315,15 +340,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
             default:
                 break;
         }
-    }
-
-    private void showTutorial() {
-        TutorialSequence sequence = new TutorialSequence(this);
-
-        TutorialCard page = new TutorialCard(button_totalDay, "test title", "subtitle", "some text to put into the body of the message for someone to read which will make them understand");
-        sequence.addCard(page);
-
-        sequence.Start();
     }
 
 }
