@@ -1,7 +1,9 @@
 package senior_project.foodscanner.activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -10,8 +12,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+
 import java.util.Calendar;
 
+import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
 
@@ -26,6 +31,7 @@ public class SettingsActivity extends AppCompatActivity {
 	View setTimesButton;
 	TextView currentTimeSetting;
 	View logoutButton;
+	TextView usernameText;
 
 	Settings settings;
 	Calendar calendarExample;
@@ -41,6 +47,7 @@ public class SettingsActivity extends AppCompatActivity {
 		setTimesButton = findViewById(R.id.manual_meal_time_layout);
 		currentTimeSetting = (TextView) findViewById(R.id.meal_time_current);
 		logoutButton = findViewById(R.id.logout_layout);
+		usernameText = (TextView) findViewById(R.id.logout_username);
 
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -49,6 +56,12 @@ public class SettingsActivity extends AppCompatActivity {
 		calendarExample = Calendar.getInstance();
 		calendarExample.set(0, 0, 0, 13, 0);
 		setHourFormat(settings.getTimeFormat().equals(Settings.TimeFormat._24));
+
+		SharedPreferences prefs = getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE);
+		GoogleAccountCredential credential = GoogleAccountCredential.usingAudience(this.getApplicationContext(), "server:client_id:" + Constants.WEB_CLIENT_ID);
+		credential.setSelectedAccountName(prefs.getString(Constants.PREF_ACCOUNT_NAME, null));
+
+		usernameText.setText(credential.getSelectedAccountName());
 
 		setListeners();
 	}
