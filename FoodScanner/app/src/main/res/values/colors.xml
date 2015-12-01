@@ -6,6 +6,8 @@
     <color name="Primary.Light">#B3E5FC</color>
     <color name="Accent">#FF5252</color>
 
+    <color name="Warning">#DFDF00</color>
+
     <color name="Text.Primary">#212121</color>
     <color name="Text.Primary.Disabled">#8A8A8A</color>
     <color name="Text.Secondary">#727272</color>
