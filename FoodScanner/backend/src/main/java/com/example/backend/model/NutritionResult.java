@@ -11,7 +11,6 @@ public class NutritionResult {
 
     @Id
     private Long id;
-    private FoodItem foodItem;
     private Integer calories;
     private Integer totalFat;
     private Integer saturatedFat;
@@ -25,7 +24,6 @@ public class NutritionResult {
 
     // Getters
     public Long getId() { return id; }
-    public FoodItem getFoodItem() { return foodItem; }
     public Integer getCalories() { return calories; }
     public Integer getTotalFat() { return totalFat; }
     public Integer getSaturatedFat() { return saturatedFat; }
@@ -40,7 +38,6 @@ public class NutritionResult {
 
     // Setters
     public void setId(Long id) { this.id = id; }
-    public void setFoodItem(FoodItem foodItem) { this.foodItem = foodItem; }
     public void setCalories(Integer value) { this.calories = value; }
     public void setTotalFat(Integer value) { this.calories = value; }
     public void setSaturatedFat(Integer value) { this.calories = value; }
