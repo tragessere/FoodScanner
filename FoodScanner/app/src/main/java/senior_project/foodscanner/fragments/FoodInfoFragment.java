@@ -66,9 +66,9 @@ public class FoodInfoFragment extends DialogFragment {
         info.append("<b>Brand:</b>  ");
         info.append(food.getBrand());
 
-        if (isSaved) {
-            info.append("<br><b>Portions:</b> ");
-            info.append(food.getNumPortions());
+        if (isSaved && food.getNumServings() != 0) {
+            info.append("<br><b>Servings:</b> ");
+            info.append(food.getNumServings());
         }
 
         info.append("<br><b>Serving Size:</b>  ");
@@ -88,18 +88,8 @@ public class FoodInfoFragment extends DialogFragment {
             }
         }
 
-        // TEMP: Display whether volume, mass, or neither need to be calculated.
-//        info.append("<br><b>Calculate:</b> ");
-//        if (food.needCalculateMass()) {
-//            info.append("mass");
-//        } else if(food.needCalculateVol()) {
-//            info.append("volume");
-//        } else {
-//            info.append("nothing");
-//        }
-
         // TEMP: Display volume
-        if (food.needCalculateVol() && food.getVolume() != 0.0) {
+        if (food.usesVolume() && food.getVolume() != 0.0) {
             info.append("<br><b>Volume:</b> ");
             NumberFormat formatter = new DecimalFormat("#0.00");
             info.append(formatter.format(food.getVolume()) +

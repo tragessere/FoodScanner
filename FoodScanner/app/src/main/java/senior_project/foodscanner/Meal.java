@@ -94,19 +94,22 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         return date;
     }
 
-    public void addFoodItem(FoodItem item) {
+    /**
+     * @param item - food item to be added
+     * @return true is success, false is failure
+     */
+    public boolean addFoodItem(FoodItem item) {
         // Check if food item has already been added
         for(FoodItem fi : food) {
             if(fi.equals(item)) {
-                // Add one more portion of food item
-                fi.addPortion();
-                return;
+                return false;  // Can only add food items once, for this demo
             }
         }
 
         // Food item hasn't already been added
         food.add(item);
         setIsChanged(true);
+        return true;
     }
 
     public void removeFoodItem(FoodItem item) {
@@ -123,7 +126,7 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
     }
 
     public void replaceFoodItem(FoodItem oldFood, FoodItem newFood) {
-        newFood.replacePortions(oldFood.getPortions());
+        newFood.setVolume(oldFood.getCubicVolume());
         this.removeFoodItem(oldFood);
         this.addFoodItem(newFood);
         setIsChanged(true);

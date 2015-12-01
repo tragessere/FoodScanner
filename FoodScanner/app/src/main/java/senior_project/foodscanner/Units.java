@@ -34,17 +34,8 @@ public class Units {
             return food;
         }
 
-        int numPortions = food.getNumPortions();
-        List<FoodItem.Portion> portions = food.getPortions();
-
         if (food.usesMass()) {
-            for (int i = 0; i < numPortions; i++) {
-                FoodItem.Portion tempPort = food.getPortion(i);
-                tempPort.setVolume(tempPort.getVolume() * ML_IN_CUBIC_INCH);
-                portions.set(i, tempPort);
-            }
-
-            food.replacePortions(portions);
+            food.setVolume(food.getVolume() * ML_IN_CUBIC_INCH);
             food.setNeedConvertVol(false);
             return food;
 
@@ -70,12 +61,7 @@ public class Units {
                 conversion = FL_OZ_IN_CUBIC_INCH;
             }
 
-            for (int i = 0; i < numPortions; i++) {
-                FoodItem.Portion tempPort = food.getPortion(i);
-                tempPort.setVolume(tempPort.getVolume() * conversion);
-                portions.set(i, tempPort);
-            }
-            food.replacePortions(portions);
+            food.setVolume(food.getVolume() * conversion);
             food.setNeedConvertVol(false);
             return food;
         }
@@ -88,13 +74,6 @@ public class Units {
     Converts mass (in grams, from density entries being g/ml) to needed mass unit.
      */
     public static FoodItem convertMass(FoodItem food) {
-        if (!food.needConvertMass()) {
-            // mass has already been converted
-            return food;
-        }
-
-        int numPortions = food.getNumPortions();
-        List<FoodItem.Portion> portions = food.getPortions();
 
         String unit = food.getActualServingSizeUnit();
         double conversion;
@@ -107,13 +86,8 @@ public class Units {
             conversion = MG_IN_GRAM;
         }
 
-        for (int i = 0; i < numPortions; i++) {
-            FoodItem.Portion tempPort = food.getPortion(i);
-            tempPort.setMass(tempPort.getMass() * conversion);
-            portions.set(i, tempPort);
-        }
-        food.replacePortions(portions);
-        food.setNeedConvertMass(false);
+        food.setMass(food.getMass() * conversion);
+
         return food;
     }
 

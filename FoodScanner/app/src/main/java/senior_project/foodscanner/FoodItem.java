@@ -25,30 +25,26 @@ public class FoodItem extends Nutritious implements Serializable {
     private double servingSize;
     private String servingSizeUnit;  //e.g. cup, grams, taco
     private String actualServingSizeUnit; //e.g. convert "grams of flakes" to "grams"
-    private boolean calculateVol;   //might not be needed
-    private boolean calculateMass;  //might not be needed
+    private boolean usesVol;
+    private boolean usesMass;
     private boolean needConvertVol;   //whether or not the volume needs to be converted
-    private boolean needConvertMass;  //whether or not the mass needs to be converted
+    private boolean needCalculateServings;  //where or not the servings need to be calcualted
     private Set<String> volUnits;
     private Set<String> massUnits;
     private int maxMassLen;
     private int maxVolLen;
     private Density density;
-    private List<Portion> portions;  //list of individual items, e.g. 3 pieces of chicken that we
-    //want to calculate individually will each have a portion.
     private double numServings;  //number of servings user has entered, after calculation.
 
-    private double volume; //this is temporary, for Spring 2 demo
+    private double volume;
+    private double cubicVolume;  //volume that will always be in inches cubed
+    private double mass;
 
     private static Map<String, Double> densities = null;
 
     public FoodItem() {
         //LinkedHashMap used to ensure insertion order is maintained, for iteration.
         fields = new LinkedHashMap<>(7);
-
-        //Create portions list and first portion
-        portions = new ArrayList<>();
-        portions.add(new Portion());
 
         //NOTE: when checking if the serving size matches, call toLower() on it first, and remove
         //'s' at the end of the word, if necessary.
@@ -78,7 +74,8 @@ public class FoodItem extends Nutritious implements Serializable {
         density = new Density();
         density.value = 0.0;
         numServings = 0.0;
-        volume = 0.0;   //temp, for clarity
+        volume = 0.0;
+        mass = 0.0;
     }
 
     public void setField(String field, Double value) {
@@ -144,16 +141,16 @@ public class FoodItem extends Nutritious implements Serializable {
         }
 
         if(massUnits.contains(formattedUnit)) {
-            setCalculateVol(true);
-            setCalculateMass(true);
-            setNeedConvertVol(true);
-            setNeedConvertMass(true);
+            usesMass = true;
+            usesVol = false;
+            needConvertVol = true;
+            needCalculateServings = true;
             actualServingSizeUnit = formattedUnit;
         } else if(volUnits.contains(formattedUnit)) {
-            setCalculateVol(true);
-            setCalculateMass(false);
-            setNeedConvertVol(true);
-            setNeedConvertMass(false);
+            usesMass = false;
+            usesVol = true;
+            needConvertVol = true;
+            needCalculateServings = true;
             actualServingSizeUnit = formattedUnit;
         } else {
             //check that each substring is not in either, e.g. 'cups (chopped)'
@@ -166,10 +163,10 @@ public class FoodItem extends Nutritious implements Serializable {
                 }
                 if(massUnits.contains(formattedUnit.substring(0, i))) {
                     stopCheck = true;
-                    setCalculateVol(true);
-                    setCalculateMass(true);
-                    setNeedConvertVol(true);
-                    setNeedConvertMass(true);
+                    usesMass = true;
+                    usesVol = false;
+                    needConvertVol = true;
+                    needCalculateServings = true;
                     actualServingSizeUnit = formattedUnit.substring(0, i);
                     break;
                 }
@@ -185,10 +182,11 @@ public class FoodItem extends Nutritious implements Serializable {
                 }
                 if(volUnits.contains(formattedUnit.substring(0, i))) {
                     stopCheck = true;
-                    setCalculateVol(true);
-                    setCalculateMass(false);
-                    setNeedConvertVol(true);
-                    setNeedConvertMass(false);
+                    usesMass = false;
+                    usesVol = true;
+                    needConvertVol = true;
+                    needCalculateServings = true;
+                    actualServingSizeUnit = formattedUnit.substring(0, i);
                     break;
                 }
             }
@@ -196,11 +194,10 @@ public class FoodItem extends Nutritious implements Serializable {
                 return;
             }
 
-            //not necessary; here for clarity
-            setCalculateVol(false);
-            setCalculateMass(false);
-            setNeedConvertVol(false);
-            setNeedConvertMass(false);
+            usesMass = false;
+            usesVol = false;
+            needConvertVol = false;
+            needCalculateServings = false;
         }
     }
 
@@ -208,65 +205,39 @@ public class FoodItem extends Nutritious implements Serializable {
         return actualServingSizeUnit;
     }
 
-    public void setActualServingSizeUnit(String actualyServingSizeUnit) {
-        this.actualServingSizeUnit = actualyServingSizeUnit;
-    }
-
-    public boolean needCalculateVol() {
-        if(!calculateVol) {
-            return false;
-        }
-
-        // Check if all portions have been calculated
-        for(Portion p : portions) {
-            if(p.getVolume() == 0.0) {
-                // Has not yet been calculated
-                return true;
-            }
-        }
-
-        // All portions have been calculated
-        return false;
-    }
-
-    public void setCalculateVol(boolean calculateVol) {
-        this.calculateVol = calculateVol;
-    }
-
-    public boolean needCalculateMass() {
-        if(!calculateMass) {
-            return false;
-        }
-        // Check if all portions have been calculated
-        for(Portion p : portions) {
-            if(p.getMass() == 0.0) {
-                // Has not yet been calculated
-                return true;
-            }
-        }
-
-        // All portions have been calculated
-        return false;
-    }
-
-    public void setCalculateMass(boolean calculateMass) {
-        this.calculateMass = calculateMass;
+    public void setActualServingSizeUnit(String actualServingSizeUnit) {
+        this.actualServingSizeUnit = actualServingSizeUnit;
     }
 
     public boolean usesMass() {
-        return calculateMass;
+        return usesMass;
     }
 
     public boolean usesVolume() {
-        return calculateVol;
+        return usesVol;
     }
 
     public double getNumServings() {
+        if (needCalculateServings) {
+            if (!calculateNumServings()) {
+                // Failed; not enough info yet
+                return 0.0;
+            }
+        }
         return numServings;
     }
 
+    // Should only be called if FoodItem does not use volume or mass
     public void setNumServings(double numServings) {
         this.numServings = numServings;
+    }
+
+    public boolean isNeedCalculateServings() {
+        return needCalculateServings;
+    }
+
+    public void setNeedCalculateServings(boolean needCalculateServings) {
+        this.needCalculateServings = needCalculateServings;
     }
 
     public boolean needConvertVol() {
@@ -277,12 +248,31 @@ public class FoodItem extends Nutritious implements Serializable {
         this.needConvertVol = needConvertVol;
     }
 
-    public boolean needConvertMass() {
-        return needConvertMass;
+    public double getVolume() {
+        return volume;
     }
 
-    public void setNeedConvertMass(boolean needConvertMass) {
-        this.needConvertMass = needConvertMass;
+    public void setVolume(double volume) {
+        this.volume = volume;
+        cubicVolume = volume;
+        needConvertVol = true;
+        needCalculateServings = true;
+    }
+
+    public double getCubicVolume() {
+        return cubicVolume;
+    }
+
+    public void setCubicVolume(double cubicVolume) {
+        this.cubicVolume = cubicVolume;
+    }
+
+    public double getMass() {
+        return mass;
+    }
+
+    public void setMass(double mass) {
+        this.mass = mass;
     }
 
     //endregion
@@ -307,61 +297,6 @@ public class FoodItem extends Nutritious implements Serializable {
         }
     }
 
-    public class Portion implements Serializable {
-        private double volume = 0.0;
-        private double mass = 0.0;
-
-        //region getters and setters
-        public double getVolume() {
-            return volume;
-        }
-
-        public void setVolume(double volume) {
-            this.volume = volume;
-        }
-
-        public double getMass() {
-            return mass;
-        }
-
-        public void setMass(double mass) {
-            this.mass = mass;
-        }
-        //endregion
-    }
-
-    //NOTE: not sure how these will be used exactly. subject to change.
-
-    public List<Portion> getPortions() {
-        return portions;
-    }
-
-    public Portion getPortion(int index) {
-        return portions.get(index);
-    }
-
-    public int getNumPortions() {
-        return portions.size();
-    }
-
-    public Portion addPortion() {
-        Portion p = new Portion();
-        portions.add(p);
-        return p;
-    }
-
-    public void removePortion(int index) throws IndexOutOfBoundsException {
-        portions.remove(index);
-    }
-
-    public void removePortion(Portion p) {
-        portions.remove(p);
-    }
-
-    public void replacePortions(List<Portion> newPortions) {
-        portions = newPortions;
-    }
-
     @Override
     public Map<String, Double> getNutrition() {
         Map<String, Double> nutr = new LinkedHashMap<>(fields);
@@ -369,68 +304,56 @@ public class FoodItem extends Nutritious implements Serializable {
         return nutr;
     }
 
-    public double getTotalMass() {
-        double totalMass = 0.0;
-        for(Portion p : portions) {
-            totalMass += p.getMass();
-        }
-        return totalMass;
-    }
-
-    public double getTotalVolume() {
-        double totalVolume = 0.0;
-        for(Portion p : portions) {
-            totalVolume += p.getVolume();
-        }
-        return totalVolume;
-    }
 
     /**
      * Calculates number of servings
      * @return true is success, false if failure
      */
     public boolean calculateNumServings() {
-        FoodItem convertedFood = this;
+        if (!needCalculateServings) {
+            // already done
+            return true;
+        }
 
-        if (usesMass()) {
-            if (getTotalVolume() == 0.0 || density.value == 0.0) {
+        if (usesMass) {
+            if (volume == 0.0 || density.value == 0.0) {
                 return false;
             }
 
-            if (needConvertVol()) {
-                convertedFood = Units.convertVolume(this);
+            if (needConvertVol) {
+                FoodItem convertedFood = Units.convertVolume(this);
+                needConvertVol = false;
+                volume = convertedFood.getVolume();
             }
 
-            int numPortions = convertedFood.getNumPortions();
-            List<FoodItem.Portion> tempPortions = convertedFood.getPortions();
-            for (int i = 0; i < numPortions; i++) {
-                Portion tempPort = convertedFood.getPortion(i);
-                tempPort.setMass(tempPort.getVolume() * density.value);
-                tempPortions.set(i, tempPort);
-            }
-            convertedFood.replacePortions(tempPortions);
+            mass = volume * density.value;
 
-            if (needConvertMass()) {
-                convertedFood = Units.convertMass(convertedFood);
-            }
+            FoodItem convertedFood = Units.convertMass(this);
+            mass = convertedFood.getMass();
 
-            setNumServings((convertedFood.getTotalMass()) / getServingSize());
+            numServings = mass / servingSize;
+            needCalculateServings = false;
             return true;
 
-        } else if (usesVolume()) {
-            if (getTotalVolume() == 0.0) {
+        } else if (usesVol) {
+            if (volume == 0.0) {
                 return false;
             }
 
-            if (needConvertVol()) {
-                convertedFood = Units.convertVolume(this);
+            if (needConvertVol) {
+                FoodItem convertedFood = Units.convertVolume(this);
+                needConvertVol = false;
+                volume = convertedFood.getVolume();
             }
 
-            setNumServings(convertedFood.getTotalVolume() / getServingSize());
+            numServings = volume / servingSize;
+            needCalculateServings = false;
             return true;
         }
 
         // no need to calculate number of servings, user should enter manually
+        // (this should never happen anymore)
+        needCalculateServings = false;
         return true;
     }
 
@@ -508,13 +431,4 @@ public class FoodItem extends Nutritious implements Serializable {
         return true;
     }
 
-    // This is temporary, for Spring 2 demo
-
-    public double getVolume() {
-        return volume;
-    }
-
-    public void setVolume(double volume) {
-        this.volume = volume;
-    }
 }
