@@ -47,6 +47,12 @@ public class MealEndpoint {
         ofy().save().entity(meal).now();
     }
 
+    @ApiMethod(name = "deleteMeal")
+    public void deleteMeal(Meal meal, User user) throws ServiceException {
+        AuthUtil.throwIfNotAuthenticated(user);
+        ofy().delete().entity(meal).now();
+    }
+
     @ApiMethod(name = "getAllMeals")
     public CollectionResponse<Meal> getAllMeals (User user) throws ServiceException {
         Query<Meal> query = ofy().load().type(Meal.class);
