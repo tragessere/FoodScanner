@@ -183,6 +183,19 @@ public class EndpointsHelper
 		}
 	}
 
+	public class DeleteMealTask extends AsyncTask<Meal, Void, Boolean> {
+		@Override
+		protected Boolean doInBackground(Meal... meals) {
+			try {
+				mAPI.deleteMeal(meals[0]).execute();
+				return true;
+			} catch (IOException e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
+	}
+
 	public class GetMealsWithinDates extends AsyncTask<Date, Void, List<Meal>> {
 		@Override
 		protected List<Meal> doInBackground(Date... dates) {
