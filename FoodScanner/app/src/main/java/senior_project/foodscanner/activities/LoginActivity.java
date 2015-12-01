@@ -61,6 +61,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 		credential = GoogleAccountCredential.usingAudience(this.getApplicationContext(), "server:client_id:" + Constants.WEB_CLIENT_ID);
 		credential.setSelectedAccountName(prefs.getString(Constants.PREF_ACCOUNT_NAME, null));
 
+		if(credential.getSelectedAccountName() != null) {
+			//signed in. Finish activity and continue.
+			LoginActivity.finishLogin(this, credential, findViewById(R.id.loading));
+			return;
+		}
+
 		googleButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
