@@ -70,8 +70,47 @@
             android:id="@+id/listView_meals"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/container_warning"
+            android:layout_below="@+id/container_date"
+            android:background="@drawable/tap_add_meal"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/container_warning"
             android:layout_above="@+id/container_total"
-            android:layout_below="@+id/container_date"/>
+            android:background="@color/Warning"
+            android:padding="10dp"
+            >
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/imageView2"
+                    android:src="@android:drawable/ic_dialog_alert"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Meals are not synced with the server!"
+                    android:id="@+id/textView2"
+                    android:textStyle="bold"
+                    android:textAlignment="center"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:textAppearance="@android:style/TextAppearance.Medium"/>
+            </LinearLayout>
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/container_total"
@@ -100,7 +139,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
-                android:text="Month"
+                android:text="28 Day"
                 />
 
             <Button
@@ -108,7 +147,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
-                android:text="Week"/>
+                android:text="7 Day"/>
 
             <Button
                 android:id="@+id/button_total_day"

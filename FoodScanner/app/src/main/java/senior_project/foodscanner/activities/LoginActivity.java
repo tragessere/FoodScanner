@@ -25,11 +25,12 @@ import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
+import senior_project.foodscanner.fragments.MessageDialogFragment;
 
 /**
  * Created by Evan on 9/16/2015.
  */
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
 	private static final int REQUEST_ACCOUNT_PICKER = 2;
 	private static final int REQUEST_READ_CONTACTS = 3;
     public static final String EXTRA_ACCOUNT_NAME = "account_name";
@@ -73,6 +74,8 @@ public class LoginActivity extends AppCompatActivity {
 				//consumes touches
 			}
 		});
+
+		findViewById(R.id.imageView_logo).setOnClickListener(this);
 	}
 
 	private void setSelectedAccountName(String accountName) {
@@ -170,6 +173,14 @@ public class LoginActivity extends AppCompatActivity {
 					&& grantResults[0] != PackageManager.PERMISSION_GRANTED) {
 				//TODO: SHOW ERROR
 			}
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		if(v.getId() == R.id.imageView_logo) {
+			MessageDialogFragment dialog = MessageDialogFragment.newInstance(Constants.LEGAL_LOGO_ATTRIBUTION_TEXT, "FoodScanner Logo", R.drawable.ic_launcher);
+			dialog.show(getFragmentManager(), "Logo");
 		}
 	}
 

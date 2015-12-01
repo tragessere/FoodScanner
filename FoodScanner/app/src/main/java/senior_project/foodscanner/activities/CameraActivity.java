@@ -1,6 +1,7 @@
 package senior_project.foodscanner.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -18,13 +19,16 @@ import android.view.Gravity;
 import android.view.Surface;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.Serializable;
 
 import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.ui.components.ErrorDialogFragment;
+import senior_project.foodscanner.fragments.ErrorDialogFragment;
 import senior_project.foodscanner.ui.components.camera.CameraView;
 
 /**
@@ -36,6 +40,9 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
 
     // Public fields
     public static final String EXTRA_FILENAME = "filename";
+    public static final String EXTRA_IMAGE_NAME = "image_name"; //optional String
+    public static final String EXTRA_IMAGE_DESCRIPTION = "image_desc"; //optional String
+    public static final String EXTRA_HELP_ACTOR = "help_actor"; //optional CameraActivity_HelpActor
     public static final String RESULT_IMAGE_FILE = "image_file";
 
     // Image file format
@@ -44,6 +51,7 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
 
     // Activity params
     private String filename;
+    private CameraActivity_HelpActor help_actor;
 
     // Private fields
     private static final int REQUEST_PERMISSION_CAMERA = 0;
@@ -51,6 +59,9 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     private int cameraId;
     private FrameLayout cameraContainer;
     private CameraView cameraView;
+    private TextView textView_Image_Title;
+    private TextView textView_Image_Desc;
+    private ImageButton button_help;
     private int shutterOrientation;
 
     @Override
@@ -64,8 +75,34 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         }
 
         setContentView(R.layout.activity_camera);
+        textView_Image_Title = (TextView)findViewById(R.id.textView_image_title);
+        textView_Image_Desc = (TextView)findViewById(R.id.textView_image_count);
         cameraContainer = ((FrameLayout) findViewById(R.id.container_camera));
+        button_help = ((ImageButton) findViewById(R.id.imageButton_help));
         cameraContainer.findViewById(R.id.imageButton_takePicture).setOnClickListener(this);
+        button_help.setOnClickListener(this);
+
+        if(getIntent().hasExtra(EXTRA_IMAGE_NAME)) {
+            textView_Image_Title.setText(getIntent().getCharSequenceExtra(EXTRA_IMAGE_NAME));
+        }
+        else {
+            textView_Image_Title.setVisibility(View.GONE);
+        }
+
+        if(getIntent().hasExtra(EXTRA_IMAGE_DESCRIPTION)) {
+            textView_Image_Desc.setText(getIntent().getCharSequenceExtra(EXTRA_IMAGE_DESCRIPTION));
+        }
+        else {
+            textView_Image_Desc.setVisibility(View.GONE);
+        }
+
+        if(getIntent().hasExtra(EXTRA_HELP_ACTOR)) {
+            help_actor = (CameraActivity_HelpActor)getIntent().getSerializableExtra(EXTRA_HELP_ACTOR);
+        }
+        else {
+            button_help.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
@@ -101,6 +138,9 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         switch(v.getId()) {
             case R.id.imageButton_takePicture:
                 takePicture();
+                break;
+            case R.id.imageButton_help:
+                help_actor.doHelpAction(this);
                 break;
             default:
                 ErrorDialogFragment.showErrorDialog(this, "Unhandled click action!");
@@ -387,6 +427,10 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
 
         params.setRotation(rPic);
         camera.setParameters(params);
+    }
+
+    public interface CameraActivity_HelpActor extends Serializable{
+        void doHelpAction(Activity activity);
     }
 
 }

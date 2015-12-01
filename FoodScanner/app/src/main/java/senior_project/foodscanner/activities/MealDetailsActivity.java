@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
 
+import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
 
@@ -71,16 +73,14 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     private FoodItem removedFood;
     private FoodItem lastClickedFood;
 
+    ProgressDialog dialog;
     // TODO add ui to display date of meal (Settings class has some useful functions to format a date)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Query density database, if necessary
-        if (FoodItem.getDensityKeys() == null) {
-            EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask(this).execute();
-        }
+        dialog = new ProgressDialog(this);
 
         meal = (Meal) getIntent().getSerializableExtra("meal");
 
@@ -136,6 +136,26 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     public void onResume(){
         super.onResume();
 
+        // Query density database, if necessary
+        synchronized (EndpointsHelper.mEndpoints) {
+            if (EndpointsHelper.getDownloadStatus() == Constants.DENSITY_NOT_DOWNLOADED || EndpointsHelper.getDownloadStatus() == Constants.DENSITY_DOWNLOADING) {
+                dialog.setMessage("Loading...");
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
+
+                EndpointsHelper.registerDensityObserver(new EndpointsHelper.densityDownloadObserver() {
+                    @Override
+                    public void densityDownloaded() {
+                        EndpointsHelper.registerDensityObserver(null);
+                        dialog.dismiss();
+                    }
+                });
+
+                if (EndpointsHelper.getDownloadStatus() == Constants.DENSITY_NOT_DOWNLOADED)
+                    EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask(this);
+            }
+        }
+
         // Set up list of food items
         ListView lv = (ListView) findViewById(R.id.food_list);
         ArrayAdapter<FoodItem> arrayAdapter = new ArrayAdapter<>(
@@ -189,6 +209,13 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         });
 
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        EndpointsHelper.registerDensityObserver(null);
+    }
+
 
     @Override
     public void onBackPressed() {
