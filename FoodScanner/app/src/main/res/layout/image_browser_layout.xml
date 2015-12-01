@@ -11,7 +11,6 @@
             android:layout_gravity="center"/>
 
         <Button
-            style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="&lt;Action>"
@@ -39,23 +38,16 @@
             android:layout_gravity="right|center_vertical"
             android:src="@drawable/arrow_right"/>
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="0/0"
-            android:id="@+id/textView_count"
-            android:layout_gravity="right|top"
-            android:background="#9665d5ff"/>
-
-    <TextView
+    <include
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Image Title"
-        android:id="@+id/textView_title"
-        android:layout_gravity="left|top"
-        android:background="#9665d5ff"
-        android:textSize="30dp"/>
+        layout="@layout/textview_image_title"
+        android:layout_gravity="left|top"/>
+
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        layout="@layout/textview_image_count"
+        android:layout_gravity="right|top"/>
 
 </FrameLayout>
