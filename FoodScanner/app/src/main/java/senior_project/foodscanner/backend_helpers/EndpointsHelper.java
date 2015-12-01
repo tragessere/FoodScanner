@@ -158,7 +158,7 @@ public class EndpointsHelper
 		}
 	}
 
-	public class GetPartialMatchDensity extends AsyncTask<String, Void, List<DensityEntry>> {
+	public class getDensitiesWithNameSimilarTo extends AsyncTask<String, Void, List<DensityEntry>> {
 		@Override
 		protected  List<DensityEntry> doInBackground(String...strings) {
 			try {

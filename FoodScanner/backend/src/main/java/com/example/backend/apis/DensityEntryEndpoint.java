@@ -78,9 +78,13 @@ public class DensityEntryEndpoint {
         while (iterator.hasNext())
         {
             entry = iterator.next();
-            boolean contains = entry.getName().toLowerCase().matches(".*\\b" + name.toLowerCase() + "\\b.*");
-            if(contains) {
-                results.add(entry);
+            String[] words = name.split("\\s+");
+            for (String word : words)
+            {
+                boolean contains = entry.getName().toLowerCase().matches(".*\\b" + word.toLowerCase() + "\\b.*");
+                if(contains) {
+                    results.add(entry);
+                }
             }
         }
 
