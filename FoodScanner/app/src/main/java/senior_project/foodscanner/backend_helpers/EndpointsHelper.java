@@ -158,6 +158,18 @@ public class EndpointsHelper
 		}
 	}
 
+	public class GetDensitiesWithNameSimilarToTask extends AsyncTask<String, Void, List<DensityEntry>> {
+		@Override
+		protected  List<DensityEntry> doInBackground(String...strings) {
+			try {
+				return mAPI.getDensitiesWithNameSimilarTo(strings[0]).execute().getItems();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+	}
+
 	public class SaveMealTask extends AsyncTask<Meal, Void, Meal> {
 		@Override
 		protected Meal doInBackground(Meal... meals) {
@@ -167,6 +179,19 @@ public class EndpointsHelper
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;
+			}
+		}
+	}
+
+	public class DeleteMealTask extends AsyncTask<Meal, Void, Boolean> {
+		@Override
+		protected Boolean doInBackground(Meal... meals) {
+			try {
+				mAPI.deleteMeal(meals[0]).execute();
+				return true;
+			} catch (IOException e) {
+				e.printStackTrace();
+				return false;
 			}
 		}
 	}
