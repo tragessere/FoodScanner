@@ -10,29 +10,30 @@ import com.googlecode.objectify.annotation.Index;
 @Entity
 public class FoodItem {
 
-    // TEMPORARY PLACEHOLDER
-    //TODO: IMPLEMENT REAL FOODITEM OBJECT
-
     @Id
     private Long id;
     @Index
     private String name;
     private Float density;
+    private NutritionResult nutritionTotals;
 
     // Getters
     public Long getId() { return id; }
     public String getName() { return name; }
     public Float getDensity() { return density; }
+    public NutritionResult getNutritionTotals() { return nutritionTotals; }
 
     // Setters
     public void setId(Long id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setDensity(Float density) { this.density = density; }
+    public void setNutritionTotals(NutritionResult nutritionTotals) { this.nutritionTotals = nutritionTotals; }
 
     public FoodItem() {}
 
-    public FoodItem(String name, Float density) {
+    public FoodItem(String name, Float density, NutritionResult nutritionTotals) {
         this.name = name;
         this.density = density;
+        this.nutritionTotals = nutritionTotals;
     }
 }
