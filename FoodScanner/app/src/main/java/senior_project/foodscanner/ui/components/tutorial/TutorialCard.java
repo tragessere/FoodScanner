@@ -39,6 +39,12 @@ public class TutorialCard {
 		this.message = message;
 	}
 
+	public TutorialCard(View highlight, String title, String message) {
+		highlightView = highlight;
+		this.title = title;
+		this.message = message;
+	}
+
 	public View getHighlightView() {
 		return highlightView;
 	}

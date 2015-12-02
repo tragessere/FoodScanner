@@ -39,8 +39,6 @@ public class TutorialSequence implements SpringListener {
 	private TextView title;
 	private TextView subTitle;
 	private TextView message;
-	private Button buttonBack;
-	private Button buttonNext;
 
 	private List<TutorialCard> allPages;
 	private int currentPosition;
@@ -110,8 +108,8 @@ public class TutorialSequence implements SpringListener {
 		title = (TextView) view.findViewById(R.id.title);
 		subTitle = (TextView) view.findViewById(R.id.subtitle);
 		message = (TextView) view.findViewById(R.id.message);
-		buttonBack = (Button) view.findViewById(R.id.button_back);
-		buttonNext = (Button) view.findViewById(R.id.button_next);
+		Button buttonBack = (Button) view.findViewById(R.id.button_back);
+		Button buttonNext = (Button) view.findViewById(R.id.button_next);
 
 		margin = ((FrameLayout.LayoutParams) tutorialCard.getLayoutParams()).leftMargin;
 
@@ -322,7 +320,7 @@ public class TutorialSequence implements SpringListener {
 				Rect statusBarBorder = new Rect();
 				mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(statusBarBorder);
 				float statusBarHeight;
-				if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
 					statusBarHeight = statusBarBorder.top;
 				else
 					statusBarHeight = 0;
@@ -354,7 +352,7 @@ public class TutorialSequence implements SpringListener {
 
 				boolean positionTop = showTutorialInTopHalf(viewCenter[1], screenHeight, currentPage.getPosition());
 
-				if(endSize[0] >= screenWidth)
+				if (endSize[0] >= screenWidth)
 					endPosX = margin;
 				else
 					endPosX = (screenWidth / 2) - (endSize[0] / 2);
@@ -389,7 +387,12 @@ public class TutorialSequence implements SpringListener {
 
 	private int[] setCardViews(TutorialCard currentPage) {
 		title.setText(currentPage.getTitle());
-		subTitle.setText(currentPage.getSubTitle());
+		if (currentPage.getSubTitle() != null) {
+			subTitle.setVisibility(View.VISIBLE);
+			subTitle.setText(currentPage.getSubTitle());
+		} else {
+			subTitle.setVisibility(View.GONE);
+		}
 		message.setText(currentPage.getMessage());
 
 		cardContents.measure(View.MeasureSpec.makeMeasureSpec(activityRoot.getWidth(), View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(activityRoot.getHeight(), View.MeasureSpec.AT_MOST));
