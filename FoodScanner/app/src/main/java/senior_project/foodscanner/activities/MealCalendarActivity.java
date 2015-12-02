@@ -1,12 +1,9 @@
 package senior_project.foodscanner.activities;
 
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-
-import android.support.v7.app.AppCompatActivity;
 
 import android.text.Html;
 import android.util.Log;
@@ -15,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -38,9 +34,8 @@ import senior_project.foodscanner.fragments.MessageDialogFragment;
 import senior_project.foodscanner.fragments.ErrorDialogFragment;
 import senior_project.foodscanner.fragments.CalendarDialogFragment;
 import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
-import senior_project.foodscanner.ui.components.mealcalendar.TextDialog;
+import senior_project.foodscanner.ui.components.tutorial.TutorialBaseActivity;
 import senior_project.foodscanner.ui.components.tutorial.TutorialCard;
-import senior_project.foodscanner.ui.components.tutorial.TutorialSequence;
 
 /**
  * Displays list or calendar of meals.
@@ -56,7 +51,7 @@ import senior_project.foodscanner.ui.components.tutorial.TutorialSequence;
  * - Clicking this will log out the user
  * - Maybe a drop down menu for account settings
  */
-public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, CalendarDialogFragment.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
+public class MealCalendarActivity extends TutorialBaseActivity implements View.OnClickListener, View.OnLongClickListener, CalendarDialogFragment.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
     private static final String SAVE_DATE = "currentDate";
     private static final int VIEW_MEAL = 0;
 
@@ -76,9 +71,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private long currentDate;
     private ArrayList<Meal> meals = new ArrayList<>();
     private List<Meal> unsyncedMeals =  new ArrayList<>();
-
-    private TutorialSequence sequence;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,15 +124,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
             SQLQueryHelper.deleteMeals(meals);
         }
 
-
-
-        sequence = new TutorialSequence(this);
-
-        TutorialCard page = new TutorialCard(button_totalDay, "test title", "subtitle", "some text to put into the body of the message for someone to read which will make them understand");
-        TutorialCard page2 = new TutorialCard(button_calendar, "Calendar stuff", "it's cool", "Currently under construction, sorry.");
-        sequence.addCard(page);
-        sequence.addCard(page2);
-
         // TODO account for space when downloading and storing locally
     }
 
@@ -161,6 +144,15 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         uploadMeals();
     }
 
+
+    @Override
+    public void setupTutorial() {
+        TutorialCard calendarPage = new TutorialCard(button_calendar, getString(R.string.tutorial_calendar_calendar_button_title), getString(R.string.tutorial_calendar_calendar_button_description));
+        TutorialCard nutritionPage = new TutorialCard(findViewById(R.id.container_total), getString(R.string.tutorial_calendar_calories_button_title), getString(R.string.tutorial_calendar_calories_button_description));
+        sequence.addCard(calendarPage);
+        sequence.addCard(nutritionPage);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_meal_calendar, menu);
@@ -168,37 +160,18 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean optionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        switch (id)  {
+        switch (id) {
             case R.id.action_settings:
-                if(sequence.isActive())
-                    sequence.exitTutorial();
-
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
-            case R.id.action_tutorial:
-                if(sequence.isActive())
-                    sequence.exitTutorial();
-                else
-                    sequence.Start();
-                return true;
         }
-
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if(sequence.isActive())
-            sequence.previousPosition();
-        else
-            super.onBackPressed();
+        return false;
     }
 
     private Meal createMeal() {

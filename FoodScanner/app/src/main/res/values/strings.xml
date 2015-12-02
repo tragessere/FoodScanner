@@ -78,4 +78,10 @@
 
     <string name="accessibility_meal_time_overlap">Overlapping meal times</string>
 
+
+    <string name="tutorial_calendar_calendar_button_title">Show Calendar</string>
+    <string name="tutorial_calendar_calendar_button_description">Pick a day from the calendar to view your meals from that day.</string>
+    <string name="tutorial_calendar_calories_button_title">View Nutrition Stats</string>
+    <string name="tutorial_calendar_calories_button_description">See your nutrition information over the last 28 days, 7 days, or just today.</string>
+
 </resources>
