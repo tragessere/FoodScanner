@@ -127,7 +127,6 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
 
     public void replaceFoodItem(FoodItem oldFood, FoodItem newFood) {
         newFood.setVolume(oldFood.getCubicVolume());
-        newFood.setNumServings(oldFood.getNumServings());
         this.removeFoodItem(oldFood);
         this.addFoodItem(newFood);
         setIsChanged(true);

@@ -70,6 +70,9 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     private static final int NEW_FOOD_ITEM = 1;
     private static final int REPLACE_FOOD_ITEM = 2;
     private static final int REQUEST_DENSITY = 3;
+    public static final int RESULT_FOOD_SCANNER = 4;
+
+    public static final String RESULT_VOLUME = "volume";
 
     private double volume;
     private String[] meals;
@@ -201,6 +204,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 //                }
 
                 //View nutrition info & give option to scan/enter servings, or replace
+                lastClickedFood = meal.getFoodItem(position);
                 FoodItem food = meal.getFoodItem(position);
                 DialogFragment dialog = FoodInfoFragment.newInstance(food, true);
                 dialog.show(getFragmentManager(), "FoodInfoFragment");
@@ -274,6 +278,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
             case REQUEST_FOODSCANNER:
+                // User took new pictures, then used painting
                 if(resultCode == Activity.RESULT_OK) {
                     if(data.hasExtra(PhotoTakerActivity.RESULT_IMAGE_FILES)) {
                         File[] imgFiles = (File[]) data.getSerializableExtra(PhotoTakerActivity.RESULT_IMAGE_FILES);
@@ -281,8 +286,14 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                         //TODO delete files after they are not needed anymore. To do this use ImageDirectoryManager.clearImageDirectory()
                     }
 
-                    lastClickedFood.setVolume(data.getDoubleExtra(PhotoTakerActivity.RESULT_VOLUME, -1.0));
-                    // TODO: Make sure this actually saves the new volume
+                    lastClickedFood.setVolume(data.getDoubleExtra(RESULT_VOLUME, -1.0));
+                    SQLQueryHelper.updateMeal(meal);
+                }
+                break;
+            case RESULT_FOOD_SCANNER:
+                // User did painting with previous images
+                if(resultCode == RESULT_OK) {
+                    lastClickedFood.setVolume(data.getDoubleExtra(RESULT_VOLUME, -1.0));
                     SQLQueryHelper.updateMeal(meal);
                 }
                 break;
@@ -475,9 +486,10 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onPhotoDialogNegativeClick(DialogFragment dialog) {
         // User touched "Keep" - keep the previous photos
-        // TODO: Go straight to drawing activity
+        // Go straight to drawing activity
+        Intent paintingIntent = new Intent(this, PaintingActivity.class);
+        startActivityForResult(paintingIntent, RESULT_FOOD_SCANNER);
     }
-
 
     //endregion
 

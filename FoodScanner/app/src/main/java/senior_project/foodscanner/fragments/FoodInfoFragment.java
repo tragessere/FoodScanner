@@ -89,11 +89,11 @@ public class FoodInfoFragment extends DialogFragment {
         }
 
         // TEMP: Display volume
-        if (food.usesVolume() && food.getVolume() != 0.0) {
+        if ((food.usesVolume() || food.usesMass()) && food.getVolume() != 0.0) {
             info.append("<br><b>Volume:</b> ");
             NumberFormat formatter = new DecimalFormat("#0.00");
             info.append(formatter.format(food.getVolume()) +
-                    " in<sup><small><small>2</small></small></sup>");
+                    " in<sup><small><small>3</small></small></sup>");
         }
 
         Spanned nutritionInfo = Html.fromHtml(info.toString());

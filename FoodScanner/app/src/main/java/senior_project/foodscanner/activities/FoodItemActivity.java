@@ -69,6 +69,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        replacedFood = null;
         meal = (Meal) getIntent().getSerializableExtra("meal");
         int requestCode = getIntent().getIntExtra("requestCode", 0);  //0 is arbitrary
         if (requestCode == REPLACE_FOOD_ITEM) {
@@ -156,9 +157,15 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
 
         } else {
             // Replace previously added food item
-            meal.replaceFoodItem(replacedFood, frag.food);
-            displayToast("Replaced food item.", this);
-            saveAndFinish();
+            if (frag.food.usesVolume() || frag.food.usesMass()) {
+                // TODO: density query stuff
+                meal.replaceFoodItem(replacedFood, frag.food);
+                displayToast("Replaced food item.", this);
+                saveAndFinish();
+            } else {
+                DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food);
+                servingsDialog.show(getFragmentManager(), "FoodServingFragment");
+            }
         }
 
     }
@@ -194,10 +201,16 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onServingDialogPositiveClick(DialogFragment dialog) {
         // Clicked "Save" in servings dialog. Add the food to meal.
-        FoodServingFragment frag = (FoodServingFragment)dialog;
-        meal.addFoodItem(frag.food);
-        displayToast("Added to meal.", this);
-        saveAndFinish();
+        FoodServingFragment frag = (FoodServingFragment) dialog;
+        if (replacedFood == null) {
+            meal.addFoodItem(frag.food);
+            displayToast("Added to meal.", this);
+            saveAndFinish();
+        } else {
+            meal.replaceFoodItem(replacedFood, frag.food);
+            displayToast("Replaced food item.", this);
+            saveAndFinish();
+        }
     }
 
     private void saveAndFinish() {
