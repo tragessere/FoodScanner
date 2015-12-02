@@ -115,23 +115,46 @@ public class FoodInfoFragment extends DialogFragment {
                     });
         } else {
             // Dialog displayed after food item is added
-            builder.setTitle(food.getName())
-                    .setMessage(nutritionInfo)
-                    .setPositiveButton("Replace", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            mListener.onDialogPositiveClick(FoodInfoFragment.this);
-                        }
-                    })
-                    .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            mListener.onDialogNegativeClick(FoodInfoFragment.this);
-                        }
-                    })
-                    .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            mListener.onDialogNeutralClick(FoodInfoFragment.this);
-                        }
-                    });
+            // Two versions: (1) food uses mass or volume, (2) food has manual servings
+
+            if (food.usesMass() || food.usesVolume()) {
+                builder.setTitle(food.getName())
+                        .setMessage(nutritionInfo)
+                        .setPositiveButton("Scan", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogPositiveClick(FoodInfoFragment.this);
+                            }
+                        })
+                        .setNegativeButton("Replace", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogNegativeClick(FoodInfoFragment.this);
+                            }
+                        })
+                        .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogNeutralClick(FoodInfoFragment.this);
+                            }
+                        });
+            }
+            else {
+                builder.setTitle(food.getName())
+                        .setMessage(nutritionInfo)
+                        .setPositiveButton("Servings", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogPositiveClick(FoodInfoFragment.this);
+                            }
+                        })
+                        .setNegativeButton("Replace", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogNegativeClick(FoodInfoFragment.this);
+                            }
+                        })
+                        .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogNeutralClick(FoodInfoFragment.this);
+                            }
+                        });
+            }
         }
 
         // Create the AlertDialog object and return it

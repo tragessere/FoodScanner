@@ -43,6 +43,7 @@ import java.util.Collections;
 
 import senior_project.foodscanner.backend_helpers.EndpointBuilderHelper;
 import senior_project.foodscanner.fragments.FoodInfoFragment;
+import senior_project.foodscanner.fragments.FoodServingFragment;
 
 /**
  * Activity for manually adding a food item.
@@ -57,7 +58,7 @@ import senior_project.foodscanner.fragments.FoodInfoFragment;
  *  Ok - return to Meal Details with new food item added
  */
 public class FoodItemActivity extends AppCompatActivity implements View.OnClickListener,
-        FoodInfoFragment.FoodInfoDialogListener {
+        FoodInfoFragment.FoodInfoDialogListener, FoodServingFragment.FoodServingDialogListener {
 
     private Meal meal;
     private FoodItem replacedFood = null;
@@ -141,20 +142,25 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         FoodInfoFragment frag = (FoodInfoFragment)dialog;
 
         if (replacedFood == null) {
-            // Add food item to meal
-            meal.addFoodItem(frag.food);
-            displayToast("Added to meal.", this);
+            // First prompt for density or servings
+            if (frag.food.usesVolume() || frag.food.usesMass()) {
+                // TODO: density query stuff
+                // TEMP: Add food item to meal
+                meal.addFoodItem(frag.food);
+                displayToast("Added to meal.", this);
+                saveAndFinish();
+            } else {
+                DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food);
+                servingsDialog.show(getFragmentManager(), "FoodServingFragment");
+            }
+
         } else {
             // Replace previously added food item
             meal.replaceFoodItem(replacedFood, frag.food);
             displayToast("Replaced food item.", this);
+            saveAndFinish();
         }
 
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra("meal", meal);
-        setResult(Activity.RESULT_OK, resultIntent);
-
-        finish();
     }
 
     @Override
@@ -178,6 +184,28 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
                 butteredToast.show();
             }
         });
+    }
+
+    @Override
+    public void onServingDialogNeutralClick(DialogFragment dialog) {
+        // Do nothing
+    }
+
+    @Override
+    public void onServingDialogPositiveClick(DialogFragment dialog) {
+        // Clicked "Save" in servings dialog. Add the food to meal.
+        FoodServingFragment frag = (FoodServingFragment)dialog;
+        meal.addFoodItem(frag.food);
+        displayToast("Added to meal.", this);
+        saveAndFinish();
+    }
+
+    private void saveAndFinish() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("meal", meal);
+        setResult(Activity.RESULT_OK, resultIntent);
+
+        finish();
     }
 
     private class FoodSearch extends AsyncTask<String, Void, Boolean> {

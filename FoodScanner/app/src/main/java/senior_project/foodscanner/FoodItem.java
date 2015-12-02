@@ -16,7 +16,6 @@ import java.util.Set;
 public class FoodItem extends Nutritious implements Serializable {
 
     private Map<String, Double> fields;  //holds all nutrition info
-    private Map<String, Double> calculatedFields;  //holds all calculated nutrition info
 
     public static final String KEY_CAL = "Calories";
 
@@ -218,7 +217,7 @@ public class FoodItem extends Nutritious implements Serializable {
     }
 
     public double getNumServings() {
-        if (needCalculateServings) {
+        if ((usesMass || usesVol) && needCalculateServings) {
             if (!calculateNumServings()) {
                 // Failed; not enough info yet
                 return 0.0;
@@ -227,7 +226,6 @@ public class FoodItem extends Nutritious implements Serializable {
         return numServings;
     }
 
-    // Should only be called if FoodItem does not use volume or mass
     public void setNumServings(double numServings) {
         this.numServings = numServings;
     }
@@ -299,11 +297,8 @@ public class FoodItem extends Nutritious implements Serializable {
 
     @Override
     public Map<String, Double> getNutrition() {
-        Map<String, Double> nutr = new LinkedHashMap<>(fields);
-        //TODO: create & return total nutrition info, based on calculations
-        return nutr;
+        return calculateNutrition();
     }
-
 
     /**
      * Calculates number of servings
@@ -419,16 +414,14 @@ public class FoodItem extends Nutritious implements Serializable {
     Calculates & saves nutrition info, based on entered/scanned servings.
     @return true if success, false if failure
      */
-    public boolean calculateNutrition() {
-        if (!calculateNumServings()) {
-            return false;
-        }
+    private Map<String, Double> calculateNutrition() {
         double numServings = getNumServings();
+        Map<String, Double> calculatedFields = new LinkedHashMap<>(7);
 
         for (Map.Entry<String, Double> field : getSet()) {
             calculatedFields.put(field.getKey(), field.getValue() * numServings);
         }
-        return true;
+        return calculatedFields;
     }
 
 }
