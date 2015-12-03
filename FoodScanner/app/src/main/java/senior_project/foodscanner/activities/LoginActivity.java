@@ -159,7 +159,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 	}
 
 	private static void finishLogout(AppCompatActivity activity) {
-		SQLHelper.clear();
+		SQLHelper.clear(activity);
 		EndpointsHelper.clearInstance();
 		SharedPreferences.Editor editor = activity.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
 		editor.remove(Constants.PREF_ACCOUNT_NAME);
