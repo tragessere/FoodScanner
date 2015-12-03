@@ -8,13 +8,13 @@ import com.googlecode.objectify.annotation.Index;
  * Created by mlenarto on 11/3/15.
  */
 @Entity
-public class FoodItem {
+public class BackendFoodItem {
 
     @Id
     private Long id;
     @Index
     private String name;
-    private Float density;
+    private Double density;
     private String brand;
     private Integer numProportions;
     private Double servingSize;
@@ -23,7 +23,7 @@ public class FoodItem {
     // Getters
     public Long getId() { return id; }
     public String getName() { return name; }
-    public Float getDensity() { return density; }
+    public Double getDensity() { return density; }
     public NutritionResult getNutritionTotals() { return nutritionTotals; }
     public String getBrand() { return brand; }
     public Integer getNumProportions() { return numProportions; }
@@ -32,15 +32,15 @@ public class FoodItem {
     // Setters
     public void setId(Long id) { this.id = id; }
     public void setName(String name) { this.name = name; }
-    public void setDensity(Float density) { this.density = density; }
+    public void setDensity(Double density) { this.density = density; }
     public void setNutritionTotals(NutritionResult nutritionTotals) { this.nutritionTotals = nutritionTotals; }
     public void setBrand(String brand) { this.brand = brand; }
     public void setNumProportions(Integer numProportions) { this.numProportions = numProportions; }
     public void setServingSize (Double servingSize) { this.servingSize = servingSize; }
 
-    public FoodItem() {}
+    public BackendFoodItem() {}
 
-    public FoodItem(String name, Float density, String brand, Integer numProportions, Double servingSize, NutritionResult nutritionTotals) {
+    public BackendFoodItem(String name, Double density, String brand, Integer numProportions, Double servingSize, NutritionResult nutritionTotals) {
         this.name = name;
         this.density = density;
         this.brand = brand;

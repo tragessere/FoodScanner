@@ -6,18 +6,23 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
+import com.example.backend.foodScannerBackendAPI.model.BackendMeal;
+import com.example.backend.foodScannerBackendAPI.model.BackendFoodItem;
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
-import com.example.backend.foodScannerBackendAPI.model.Meal;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
+import com.example.backend.foodScannerBackendAPI.model.NutritionResult;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.util.DateTime;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import senior_project.foodscanner.Constants;
-
+import senior_project.foodscanner.Meal;
+import senior_project.foodscanner.FoodItem;
 
 /**
  * Created by Evan on 10/3/2015.
@@ -174,7 +179,8 @@ public class EndpointsHelper
 		@Override
 		protected Meal doInBackground(Meal... meals) {
 			try {
-				mAPI.saveMeal(meals[0]).execute();
+				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
+				mAPI.saveMeal(backendMeal).execute();
 				return meals[0];
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -187,7 +193,8 @@ public class EndpointsHelper
 		@Override
 		protected Boolean doInBackground(Meal... meals) {
 			try {
-				mAPI.deleteMeal(meals[0]).execute();
+				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
+				mAPI.deleteMeal(backendMeal).execute();
 				return true;
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -202,7 +209,8 @@ public class EndpointsHelper
 			try {
 				Date startDate = dates[0];
 				Date endDate = dates[1];
-				return mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+				List<BackendMeal> backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+				return convertToFrontEndMeals(backendMeals);
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;
@@ -221,5 +229,97 @@ public class EndpointsHelper
 
 	public interface densityDownloadObserver {
 		void densityDownloaded();
+	}
+
+	/* Converters */
+
+	public Meal convertToFrontEndMeal(BackendMeal backendMeal)
+	{
+		boolean isNew = true;		//TODO: ask dan what the expected value is
+		boolean isChanged = true;	//TODO: ask dan what the expected value is
+		Meal meal = new Meal(backendMeal.getId(), backendMeal.getDate(), backendMeal.getType(), convertToFrontEndFoodItems(backendMeal.getFoodItems()), isNew, isChanged);
+		return meal;
+	}
+
+	public BackendMeal convertToBackendMeal(Meal meal)
+	{
+		BackendMeal backendMeal = new BackendMeal();
+		backendMeal.setDate(meal.getDate());
+		backendMeal.setMealType(meal.getType().getName());
+		backendMeal.setFoodItems(convertToBackendFoodItems(meal.getFood()));
+
+		return backendMeal;
+	}
+
+	public BackendFoodItem convertToBackendFoodItem(FoodItem foodItem)
+	{
+		NutritionResult nutritionTotals = new NutritionResult();
+		//TODO: create converters for NutritionResult.
+
+		BackendFoodItem backendFoodItem = new BackendFoodItem();
+		backendFoodItem.setName(foodItem.getName());
+		backendFoodItem.setBrand(foodItem.getBrand());
+		backendFoodItem.setDensity(foodItem.getDensity());
+		backendFoodItem.setNumProportions(foodItem.getNumPortions());
+		backendFoodItem.setServingSize(foodItem.getServingSize());
+		backendFoodItem.setNutritionTotals(nutritionTotals);
+		return backendFoodItem;
+	}
+
+	public FoodItem convertToFrontEndFoodItem(BackendFoodItem backendFoodItem)
+	{
+		FoodItem foodItem = new FoodItem();
+		foodItem.setName(backendFoodItem.getName());
+		foodItem.setBrand(backendFoodItem.getBrand());
+		foodItem.setDensity(backendFoodItem.getDensity());
+		//foodItem.setNumServings(backendFoodItem.getNumProportions()); //TODO: why is there no setter for proportions???
+		foodItem.setServingSize(backendFoodItem.getServingSize());
+		//TODO: set the nutrition info.
+
+		return foodItem;
+	}
+
+	public ArrayList<FoodItem> convertToFrontEndFoodItems(List<BackendFoodItem> backendFoodItems)
+	{
+		ArrayList<FoodItem> foodItems = new ArrayList<FoodItem>();
+
+		for (BackendFoodItem backendFoodItem : backendFoodItems) {
+			foodItems.add(convertToFrontEndFoodItem(backendFoodItem));
+		}
+
+		return foodItems;
+	}
+
+	public List<BackendFoodItem> convertToBackendFoodItems(List<FoodItem> foodItems)
+	{
+		List<BackendFoodItem> backendFoodItems = new ArrayList<BackendFoodItem>();
+
+		for (FoodItem foodItem : foodItems) {
+			backendFoodItems.add(convertToBackendFoodItem(foodItem));
+		}
+
+		return backendFoodItems;
+	}
+
+	public ArrayList<Meal> convertToFrontEndMeals(List<BackendMeal> backendMeals)
+	{
+		ArrayList<Meal> meals = new ArrayList<Meal>();
+
+		for (BackendMeal backendMeal : backendMeals) {
+			meals.add(convertToFrontEndMeal(backendMeal));
+		}
+
+		return meals;
+	}
+
+	public List<BackendMeal> convertToBackendMeals(List<Meal> meals)
+	{
+		List<BackendMeal> backendMeals = new ArrayList<BackendMeal>();
+
+		for (Meal meal : meals) {
+			backendMeals.add(convertToBackendMeal(meal));
+		}
+
+		return backendMeals;
 	}
 }

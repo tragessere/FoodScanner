@@ -1,7 +1,7 @@
 package com.example.backend.apis;
 
 import com.example.backend.Constants;
-import com.example.backend.model.FoodItem;
+import com.example.backend.model.BackendFoodItem;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Named;
-
-import sun.awt.FontDescriptor;
 
 import static com.example.backend.OfyService.ofy;
 
@@ -42,8 +40,8 @@ public class FoodItemEndpoint {
      * @return food item with name equal to the specified name.
      */
     @ApiMethod(name = "getFoodItem")
-    public FoodItem getFoodItem(@Named("name") String name) {
-        return ofy().load().type(FoodItem.class).filter("name", name).list().get(0);
+    public BackendFoodItem getFoodItem(@Named("name") String name) {
+        return ofy().load().type(BackendFoodItem.class).filter("name", name).list().get(0);
     }
 
     /**
@@ -51,16 +49,16 @@ public class FoodItemEndpoint {
      * @return CollectionResponse of all food items.
      */
     @ApiMethod(name = "getAllFoodItems")
-    public CollectionResponse<FoodItem> getFoodItems() {
+    public CollectionResponse<BackendFoodItem> getFoodItems() {
 
-        Query<FoodItem> query = ofy().load().type(FoodItem.class);
-        List<FoodItem> results = new ArrayList<FoodItem>();
-        QueryResultIterator<FoodItem> iterator = query.iterator();
+        Query<BackendFoodItem> query = ofy().load().type(BackendFoodItem.class);
+        List<BackendFoodItem> results = new ArrayList<BackendFoodItem>();
+        QueryResultIterator<BackendFoodItem> iterator = query.iterator();
 
         while (iterator.hasNext()) {
             results.add(iterator.next());
         }
 
-        return CollectionResponse.<FoodItem>builder().setItems(results).build();
+        return CollectionResponse.<BackendFoodItem>builder().setItems(results).build();
     }
 }
