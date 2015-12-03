@@ -92,9 +92,9 @@ public class FoodServingFragment extends DialogFragment {
 
                         food.setNumServings(numServings);
                         mListener.onServingDialogPositiveClick(FoodServingFragment.this);
-                        Toast butteredToast = Toast.makeText(getActivity(),
-                                "Saved servings.", Toast.LENGTH_SHORT);
-                        butteredToast.show();
+//                        Toast butteredToast = Toast.makeText(getActivity(),
+//                                "Saved servings.", Toast.LENGTH_SHORT);
+//                        butteredToast.show();
                     }
                 })
                 .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {

@@ -1,5 +1,9 @@
 package senior_project.foodscanner;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +20,7 @@ import java.util.Set;
 public class FoodItem extends Nutritious implements Serializable {
 
     private Map<String, Double> fields;  //holds all nutrition info
+    private Map<String, Double> calculatedFields;  //holds all calculated nutrition info
 
     public static final String KEY_CAL = "Calories";
 
@@ -39,7 +44,7 @@ public class FoodItem extends Nutritious implements Serializable {
     private double cubicVolume;  //volume that will always be in inches cubed
     private double mass;
 
-    private static Map<String, Double> densities = null;
+    private static Map<String, Double> densities = null;  //not associated with a single FoodItem
 
     public FoodItem() {
         //LinkedHashMap used to ensure insertion order is maintained, for iteration.
@@ -255,6 +260,11 @@ public class FoodItem extends Nutritious implements Serializable {
         cubicVolume = volume;
         needConvertVol = true;
         needCalculateServings = true;
+        calculateNutrition();
+    }
+
+    public void setConvertedVolume(double volume) {
+        this.volume = volume;
     }
 
     public double getCubicVolume() {
@@ -410,17 +420,51 @@ public class FoodItem extends Nutritious implements Serializable {
         }
     }
 
+    public static Map<String, Double> getAllDensities() {
+        return densities;
+    }
+
+
+//    /**
+//     * Gets partial matches from the density database
+//     * @param name of food item
+//     * @return Map containing all matches
+//     */
+//    public static Map<String, Double> getDensityPartialMatches(String name) {
+//        Map<String, Double> results = new HashMap<>();
+//
+//        for (Map.Entry<String, Double> entry : densities.entrySet()) {
+//            String[] words = name.split("\\s+");
+//            for (String word : words)
+//            {
+//                //boolean contains = entry.getKey().toLowerCase().matches(".*\\b" + word.toLowerCase() + "\\b.*");
+//                String cleanedWord = word.replaceAll("[^\\w]","");
+//                if (cleanedWord.equals("")) {
+//                    continue;
+//                }
+//                boolean contains = entry.getKey().toLowerCase().matches(".*\\b" + cleanedWord.toLowerCase() + "\\b.*");
+//                if(contains) {
+//                    results.put(entry.getKey(), entry.getValue());
+//                }
+//            }
+//        }
+//
+//        return results;
+//    }
+
     /**
     Calculates & saves nutrition info, based on entered/scanned servings.
-    @return true if success, false if failure
+    @return copy of calculated fields
      */
-    private Map<String, Double> calculateNutrition() {
+    public Map<String, Double> calculateNutrition() {
         double numServings = getNumServings();
         Map<String, Double> calculatedFields = new LinkedHashMap<>(7);
 
         for (Map.Entry<String, Double> field : getSet()) {
             calculatedFields.put(field.getKey(), field.getValue() * numServings);
         }
+
+        this.calculatedFields = new LinkedHashMap<>(calculatedFields);
         return calculatedFields;
     }
 

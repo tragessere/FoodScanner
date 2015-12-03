@@ -35,7 +35,7 @@ public class Units {
         }
 
         if (food.usesMass()) {
-            food.setVolume(food.getVolume() * ML_IN_CUBIC_INCH);
+            food.setConvertedVolume(food.getVolume() * ML_IN_CUBIC_INCH);
             food.setNeedConvertVol(false);
             return food;
 
@@ -61,7 +61,7 @@ public class Units {
                 conversion = FL_OZ_IN_CUBIC_INCH;
             }
 
-            food.setVolume(food.getVolume() * conversion);
+            food.setConvertedVolume(food.getVolume() * conversion);
             food.setNeedConvertVol(false);
             return food;
         }

@@ -61,8 +61,7 @@ import senior_project.foodscanner.fragments.PreviousPhotoFragment;
  * Back Button - return to Meal Calendar
  */
 public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener,
-        FoodInfoFragment.FoodInfoDialogListener, FoodDensityFragment.FoodDensityDialogListener,
-        FoodVolumeFragment.FoodVolumeDialogListener, FoodServingFragment.FoodServingDialogListener,
+        FoodInfoFragment.FoodInfoDialogListener, FoodServingFragment.FoodServingDialogListener,
         PreviousPhotoFragment.PreviousPhotoDialogListener {
 
     private Meal meal;
@@ -94,8 +93,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_meal_details);
 
         // Set up FoodScanner button
-        Button scan_button = (Button) findViewById(R.id.button_foodscanner);
-        scan_button.setOnClickListener(this);
+        //Button scan_button = (Button) findViewById(R.id.button_foodscanner);
+        //scan_button.setOnClickListener(this);
 
         // Set up Add Food button
         Button add_button = (Button) findViewById(R.id.button_addfood);
@@ -258,15 +257,16 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.button_foodscanner) {
-//            Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
-//            intent.putExtra("pic_names", new String[]{"Top", "Side"});
-//            startActivityForResult(intent, REQUEST_FOODSCANNER);
-            Toast butteredToast = Toast.makeText(getApplicationContext(), "Please choose food item first.",
-                    Toast.LENGTH_SHORT);
-            butteredToast.show();
-
-        } else if(v.getId() == R.id.button_addfood) {
+//        if(v.getId() == R.id.button_foodscanner) {
+////            Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
+////            intent.putExtra("pic_names", new String[]{"Top", "Side"});
+////            startActivityForResult(intent, REQUEST_FOODSCANNER);
+//            Toast butteredToast = Toast.makeText(getApplicationContext(), "Please choose food item first.",
+//                    Toast.LENGTH_SHORT);
+//            butteredToast.show();
+//
+//        } else
+        if(v.getId() == R.id.button_addfood) {
             Intent intent = new Intent(MealDetailsActivity.this, FoodItemActivity.class);
             intent.putExtra("meal", meal);
             intent.putExtra("requestCode", NEW_FOOD_ITEM);
@@ -420,6 +420,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         // Do nothing, besides exit dialog.
     }
 
+    //region No longer used dialogs
+    /*
     // This is for the food density dialog
     @Override
     public void onDensityDialogPositiveClick(DialogFragment dialog) {
@@ -449,6 +451,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         // User touched the dialog's neutral button - "Cancel"
         // Do nothing, besides exit dialog.
     }
+    */
+    //endregion
 
     // This is for the food serving dialog
     @Override
@@ -456,6 +460,9 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         // User touched the dialog's positive button - "Save"
         // Servings already updated in dialog; just update meal in db
         SQLQueryHelper.updateMeal(meal);
+        Toast butteredToast = Toast.makeText(this,
+                "Saved servings.", Toast.LENGTH_SHORT);
+        butteredToast.show();
     }
 
     // This is for the food serving dialog

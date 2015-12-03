@@ -68,7 +68,8 @@ public class FoodInfoFragment extends DialogFragment {
 
         if (isSaved && food.getNumServings() != 0) {
             info.append("<br><b>Servings:</b> ");
-            info.append(food.getNumServings());
+            NumberFormat formatter = new DecimalFormat("#0.00");
+            info.append(formatter.format(food.getNumServings()));
         }
 
         info.append("<br><b>Serving Size:</b>  ");
@@ -88,12 +89,17 @@ public class FoodInfoFragment extends DialogFragment {
             }
         }
 
-        // TEMP: Display volume
-        if ((food.usesVolume() || food.usesMass()) && food.getVolume() != 0.0) {
+        // TEMP?: Display mass & volume
+        if (food.usesVolume() && !food.usesMass() && food.getVolume() != 0.0) {
             info.append("<br><b>Volume:</b> ");
             NumberFormat formatter = new DecimalFormat("#0.00");
-            info.append(formatter.format(food.getVolume()) +
-                    " in<sup><small><small>3</small></small></sup>");
+            info.append(formatter.format(food.getVolume()) + " " + food.getActualServingSizeUnit());
+        } else if ((food.usesMass()) && food.getMass() != 0.0) {
+            info.append("<br><b>Volume:</b> ");
+            NumberFormat formatter = new DecimalFormat("#0.00");
+            info.append(formatter.format(food.getVolume()) + " ml");
+            info.append("<br><b>Mass:</b> ");
+            info.append(formatter.format(food.getMass()) + " " + food.getActualServingSizeUnit());
         }
 
         Spanned nutritionInfo = Html.fromHtml(info.toString());
