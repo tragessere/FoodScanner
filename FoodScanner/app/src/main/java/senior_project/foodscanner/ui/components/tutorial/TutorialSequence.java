@@ -2,6 +2,7 @@ package senior_project.foodscanner.ui.components.tutorial;
 
 import android.graphics.Rect;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.facebook.rebound.Spring;
@@ -39,6 +41,7 @@ public class TutorialSequence implements SpringListener {
 	private TextView title;
 	private TextView subTitle;
 	private TextView message;
+	private ImageView image;
 
 	private List<TutorialCard> allPages;
 	private int currentPosition;
@@ -108,6 +111,7 @@ public class TutorialSequence implements SpringListener {
 		title = (TextView) view.findViewById(R.id.title);
 		subTitle = (TextView) view.findViewById(R.id.subtitle);
 		message = (TextView) view.findViewById(R.id.message);
+		image = (ImageView) view.findViewById(R.id.image);
 		Button buttonBack = (Button) view.findViewById(R.id.button_back);
 		Button buttonNext = (Button) view.findViewById(R.id.button_next);
 
@@ -255,6 +259,7 @@ public class TutorialSequence implements SpringListener {
 		float radius = (float) Math.sqrt(
 				viewHalfWidth * viewHalfWidth +
 				viewHalfHeight * viewHalfHeight);
+		radius += currentPage.getHighlightPadding();
 
 		viewCenter[1] -= parentTop;
 		background.enter(viewCenter, radius);
@@ -293,10 +298,12 @@ public class TutorialSequence implements SpringListener {
 		float radius;
 		if(currentPosition == -1)
 			radius = 0;
-		else
+		else {
 			radius = (float) Math.sqrt(
-				screenWidth * screenWidth +
-				screenHeight * screenHeight);
+					screenWidth * screenWidth +
+					screenHeight * screenHeight);
+			radius += currentPage.getHighlightPadding();
+		}
 
 		viewCenter[1] -= parentTop;
 		background.exit(radius);
@@ -370,6 +377,7 @@ public class TutorialSequence implements SpringListener {
 				float radius = (float) Math.sqrt(
 						viewHalfWidth * viewHalfWidth +
 								viewHalfHeight * viewHalfHeight);
+				radius += currentPage.getHighlightPadding();
 
 				viewCenter[1] -= parentTop;
 				background.move(viewCenter, radius);
@@ -394,6 +402,12 @@ public class TutorialSequence implements SpringListener {
 			subTitle.setVisibility(View.GONE);
 		}
 		message.setText(currentPage.getMessage());
+		if(currentPage.getImageResource() >= 0) {
+			image.setVisibility(View.VISIBLE);
+			image.setImageDrawable(ContextCompat.getDrawable(mActivity, currentPage.getImageResource()));
+		} else {
+			image.setVisibility(View.GONE);
+		}
 
 		cardContents.measure(View.MeasureSpec.makeMeasureSpec(activityRoot.getWidth(), View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(activityRoot.getHeight(), View.MeasureSpec.AT_MOST));
 		return new int[]{cardContents.getMeasuredWidth(), cardContents.getMeasuredHeight()};

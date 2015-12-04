@@ -59,6 +59,9 @@ public abstract class TutorialBaseActivity extends AppCompatActivity {
 			sequence.exitTutorial();
 			if(optionsItemSelected(item))
 				return true;
+		} else {
+			if(optionsItemSelected(item))
+				return true;
 		}
 
 		return super.onOptionsItemSelected(item);

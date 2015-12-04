@@ -1,13 +1,12 @@
 package senior_project.foodscanner.ui.components.tutorial;
 
-import android.content.Context;
 import android.view.View;
 
 /**
  * Created by Evan on 11/18/2015.
  */
 public class TutorialCard {
-	public static final int DEFAULT_CARD_MARGIN_DP = 15;
+	public static final int DEFAULT_CARD_MARGIN_DP = 0;
 	public static final int DEFAULT_HIGHLIGHT_PADDING_DP = 10;
 
 	public static final int POSITION_DEFAULT = 0;
@@ -27,6 +26,7 @@ public class TutorialCard {
 	private String title;
 	private String subTitle;
 	private String message;
+	private int imageResource = -1;
 
 	public TutorialCard(View highlightView) {
 		this.highlightView = highlightView;
@@ -74,6 +74,15 @@ public class TutorialCard {
 
 	public String getMessage() {
 		return message;
+	}
+
+	public TutorialCard setImageResource(int resourceId) {
+		imageResource = resourceId;
+		return this;
+	}
+
+	public int getImageResource() {
+		return imageResource;
 	}
 
 	public TutorialCard setHightlightShape(int shape) {
