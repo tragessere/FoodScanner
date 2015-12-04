@@ -4,6 +4,9 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by mlenarto on 11/3/15.
  */
@@ -16,36 +19,32 @@ public class BackendFoodItem {
     private String name;
     private Double density;
     private String brand;
-    private Integer numProportions;
     private Double servingSize;
-    private NutritionResult nutritionTotals;
+    private Map<String, Double> nutritionFields;  //holds all nutrition info
 
     // Getters
     public Long getId() { return id; }
     public String getName() { return name; }
     public Double getDensity() { return density; }
-    public NutritionResult getNutritionTotals() { return nutritionTotals; }
     public String getBrand() { return brand; }
-    public Integer getNumProportions() { return numProportions; }
     public Double getServingSize() { return servingSize; }
+    public Map<String, Double> getNutritionFields() { return nutritionFields; }
 
     // Setters
     public void setId(Long id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setDensity(Double density) { this.density = density; }
-    public void setNutritionTotals(NutritionResult nutritionTotals) { this.nutritionTotals = nutritionTotals; }
     public void setBrand(String brand) { this.brand = brand; }
-    public void setNumProportions(Integer numProportions) { this.numProportions = numProportions; }
     public void setServingSize (Double servingSize) { this.servingSize = servingSize; }
+    public void setNutritionFields(Map<String, Double> nutritionFields) { this.nutritionFields = new HashMap<String, Double>(nutritionFields); }
 
     public BackendFoodItem() {}
 
-    public BackendFoodItem(String name, Double density, String brand, Integer numProportions, Double servingSize, NutritionResult nutritionTotals) {
+    public BackendFoodItem(String name, Double density, String brand, Double servingSize, Map<String, Double> nutritionFields) {
         this.name = name;
         this.density = density;
         this.brand = brand;
-        this.numProportions = numProportions;
         this.servingSize = servingSize;
-        this.nutritionTotals = nutritionTotals;
+        this.nutritionFields = new HashMap<String, Double>(nutritionFields);
     }
 }

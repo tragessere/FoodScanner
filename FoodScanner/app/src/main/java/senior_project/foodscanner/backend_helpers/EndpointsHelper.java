@@ -9,14 +9,15 @@ import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
 import com.example.backend.foodScannerBackendAPI.model.BackendMeal;
 import com.example.backend.foodScannerBackendAPI.model.BackendFoodItem;
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
+import com.example.backend.foodScannerBackendAPI.model.JsonMap;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
-import com.example.backend.foodScannerBackendAPI.model.NutritionResult;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.util.DateTime;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -235,9 +236,15 @@ public class EndpointsHelper
 
 	public Meal convertToFrontEndMeal(BackendMeal backendMeal)
 	{
-		boolean isNew = true;		//TODO: ask dan what the expected value is
-		boolean isChanged = true;	//TODO: ask dan what the expected value is
-		Meal meal = new Meal(backendMeal.getId(), backendMeal.getDate(), backendMeal.getType(), convertToFrontEndFoodItems(backendMeal.getFoodItems()), isNew, isChanged);
+		Meal meal = new Meal(
+				backendMeal.getId(),
+				backendMeal.getDate(),
+				backendMeal.getType(),
+				convertToFrontEndFoodItems(backendMeal.getFoodItems()),
+				backendMeal.getIsNew(),
+				backendMeal.getIsChanged()
+		);
+
 		return meal;
 	}
 
@@ -253,16 +260,16 @@ public class EndpointsHelper
 
 	public BackendFoodItem convertToBackendFoodItem(FoodItem foodItem)
 	{
-		NutritionResult nutritionTotals = new NutritionResult();
-		//TODO: create converters for NutritionResult.
-
 		BackendFoodItem backendFoodItem = new BackendFoodItem();
 		backendFoodItem.setName(foodItem.getName());
 		backendFoodItem.setBrand(foodItem.getBrand());
 		backendFoodItem.setDensity(foodItem.getDensity());
-		backendFoodItem.setNumProportions(foodItem.getNumPortions());
 		backendFoodItem.setServingSize(foodItem.getServingSize());
-		backendFoodItem.setNutritionTotals(nutritionTotals);
+
+		JsonMap nutritionMap = new JsonMap();
+		nutritionMap.putAll(foodItem.getNutrition());
+		backendFoodItem.setNutritionFields(nutritionMap);
+
 		return backendFoodItem;
 	}
 
@@ -272,9 +279,16 @@ public class EndpointsHelper
 		foodItem.setName(backendFoodItem.getName());
 		foodItem.setBrand(backendFoodItem.getBrand());
 		foodItem.setDensity(backendFoodItem.getDensity());
-		//foodItem.setNumServings(backendFoodItem.getNumProportions()); //TODO: why is there no setter for proportions???
 		foodItem.setServingSize(backendFoodItem.getServingSize());
-		//TODO: set the nutrition info.
+
+		JsonMap nutritionMap = backendFoodItem.getNutritionFields();
+
+		Iterator it = nutritionMap.entrySet().iterator();
+		while (it.hasNext()) {
+			JsonMap.Entry pair = (JsonMap.Entry)it.next();
+			foodItem.setField((String)pair.getKey(), (Double)pair.getValue());
+			it.remove(); // avoids a ConcurrentModificationException
+		}
 
 		return foodItem;
 	}
