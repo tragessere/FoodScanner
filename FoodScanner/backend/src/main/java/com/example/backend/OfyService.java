@@ -1,8 +1,8 @@
 package com.example.backend;
 
 import com.example.backend.model.DensityEntry;
-import com.example.backend.model.FoodItem;
-import com.example.backend.model.Meal;
+import com.example.backend.model.BackendFoodItem;
+import com.example.backend.model.BackendMeal;
 
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyFactory;
@@ -18,9 +18,9 @@ public final class OfyService {
     }
     
     static {
-        factory().register(FoodItem.class);
+        factory().register(BackendFoodItem.class);
         factory().register(DensityEntry.class);
-        factory().register(Meal.class);
+        factory().register(BackendMeal.class);
     }
 
     /**
