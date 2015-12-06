@@ -29,6 +29,10 @@ import senior_project.foodscanner.FoodItem;
  */
 public class EndpointsHelper
 {
+	public static final String TASKID_MEAL_SAVE = "saved_meal_success";
+	public static final String TASKID_MEAL_DELETE = "delete_meal_success";
+	public static final String TASKID_MEALS_GET = "meals";
+
 	public static EndpointsHelper mEndpoints;
 	public FoodScannerBackendAPI mAPI;
 
@@ -175,12 +179,80 @@ public class EndpointsHelper
 		}
 	}
 
+	/**
+	 * Saves/updates meal in backend. Returns success boolean and meal.
+	 */
 	public class SaveMealTask extends AsyncTask<Meal, Void, Meal> {
+		private TaskCompletionListener mListener;
+		private boolean success = false;
+
+		public SaveMealTask(TaskCompletionListener listener) {
+			mListener = listener;
+		}
+
+		@Override
+		protected void onCancelled(Meal meal) {
+			Bundle b = new Bundle();
+			b.putSerializable(TASKID_MEAL_SAVE, meal);
+			b.putBoolean(TASKID_MEAL_SAVE, false);
+			mListener.onTaskCompleted(b);
+		}
+
+		@Override
+		protected void onPostExecute(Meal meal) {
+			Bundle b = new Bundle();
+			b.putSerializable(TASKID_MEAL_SAVE, meal);
+			b.putBoolean(TASKID_MEAL_SAVE, success);
+			mListener.onTaskCompleted(b);
+		}
+
 		@Override
 		protected Meal doInBackground(Meal... meals) {
 			try {
 				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
 				mAPI.saveMeal(backendMeal).execute();
+				success = true;
+				return meals[0];
+			} catch (IOException e) {
+				e.printStackTrace();
+				return meals[0];
+			}
+		}
+	}
+
+	/**
+	 * Deletes meal from backend. Returns success boolean and meal.
+	 */
+	public class DeleteMealTask extends AsyncTask<Meal, Void, Meal> {
+		private TaskCompletionListener mListener;
+		private boolean success = false;
+
+		public DeleteMealTask(TaskCompletionListener listener) {
+			mListener = listener;
+		}
+
+		@Override
+		protected void onCancelled(Meal meal) {
+			Bundle b = new Bundle();
+			b.putSerializable(TASKID_MEAL_DELETE, meal);
+			b.putBoolean(TASKID_MEAL_DELETE, false);
+			mListener.onTaskCompleted(b);
+		}
+
+		@Override
+		protected void onPostExecute(Meal meal) {
+			Bundle b = new Bundle();
+			b.putSerializable(TASKID_MEAL_DELETE, meal);
+			b.putBoolean(TASKID_MEAL_DELETE, success);
+			mListener.onTaskCompleted(b);
+		}
+
+		@Override
+		protected Meal doInBackground(Meal... meals) {
+			try {
+				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
+				mAPI.deleteMeal(backendMeal).execute();
+				success = true;
 				return meals[0];
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -189,21 +261,30 @@ public class EndpointsHelper
 		}
 	}
 
-	public class DeleteMealTask extends AsyncTask<Meal, Void, Boolean> {
-		@Override
-		protected Boolean doInBackground(Meal... meals) {
-			try {
-				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
-				mAPI.deleteMeal(backendMeal).execute();
-				return true;
-			} catch (IOException e) {
-				e.printStackTrace();
-				return false;
-			}
-		}
-	}
+	/**
+	 * Gets all meals in backend between two dates inclusive. Null on failure.
+	 */
+	public class GetMealsWithinDatesTask extends AsyncTask<Date, Void, List<Meal>> {
+		private TaskCompletionListener mListener;
 
-	public class GetMealsWithinDates extends AsyncTask<Date, Void, List<Meal>> {
+		public GetMealsWithinDatesTask(TaskCompletionListener listener) {
+			mListener = listener;
+		}
+
+		@Override
+		protected void onCancelled(){
+			Bundle b = new Bundle();
+			b.putSerializable(TASKID_MEALS_GET, null);
+			mListener.onTaskCompleted(b);
+		}
+
+		@Override
+		protected void onPostExecute(List<Meal> meals) {
+			Bundle b = new Bundle();
+			b.putSerializable(TASKID_MEALS_GET, meals.toArray());
+			mListener.onTaskCompleted(b);
+		}
+
 		@Override
 		protected List<Meal> doInBackground(Date... dates) {
 			try {
@@ -241,7 +322,8 @@ public class EndpointsHelper
 				backendMeal.getType(),
 				convertToFrontEndFoodItems(backendMeal.getFoodItems()),
 				backendMeal.getIsNew(),
-				backendMeal.getIsChanged()
+				backendMeal.getIsChanged(),
+				false
 		);
 
 		return meal;

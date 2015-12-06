@@ -46,6 +46,7 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
     // Data Management
     private long id;    //Database ID
     private boolean isChanged = true;// Flag that is set to false whenever meal details are changed. Must be manually set to false when meal is uploaded to backend.
+    private boolean isDeleted = false;// Flag that is set to true when the Meal should be deleted from the backend
     private boolean isNew; // Flag determining whether or not the Meal was just created.
 
     // Meal Details
@@ -61,12 +62,13 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         setIsNew(true);
     }
 
-    public Meal(long id, long date, String type, ArrayList<FoodItem> foodItems,  boolean isNew, boolean isChanged) {
+    public Meal(long id, long date, String type, ArrayList<FoodItem> foodItems,  boolean isNew, boolean isChanged, boolean isDeleted) {
         this.id = id;
         this.date = date;
         this.type = MealType.valueOf(type);
         food = foodItems;
         this.isChanged = isChanged;
+        this.isDeleted = isDeleted;
         this.isNew = isNew;
         setIsNew(false);
     }
@@ -147,7 +149,18 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
     }
 
     public void setIsChanged(boolean isChanged) {
-        this.isChanged = isChanged;
+        if(!isDeleted) {
+            this.isChanged = isChanged;
+        }
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted() {
+        isChanged = true;
+        isDeleted = true;
     }
 
     @Override
@@ -162,6 +175,7 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         cv.put(SQLHelper.COLUMN_FOOD_LIST, SQLQueryHelper.foodListToBytes(food));
         cv.put(SQLHelper.COLUMN_NEW, isNew);
         cv.put(SQLHelper.COLUMN_CHANGED, isChanged);
+        cv.put(SQLHelper.COLUMN_DELETED, isDeleted);
         return cv;
     }
 
