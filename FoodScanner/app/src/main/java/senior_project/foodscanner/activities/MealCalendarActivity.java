@@ -384,9 +384,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                                 if(meal != null) {
                                     if(b.getBoolean(EndpointsHelper.TASKID_MEAL_SAVE, false)) {//TODO conflicting values for same key?
                                         // update local storage
-                                        meal.setIsChanged(false);//TODO handle case where user makes a change while syncing, conflicting meal objects and don't set isChanged to false
-                                        //TODO possible solution: isChanged becomes numChanges as an integer
-                                        SQLQueryHelper.updateMeal(meal);
+                                        if(meal.isMoreRecentlyChangedThan(SQLQueryHelper.getMeal(meal.getId()))){ // only set meal unchanged if it was not changed during syncing
+                                            meal.setUnchanged();
+                                            SQLQueryHelper.updateMeal(meal);
+                                        }
                                     }
                                 }
                                 updateSyncWarnings();

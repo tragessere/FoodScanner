@@ -15,7 +15,7 @@ public class SQLHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "foodScanner.db";
 	//Update database version whenever changing tables or columns
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	private static final String DROP = "DROP TABLE IF EXISTS ";
 
 	public static final String TABLE_MEALS = "table_meals";
