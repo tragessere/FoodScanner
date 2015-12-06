@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/container_warning"
             android:layout_below="@+id/container_date"
-            android:background="@drawable/tap_add_meal"/>
+            android:background="@drawable/background_add_meal"/>
 
         <FrameLayout
             android:layout_width="match_parent"

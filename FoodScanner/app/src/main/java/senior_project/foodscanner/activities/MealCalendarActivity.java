@@ -1,7 +1,6 @@
 package senior_project.foodscanner.activities;
 
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -204,11 +202,11 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
             day.setTimeInMillis(currentDate);
             if(day.get(Calendar.MONTH) == Calendar.APRIL && day.get(Calendar.DAY_OF_MONTH) == 1)
             {
-                mealListView.setBackgroundResource(R.drawable.tap_add_meal_fool);// April Fool's Easter Egg
+                mealListView.setBackgroundResource(R.drawable.background_add_meal_fool);// April Fool's Easter Egg
             }
             else
             {
-                mealListView.setBackgroundResource(R.drawable.tap_add_meal);
+                mealListView.setBackgroundResource(R.drawable.background_add_meal);
             }
         }
         else{
