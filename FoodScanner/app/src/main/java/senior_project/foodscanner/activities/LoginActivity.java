@@ -61,6 +61,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 		credential = GoogleAccountCredential.usingAudience(this.getApplicationContext(), "server:client_id:" + Constants.WEB_CLIENT_ID);
 		credential.setSelectedAccountName(prefs.getString(Constants.PREF_ACCOUNT_NAME, null));
 
+		if(credential.getSelectedAccountName() != null) {
+			//signed in. Finish activity and continue.
+			LoginActivity.finishLogin(this, credential, findViewById(R.id.loading));
+			return;
+		}
+
 		googleButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -153,7 +159,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 	}
 
 	private static void finishLogout(AppCompatActivity activity) {
-		SQLHelper.clear();
+		SQLHelper.clear(activity);
 		EndpointsHelper.clearInstance();
 		SharedPreferences.Editor editor = activity.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
 		editor.remove(Constants.PREF_ACCOUNT_NAME);

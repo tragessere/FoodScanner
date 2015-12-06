@@ -4,7 +4,7 @@ package com.example.backend.apis;
  * Created by mlenarto on 10/29/15.
  */
 import com.example.backend.Constants;
-import com.example.backend.model.Meal;
+import com.example.backend.model.BackendMeal;
 import com.example.backend.utils.AuthUtil;
 import com.google.api.server.spi.ServiceException;
 import com.google.api.server.spi.config.Api;
@@ -42,34 +42,40 @@ import static com.example.backend.OfyService.ofy;
 public class MealEndpoint {
 
     @ApiMethod(name = "saveMeal")
-    public void saveMeal(Meal meal, User user) throws ServiceException {
+    public void saveMeal(BackendMeal meal, User user) throws ServiceException {
         AuthUtil.throwIfNotAuthenticated(user);
         ofy().save().entity(meal).now();
     }
 
+    @ApiMethod(name = "deleteMeal")
+    public void deleteMeal(BackendMeal meal, User user) throws ServiceException {
+        AuthUtil.throwIfNotAuthenticated(user);
+        ofy().delete().entity(meal).now();
+    }
+
     @ApiMethod(name = "getAllMeals")
-    public CollectionResponse<Meal> getAllMeals (User user) throws ServiceException {
-        Query<Meal> query = ofy().load().type(Meal.class);
-        List<Meal> results = new ArrayList<Meal>();
-        QueryResultIterator<Meal> iterator = query.iterator();
+    public CollectionResponse<BackendMeal> getAllMeals (User user) throws ServiceException {
+        Query<BackendMeal> query = ofy().load().type(BackendMeal.class);
+        List<BackendMeal> results = new ArrayList<BackendMeal>();
+        QueryResultIterator<BackendMeal> iterator = query.iterator();
 
         while (iterator.hasNext()) {
             results.add(iterator.next());
         }
 
-        return CollectionResponse.<Meal>builder().setItems(results).build();
+        return CollectionResponse.<BackendMeal>builder().setItems(results).build();
     }
 
     @ApiMethod(name = "getMealsWithinDates")
-    public CollectionResponse<Meal> getMealsWithinDates (@Named("startDate")Date startDate, @Named("endDate")Date endDate, User user) throws ServiceException {
-        Query<Meal> query = ofy().load().type(Meal.class).filter("date >=", startDate).filter("date <=", endDate);
-        List<Meal> results = new ArrayList<Meal>();
-        QueryResultIterator<Meal> iterator = query.iterator();
+    public CollectionResponse<BackendMeal> getMealsWithinDates (@Named("startDate")Date startDate, @Named("endDate")Date endDate, User user) throws ServiceException {
+        Query<BackendMeal> query = ofy().load().type(BackendMeal.class).filter("date >=", startDate).filter("date <=", endDate);
+        List<BackendMeal> results = new ArrayList<BackendMeal>();
+        QueryResultIterator<BackendMeal> iterator = query.iterator();
 
         while (iterator.hasNext()) {
             results.add(iterator.next());
         }
 
-        return CollectionResponse.<Meal>builder().setItems(results).build();
+        return CollectionResponse.<BackendMeal>builder().setItems(results).build();
     }
 }

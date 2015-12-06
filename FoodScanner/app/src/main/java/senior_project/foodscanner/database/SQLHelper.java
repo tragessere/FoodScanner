@@ -67,9 +67,10 @@ public class SQLHelper extends SQLiteOpenHelper {
 			mDbHelper = new SQLHelper(context.getApplicationContext());
 	}
 
-	public static void clear() {
+	public static void clear(Context context) {
 		mDbHelper.clearDatabase(mDbHelper.getWritableDatabase());
 		mDbHelper.close();
+		context.deleteDatabase(DATABASE_NAME);
 		mDbHelper = null;
 	}
 

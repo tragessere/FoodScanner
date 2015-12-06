@@ -6,18 +6,23 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
+import com.example.backend.foodScannerBackendAPI.model.BackendMeal;
+import com.example.backend.foodScannerBackendAPI.model.BackendFoodItem;
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
-import com.example.backend.foodScannerBackendAPI.model.Meal;
+import com.example.backend.foodScannerBackendAPI.model.JsonMap;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.util.DateTime;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import senior_project.foodscanner.Constants;
-
+import senior_project.foodscanner.Meal;
+import senior_project.foodscanner.FoodItem;
 
 /**
  * Created by Evan on 10/3/2015.
@@ -158,15 +163,42 @@ public class EndpointsHelper
 		}
 	}
 
+	public class GetDensitiesWithNameSimilarToTask extends AsyncTask<String, Void, List<DensityEntry>> {
+		@Override
+		protected  List<DensityEntry> doInBackground(String...strings) {
+			try {
+				return mAPI.getDensitiesWithNameSimilarTo(strings[0]).execute().getItems();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+	}
+
 	public class SaveMealTask extends AsyncTask<Meal, Void, Meal> {
 		@Override
 		protected Meal doInBackground(Meal... meals) {
 			try {
-				mAPI.saveMeal(meals[0]).execute();
+				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
+				mAPI.saveMeal(backendMeal).execute();
 				return meals[0];
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;
+			}
+		}
+	}
+
+	public class DeleteMealTask extends AsyncTask<Meal, Void, Boolean> {
+		@Override
+		protected Boolean doInBackground(Meal... meals) {
+			try {
+				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
+				mAPI.deleteMeal(backendMeal).execute();
+				return true;
+			} catch (IOException e) {
+				e.printStackTrace();
+				return false;
 			}
 		}
 	}
@@ -177,7 +209,8 @@ public class EndpointsHelper
 			try {
 				Date startDate = dates[0];
 				Date endDate = dates[1];
-				return mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+				List<BackendMeal> backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+				return convertToFrontEndMeals(backendMeals);
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;
@@ -196,5 +229,110 @@ public class EndpointsHelper
 
 	public interface densityDownloadObserver {
 		void densityDownloaded();
+	}
+
+	/* Converters */
+
+	public Meal convertToFrontEndMeal(BackendMeal backendMeal)
+	{
+		Meal meal = new Meal(
+				backendMeal.getId(),
+				backendMeal.getDate(),
+				backendMeal.getType(),
+				convertToFrontEndFoodItems(backendMeal.getFoodItems()),
+				backendMeal.getIsNew(),
+				backendMeal.getIsChanged()
+		);
+
+		return meal;
+	}
+
+	public BackendMeal convertToBackendMeal(Meal meal)
+	{
+		BackendMeal backendMeal = new BackendMeal();
+		backendMeal.setDate(meal.getDate());
+		backendMeal.setMealType(meal.getType().getName());
+		backendMeal.setFoodItems(convertToBackendFoodItems(meal.getFood()));
+
+		return backendMeal;
+	}
+
+	public BackendFoodItem convertToBackendFoodItem(FoodItem foodItem)
+	{
+		BackendFoodItem backendFoodItem = new BackendFoodItem();
+		backendFoodItem.setName(foodItem.getName());
+		backendFoodItem.setBrand(foodItem.getBrand());
+		backendFoodItem.setDensity(foodItem.getDensity());
+		backendFoodItem.setServingSize(foodItem.getServingSize());
+
+		JsonMap nutritionMap = new JsonMap();
+		nutritionMap.putAll(foodItem.getNutrition());
+		backendFoodItem.setNutritionFields(nutritionMap);
+
+		return backendFoodItem;
+	}
+
+	public FoodItem convertToFrontEndFoodItem(BackendFoodItem backendFoodItem)
+	{
+		FoodItem foodItem = new FoodItem();
+		foodItem.setName(backendFoodItem.getName());
+		foodItem.setBrand(backendFoodItem.getBrand());
+		foodItem.setDensity(backendFoodItem.getDensity());
+		foodItem.setServingSize(backendFoodItem.getServingSize());
+
+		JsonMap nutritionMap = backendFoodItem.getNutritionFields();
+
+		Iterator it = nutritionMap.entrySet().iterator();
+		while (it.hasNext()) {
+			JsonMap.Entry pair = (JsonMap.Entry)it.next();
+			foodItem.setField((String)pair.getKey(), (Double)pair.getValue());
+			it.remove(); // avoids a ConcurrentModificationException
+		}
+
+		return foodItem;
+	}
+
+	public ArrayList<FoodItem> convertToFrontEndFoodItems(List<BackendFoodItem> backendFoodItems)
+	{
+		ArrayList<FoodItem> foodItems = new ArrayList<FoodItem>();
+
+		for (BackendFoodItem backendFoodItem : backendFoodItems) {
+			foodItems.add(convertToFrontEndFoodItem(backendFoodItem));
+		}
+
+		return foodItems;
+	}
+
+	public List<BackendFoodItem> convertToBackendFoodItems(List<FoodItem> foodItems)
+	{
+		List<BackendFoodItem> backendFoodItems = new ArrayList<BackendFoodItem>();
+
+		for (FoodItem foodItem : foodItems) {
+			backendFoodItems.add(convertToBackendFoodItem(foodItem));
+		}
+
+		return backendFoodItems;
+	}
+
+	public ArrayList<Meal> convertToFrontEndMeals(List<BackendMeal> backendMeals)
+	{
+		ArrayList<Meal> meals = new ArrayList<Meal>();
+
+		for (BackendMeal backendMeal : backendMeals) {
+			meals.add(convertToFrontEndMeal(backendMeal));
+		}
+
+		return meals;
+	}
+
+	public List<BackendMeal> convertToBackendMeals(List<Meal> meals)
+	{
+		List<BackendMeal> backendMeals = new ArrayList<BackendMeal>();
+
+		for (Meal meal : meals) {
+			backendMeals.add(convertToBackendMeal(meal));
+		}
+
+		return backendMeals;
 	}
 }

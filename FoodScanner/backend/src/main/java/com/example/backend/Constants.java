@@ -10,9 +10,27 @@ public class Constants {
     public static final String EMAIL_SCOPE = "https://www.googleapis.com/auth/userinfo.email";
 
     public enum MealType {
-        BREAKFAST,
-        LUNCH,
-        DINNER,
-        SNACK
+        BREAKFAST("Breakfast", 0),
+        BRUNCH("Brunch", 1),
+        LUNCH("Lunch", 2),
+        SNACK("Snack", 3),
+        DINNER("Dinner", 4),
+        DESSERT("Dessert", 5);
+
+
+        private final String name;
+        private final int priority;
+
+        MealType(String name, int priority) {
+            this.name = name;
+            this.priority = priority;
+        }
+
+        public String getName() {
+            return name;
+        }
+        public int getPriority() {
+            return priority;
+        }
     }
 }
