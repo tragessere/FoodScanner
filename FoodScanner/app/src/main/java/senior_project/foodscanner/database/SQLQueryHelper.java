@@ -27,7 +27,8 @@ public class SQLQueryHelper {
 	private static final String[] ALL_COLUMNS = new String[] {
 			SQLHelper.COLUMN_ID, SQLHelper.COLUMN_MEAL_TYPE,
 			SQLHelper.COLUMN_TIME, SQLHelper.COLUMN_FOOD_LIST,
-			SQLHelper.COLUMN_NEW, SQLHelper.COLUMN_CHANGED};
+			SQLHelper.COLUMN_NEW, SQLHelper.COLUMN_CHANGED,
+			SQLHelper.COLUMN_DELETED};
 
 	/**
 	 * Insert a meal object into the database
@@ -108,7 +109,7 @@ public class SQLQueryHelper {
 				null, null, null);
 
 		if(c != null && c.moveToFirst()) {
-			Meal meal = new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5) == 1);
+			Meal meal = new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1);
 
 			c.close();
 
@@ -122,7 +123,7 @@ public class SQLQueryHelper {
 
 
 	/**
-	 * return a list of all meals in a given date interval.
+	 * Returns a list of all meals in a given date interval. Does not return meals that have isDeleted set to true.
 	 *
 	 * @param startDay		The earliest date to return meal entries
 	 * @param endDay		The latest date to return meal entries
@@ -149,12 +150,12 @@ public class SQLQueryHelper {
 		SQLiteDatabase db = SQLHelper.getInstance().getReadableDatabase();
 
 		Cursor c = db.query(SQLHelper.TABLE_MEALS, ALL_COLUMNS,
-				SQLHelper.COLUMN_TIME + " >= " + startDay.getTimeInMillis() + " AND " + SQLHelper.COLUMN_TIME + " <= " + endDay.getTimeInMillis(),
+				SQLHelper.COLUMN_TIME + " >= " + startDay.getTimeInMillis() + " AND " + SQLHelper.COLUMN_TIME + " <= " + endDay.getTimeInMillis() + " AND " + SQLHelper.COLUMN_DELETED + "!= 1",
 				null, null, null, SQLHelper.COLUMN_TIME);
 
 		if(c != null && c.moveToFirst()) {
 			while(!c.isAfterLast()) {
-				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5) == 1));
+				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
 				c.moveToNext();
 			}
 			c.close();
@@ -195,7 +196,7 @@ public class SQLQueryHelper {
 
 		if(c != null && c.moveToFirst()) {
 			while(!c.isAfterLast()) {
-				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5) == 1));
+				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
 				c.moveToNext();
 			}
 			c.close();
@@ -223,7 +224,7 @@ public class SQLQueryHelper {
 
 		if(c != null && c.moveToFirst()) {
 			while(!c.isAfterLast()) {
-				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5) == 1));
+				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
 				c.moveToNext();
 			}
 			c.close();
@@ -250,7 +251,7 @@ public class SQLQueryHelper {
 
         if(c != null && c.moveToFirst()) {
             while(!c.isAfterLast()) {
-                mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5) == 1));
+                mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
                 c.moveToNext();
             }
             c.close();

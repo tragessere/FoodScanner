@@ -1,0 +1,100 @@
+package senior_project.foodscanner.fragments;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
+import android.os.Bundle;
+
+/**
+ * General Alert Dialog Fragment
+ */
+public class AlertDialogFragment extends DialogFragment {
+    private int iconId;
+    private CharSequence title;
+    private CharSequence message;
+    private CharSequence positiveText;
+    private CharSequence negativeText;
+    private CharSequence neutralText;
+    private AlertDialogFragment.OnClickListener posListener;
+    private AlertDialogFragment.OnClickListener negListener;
+    private AlertDialogFragment.OnClickListener neuListener;
+
+    public void setIcon(int id){
+        iconId = id;
+    }
+
+    public void setTitle(String text){
+        title = text;
+    }
+
+    public void setMessage(String text){
+        message = text;
+    }
+
+    public void setPositiveButton(String text, AlertDialogFragment.OnClickListener listener){
+        positiveText = text;
+        posListener = listener;
+    }
+
+    public void setNegativeButton(String text, AlertDialogFragment.OnClickListener listener){
+        negativeText = text;
+        negListener = listener;
+    }
+
+    public void setNeutralButton(String text, AlertDialogFragment.OnClickListener listener){
+        neutralText = text;
+        neuListener = listener;
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
+        d.setIcon(iconId);
+        if(title!=null){
+            d.setTitle(title);
+        }
+        if(message!=null){
+            d.setMessage(message);
+        }
+        if(positiveText != null) {
+            d.setPositiveButton(positiveText, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if(posListener != null) {
+                        posListener.onClick(AlertDialogFragment.this, which);
+                    }
+                }
+            });
+        }
+        if(negativeText != null) {
+            d.setNegativeButton(negativeText, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if(negListener != null) {
+                        negListener.onClick(AlertDialogFragment.this, which);
+                    }
+                }
+            });
+        }
+        if(neutralText != null) {
+            d.setNeutralButton(neutralText, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if(neuListener != null) {
+                        neuListener.onClick(AlertDialogFragment.this, which);
+                    }
+                }
+            });
+        }
+        return d.create();
+    }
+
+    public interface OnClickListener{
+        /**
+         *
+         * @param which - AlertDialog.BUTTON_NEGATIVE, BUTTON_POSITIVE, BUTTON_NEUTRAL
+         */
+        public void onClick(AlertDialogFragment dialog, int which);
+    }
+}

@@ -37,7 +37,7 @@
         </activity>
         <activity
             android:name=".activities.PhotoTakerActivity"
-            android:label="Photo Reviewer"
+            android:label="Review Photos"
             android:screenOrientation="portrait" >
         </activity>
         <activity
