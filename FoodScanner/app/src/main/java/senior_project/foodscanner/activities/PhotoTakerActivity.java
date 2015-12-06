@@ -61,7 +61,7 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
 
     @Override
     public void onFinishDialog_Review() {
-        // Nothing
+        picBrowser.setCurrentIndex(0);
     }
 
     @Override
