@@ -95,6 +95,12 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         mealListView = (ListView) findViewById(R.id.listView_meals);
         container_warning = findViewById(R.id.container_warning);
 
+        loadingIndicator.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // consume click
+            }
+        });
         button_calendar.setOnClickListener(this);
         button_calendar.setOnLongClickListener(this);
         button_totalDay.setOnClickListener(this);
@@ -300,7 +306,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         }
         else{// no meals found locally, check the server
             //TODO test this, with and without connection
-            loadTask = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
+            //TODO bug: executes right away for some reason
+            /*loadTask = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
                 @Override
                 public void onTaskCompleted(Bundle b) {
                     // save meals locally and add them to ui
@@ -313,16 +320,17 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                         }
                     }
                     else{
+                        //TODO better icon
                         MessageDialogFragment.newInstance("Please check your internet connection.", "Error: Loading meals from server failed", android.R.drawable.ic_dialog_alert).show(getFragmentManager(), "Server Load Fail");
                     }
                     loadingIndicator.setVisibility(View.GONE);
                     updateUI();
                     updateSyncWarnings();
                 }
-            });
-            loadTask.execute(new Date(date), new Date(date));
+            });*/
+            //loadTask.execute(new Date(date), new Date(date));//TODO
 
-            loadingIndicator.setVisibility(View.VISIBLE);
+            //loadingIndicator.setVisibility(View.VISIBLE);//TODO
         }
     }
 
@@ -373,8 +381,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                                 updateSyncWarnings();
                             }
                         });
-                        syncTasks.add(task);
-                        task.execute(meal);
+                        //syncTasks.add(task);//TODO
+                        //task.execute(meal);//TODO
                     }
                     else{// save/update meal in backend
                         EndpointsHelper.SaveMealTask task = EndpointsHelper.mEndpoints.new SaveMealTask(new EndpointsHelper.TaskCompletionListener() {
@@ -393,8 +401,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                                 updateSyncWarnings();
                             }
                         });
-                        syncTasks.add(task);
-                        task.execute(meal);
+                        //syncTasks.add(task);//TODO
+                        //task.execute(meal);//TODO
                     }
                 }
             }

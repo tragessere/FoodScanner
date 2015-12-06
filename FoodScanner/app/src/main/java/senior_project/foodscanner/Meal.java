@@ -84,7 +84,7 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
     public void setType(MealType type) {
         if(!this.type.equals(type)) {
             this.type = type;
-            setUnchanged();
+            isChanged++;
         }
     }
 
@@ -111,13 +111,13 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         // Food item hasn't already been added
         item.calculateNutrition();
         food.add(item);
-        setUnchanged();
+        isChanged++;
         return true;
     }
 
     public void removeFoodItem(FoodItem item) {
         food.remove(item);
-        setUnchanged();
+        isChanged++;
     }
 
     public FoodItem getFoodItem(int index) {
@@ -133,7 +133,7 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         newFood.calculateNutrition();
         this.removeFoodItem(oldFood);
         this.addFoodItem(newFood);
-        setUnchanged();
+        isChanged++;
     }
 
     public boolean isNew() {

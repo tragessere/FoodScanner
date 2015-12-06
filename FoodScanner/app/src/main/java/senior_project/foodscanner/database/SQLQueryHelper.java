@@ -150,7 +150,7 @@ public class SQLQueryHelper {
 		SQLiteDatabase db = SQLHelper.getInstance().getReadableDatabase();
 
 		Cursor c = db.query(SQLHelper.TABLE_MEALS, ALL_COLUMNS,
-				SQLHelper.COLUMN_TIME + " >= " + startDay.getTimeInMillis() + " AND " + SQLHelper.COLUMN_TIME + " <= " + endDay.getTimeInMillis() + "AND" + SQLHelper.COLUMN_DELETED + "!= 1",
+				SQLHelper.COLUMN_TIME + " >= " + startDay.getTimeInMillis() + " AND " + SQLHelper.COLUMN_TIME + " <= " + endDay.getTimeInMillis() + " AND " + SQLHelper.COLUMN_DELETED + "!= 1",
 				null, null, null, SQLHelper.COLUMN_TIME);
 
 		if(c != null && c.moveToFirst()) {
