@@ -344,10 +344,11 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 public void onTaskCompleted(Bundle b) {
                     Log.d("LOADING","BACKEND: RETURNED");
                     // save meals locally and add them to ui
-                    Meal[] meals = (Meal[]) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET);
+                    Object[] meals = (Object[]) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET);
                     if(meals != null) {
                         Arrays.sort(meals);
-                        for(Meal meal:meals){
+                        for(Object obj:meals){
+                            Meal meal = (Meal)obj;
                             meal.setId(SQLQueryHelper.insertMeal(meal));
                             adapter.add(meal);
                         }
@@ -355,7 +356,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                     else{
                         Exception e = (Exception)b.getSerializable(EndpointsHelper.TASKID_MEALS_GET_EXCEPTION);
                         if(e != null) {
-                            MessageDialogFragment.newInstance(e.getLocalizedMessage(), "Error: Loading meals from server failed", R.drawable.ic_error_outline_black).show(getFragmentManager(), "Server Load Fail");
+                            MessageDialogFragment.newInstance(""+e.getLocalizedMessage(), "Error: Loading meals from server failed", R.drawable.ic_error_outline_black).show(getFragmentManager(), "Server Load Fail");
                         }
                         else{
                             MessageDialogFragment.newInstance("Unknown Reason. Please check your internet connection.", "Error: Loading meals from server failed", R.drawable.ic_error_outline_black).show(getFragmentManager(), "Server Load Fail");

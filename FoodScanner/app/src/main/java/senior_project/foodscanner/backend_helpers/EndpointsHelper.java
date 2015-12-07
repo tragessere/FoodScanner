@@ -313,6 +313,9 @@ public class EndpointsHelper
 				Date startDate = dates[0];
 				Date endDate = dates[1];
 				List<BackendMeal> backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+				if(backendMeals == null) {
+					backendMeals = new ArrayList<>();
+				}
 				return convertToFrontEndMeals(backendMeals);
 			} catch (Exception e) {
 				Log.e("EndpointsHelper","GetMealsWithinDatesTask",e);
