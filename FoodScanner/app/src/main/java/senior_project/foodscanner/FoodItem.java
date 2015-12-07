@@ -97,6 +97,8 @@ public class FoodItem extends Nutritious implements Serializable {
         return fields.entrySet();
     }
 
+    public Map<String, Double> getFields() { return fields; }
+
     //region getters and setters for hard-coded fields
 
     public String getName() {
@@ -213,13 +215,15 @@ public class FoodItem extends Nutritious implements Serializable {
         this.actualServingSizeUnit = actualServingSizeUnit;
     }
 
-    public boolean usesMass() {
-        return usesMass;
-    }
+    public boolean usesMass() { return usesMass; }
+
+    public void setUsesMass(boolean value) { this.usesMass = value; }
 
     public boolean usesVolume() {
         return usesVol;
     }
+
+    public void setUsesVol(boolean value) { this.usesVol = value; }
 
     public double getNumServings() {
         if ((usesMass || usesVol) && needCalculateServings) {

@@ -17,8 +17,10 @@ import com.google.api.client.util.DateTime;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.Meal;
@@ -150,11 +152,7 @@ public class EndpointsHelper
 
 			// Save results to density map
 			for (DensityEntry entry : results) {
-				// TODO: Fix database so no entries should have null density values
-				if (entry.getDensity() != null) {
-					senior_project.foodscanner.FoodItem.addDensity(entry.getName(),
-							(double) (entry.getDensity()));
-				}
+				senior_project.foodscanner.FoodItem.addDensity(entry.getName(), (double) (entry.getDensity()));
 			}
 
 			// TODO: Save densities locally, in case a later query fails
@@ -264,10 +262,24 @@ public class EndpointsHelper
 		backendFoodItem.setBrand(foodItem.getBrand());
 		backendFoodItem.setDensity(foodItem.getDensity());
 		backendFoodItem.setServingSize(foodItem.getServingSize());
+		backendFoodItem.setServingSizeUnit(foodItem.getServingSizeUnit());
+		backendFoodItem.setActualServingSizeUnit(foodItem.getActualServingSizeUnit());
+		backendFoodItem.setUsesVol(foodItem.usesVolume());
+		backendFoodItem.setUsesMass(foodItem.usesMass());
+		backendFoodItem.setNeedConvertVol(foodItem.needConvertVol());
+		backendFoodItem.setNeedCalculateServings(foodItem.isNeedCalculateServings());
+		backendFoodItem.setNumServings(foodItem.getNumServings());
+		backendFoodItem.setVolume(foodItem.getVolume());
+		backendFoodItem.setCubicVolume(foodItem.getCubicVolume());
+		backendFoodItem.setMass(foodItem.getMass());
 
 		JsonMap nutritionMap = new JsonMap();
 		nutritionMap.putAll(foodItem.getNutrition());
-		backendFoodItem.setNutritionFields(nutritionMap);
+		backendFoodItem.setCalculatedNutrition(nutritionMap);
+
+		JsonMap uncalcNutritionMap = new JsonMap();
+		uncalcNutritionMap.putAll(foodItem.getFields());
+		backendFoodItem.setUncalculatedNutrition(uncalcNutritionMap);
 
 		return backendFoodItem;
 	}
@@ -279,14 +291,33 @@ public class EndpointsHelper
 		foodItem.setBrand(backendFoodItem.getBrand());
 		foodItem.setDensity(backendFoodItem.getDensity());
 		foodItem.setServingSize(backendFoodItem.getServingSize());
+		foodItem.setServingSizeUnit(backendFoodItem.getServingSizeUnit());
+		foodItem.setActualServingSizeUnit(backendFoodItem.getActualServingSizeUnit());
+		foodItem.setUsesMass(backendFoodItem.getUsesMass());
+		foodItem.setUsesVol(backendFoodItem.getUsesVol());
+		foodItem.setNeedConvertVol(backendFoodItem.getNeedConvertVol());
+		foodItem.setNeedCalculateServings(backendFoodItem.getNeedCalculateServings());
+		foodItem.setNumServings(backendFoodItem.getNumServings());
+		foodItem.setVolume(backendFoodItem.getVolume());
+		foodItem.setCubicVolume(backendFoodItem.getCubicVolume());
+		foodItem.setMass(backendFoodItem.getMass());
 
-		JsonMap nutritionMap = backendFoodItem.getNutritionFields();
+		JsonMap calcNutritionMap = backendFoodItem.getCalculatedNutrition();
 
-		Iterator it = nutritionMap.entrySet().iterator();
-		while (it.hasNext()) {
-			JsonMap.Entry pair = (JsonMap.Entry)it.next();
+		Iterator itForCalc = calcNutritionMap.entrySet().iterator();
+		while (itForCalc.hasNext()) {
+			JsonMap.Entry pair = (JsonMap.Entry)itForCalc.next();
 			foodItem.setField((String)pair.getKey(), (Double)pair.getValue());
-			it.remove(); // avoids a ConcurrentModificationException
+			itForCalc.remove();
+		}
+
+		JsonMap uncalcNutritionMap = backendFoodItem.getUncalculatedNutrition();
+
+		Iterator itForUncalc = uncalcNutritionMap.entrySet().iterator();
+		while (itForUncalc.hasNext()) {
+			JsonMap.Entry pair = (JsonMap.Entry)itForUncalc.next();
+			foodItem.setField((String)pair.getKey(), (Double)pair.getValue());
+			itForUncalc.remove();
 		}
 
 		return foodItem;
