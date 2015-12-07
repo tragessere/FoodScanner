@@ -265,7 +265,7 @@ public class EndpointsHelper
 		protected Meal doInBackground(Meal... meals) {
 			try {
 				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
-				mAPI.deleteMeal(backendMeal).execute();//TODO BUG HERE java.lang.IllegalArgumentException: DELETE with non-zero content length is not supported
+				mAPI.deleteMeal(backendMeal).execute();
 				success = true;
 				return meals[0];
 			} catch (Exception e) {

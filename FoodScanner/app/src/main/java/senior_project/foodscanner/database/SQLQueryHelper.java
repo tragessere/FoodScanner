@@ -220,7 +220,7 @@ public class SQLQueryHelper {
 		List<Meal> mealList = new ArrayList<>();
 		SQLiteDatabase db = SQLHelper.getInstance().getReadableDatabase();
 
-		Cursor c = db.query(SQLHelper.TABLE_MEALS, ALL_COLUMNS, SQLHelper.COLUMN_CHANGED + " = 1", null, null, null, SQLHelper.COLUMN_TIME);
+		Cursor c = db.query(SQLHelper.TABLE_MEALS, ALL_COLUMNS, SQLHelper.COLUMN_CHANGED + " > 0", null, null, null, SQLHelper.COLUMN_TIME);
 
 		if(c != null && c.moveToFirst()) {
 			while(!c.isAfterLast()) {
