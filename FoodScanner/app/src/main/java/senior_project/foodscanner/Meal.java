@@ -45,7 +45,7 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
 
     // Data Management
     private long id;    //Database ID
-    private int isChanged = 0;// Flag that is incremented whenever meal details are changed. Must be manually set to 0 when meal is uploaded to backend.
+    private int isChanged = 1;// Flag that is incremented whenever meal details are changed. Must be manually set to 0 when meal is uploaded to backend.
     private boolean isDeleted = false;// Flag that is set to true when the Meal should be deleted from the backend
     private boolean isNew; // Flag determining whether or not the Meal was just created.
 
@@ -148,6 +148,10 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         return isChanged > 0;
     }
 
+    public int isChangedCount(){
+        return isChanged;
+    }
+
     public void setUnchanged() {
         isChanged = 0;
         if(isDeleted) {
@@ -178,13 +182,6 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         cv.put(SQLHelper.COLUMN_CHANGED, isChanged);
         cv.put(SQLHelper.COLUMN_DELETED, isDeleted);
         return cv;
-    }
-
-    public boolean isMoreRecentlyChangedThan(Meal meal2){
-        if(meal2.isDeleted && !isDeleted){
-            return false;
-        }
-        return isChanged >= meal2.isChanged;
     }
 
     @Override
