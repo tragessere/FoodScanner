@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/container_warning"
             android:layout_below="@+id/container_date"
-            android:background="@drawable/tap_add_meal"/>
+            android:background="@drawable/background_add_meal"/>
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -159,4 +159,20 @@
         </LinearLayout>
 
     </RelativeLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/loading"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progressBar"
+            android:layout_gravity="center"
+            android:background="@drawable/progress_background"
+            android:padding="15dp"/>
+    </FrameLayout>
+
 </RelativeLayout>

@@ -5,17 +5,8 @@
                 android:layout_height="match_parent"
                 android:background="@color/Primary">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/login_button_layout"
-        android:src="@drawable/ic_launcher"
-        android:id="@+id/imageView_logo"/>
-
     <LinearLayout
-        android:id="@id/login_button_layout"
+        android:id="@+id/login_button_layout"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -53,6 +44,36 @@
             android:padding="15dp"
             android:background="@drawable/progress_background"/>
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="45dp"
+        android:id="@+id/container_logo"
+        android:layout_above="@+id/login_button_layout"
+        android:layout_centerHorizontal="true">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_launcher"
+            android:id="@+id/imageView_logo"
+            android:scaleType="fitCenter"
+            android:minWidth="60sp"
+            android:minHeight="60sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Food Scanner"
+            android:id="@+id/title"
+            android:textSize="35sp"
+            android:textColor="@color/White"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="3dp"
+            />
     </LinearLayout>
 
 </RelativeLayout>

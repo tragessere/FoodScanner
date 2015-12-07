@@ -2,6 +2,8 @@ package senior_project.foodscanner;
 
 import android.text.Html;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +48,7 @@ public abstract class Nutritious {
         if(nutr != null && !nutr.isEmpty()) {
             for(String key : nutr.keySet()) {
                 s.append("<b>" + key + ": </b>");
-                s.append(nutr.get(key) + "<br>");
+                s.append(Math.round(nutr.get(key)) + "<br>");
             }
             return Html.fromHtml(s.toString());
         } else {

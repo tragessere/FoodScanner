@@ -17,7 +17,7 @@ public class BackendMeal {
     private MealType type;
     private List<BackendFoodItem> foodItems;
     private boolean isNew;
-    private boolean isChanged;
+    private int isChanged;
 
     // Getters
     public Long getId() { return id; }
@@ -25,7 +25,7 @@ public class BackendMeal {
     public MealType getType() { return type; }
     public List<BackendFoodItem> getFoodItems() { return foodItems; }
     public boolean getIsNew() { return isNew; }
-    public boolean getIsChanged() { return isChanged; }
+    public int getIsChanged() { return isChanged; }
 
     // Setters
     public void setId(Long id) { this.id = id; }
@@ -33,9 +33,9 @@ public class BackendMeal {
     public void setMealType(MealType type) { this.type = type; }
     public void setFoodItems(List<BackendFoodItem> foodItems) { this.foodItems = foodItems; }
     public void setIsNew(boolean isNew) { this.isNew = isNew; }
-    public void setIsChanged(boolean isChanged) { this.isChanged = isChanged; }
+    public void setIsChanged(int isChanged) { this.isChanged = isChanged; }
 
-    public BackendMeal(Long date, String type, List<BackendFoodItem> foodItems, boolean isNew, boolean isChanged) {
+    public BackendMeal(Long date, String type, List<BackendFoodItem> foodItems, boolean isNew, int isChanged) {
         this.date = date;
         this.type = MealType.valueOf(type);
         this.foodItems = foodItems;
