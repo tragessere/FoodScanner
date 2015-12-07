@@ -159,7 +159,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                 });
 
                 if (EndpointsHelper.getDownloadStatus() == Constants.DENSITY_NOT_DOWNLOADED)
-                    EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask(this);
+                    EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask(this).execute();
             }
         }
 
