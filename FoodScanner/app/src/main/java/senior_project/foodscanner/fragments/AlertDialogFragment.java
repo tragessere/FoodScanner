@@ -19,36 +19,57 @@ public class AlertDialogFragment extends DialogFragment {
     private AlertDialogFragment.OnClickListener posListener;
     private AlertDialogFragment.OnClickListener negListener;
     private AlertDialogFragment.OnClickListener neuListener;
+    private DialogInterface.OnCancelListener cancelListener;
 
     public void setIcon(int id){
         iconId = id;
     }
 
-    public void setTitle(String text){
+    public void setTitle(CharSequence text){
         title = text;
     }
 
-    public void setMessage(String text){
+    public void setMessage(CharSequence text){
         message = text;
     }
 
-    public void setPositiveButton(String text, AlertDialogFragment.OnClickListener listener){
+    public void setPositiveButton(CharSequence text, AlertDialogFragment.OnClickListener listener){
         positiveText = text;
         posListener = listener;
     }
 
-    public void setNegativeButton(String text, AlertDialogFragment.OnClickListener listener){
+    public void setNegativeButton(CharSequence text, AlertDialogFragment.OnClickListener listener){
         negativeText = text;
         negListener = listener;
     }
 
-    public void setNeutralButton(String text, AlertDialogFragment.OnClickListener listener){
+    public void setNeutralButton(CharSequence text, AlertDialogFragment.OnClickListener listener){
         neutralText = text;
         neuListener = listener;
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public void setCancelable(boolean isCancelable){
+        super.setCancelable(isCancelable);
+    }
+
+    public void setOnCancelListener(DialogInterface.OnCancelListener cancelListener){
+        this.cancelListener = cancelListener;
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog){
+        if(cancelListener != null){
+            cancelListener.onCancel(dialog);
+        }
+    }
+
+    /**
+     * Subclasses can override this method and call super.onBuildDialog() to add more customization options.
+     * @param savedInstanceState
+     * @return
+     */
+    protected AlertDialog.Builder onBuildDialog(Bundle savedInstanceState){
         AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
         d.setIcon(iconId);
         if(title!=null){
@@ -87,7 +108,13 @@ public class AlertDialogFragment extends DialogFragment {
                 }
             });
         }
-        return d.create();
+
+        return d;
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        return onBuildDialog(savedInstanceState).create();
     }
 
     public interface OnClickListener{

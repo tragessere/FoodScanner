@@ -16,6 +16,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.util.DateTime;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -281,7 +282,7 @@ public class EndpointsHelper
 	/**
 	 * Gets all meals in backend between two dates inclusive. Null and exception on failure.
 	 */
-	public class GetMealsWithinDatesTask extends AsyncTask<Date, Void, List<Meal>> {
+	public class GetMealsWithinDatesTask extends AsyncTask<Date, Void, ArrayList<Meal>> {
 		private TaskCompletionListener mListener;
 		private Exception exception;
 
@@ -299,10 +300,10 @@ public class EndpointsHelper
 		}
 
 		@Override
-		protected void onPostExecute(List<Meal> meals) {
+		protected void onPostExecute(ArrayList<Meal> meals) {
 			Bundle b = new Bundle();
 			if(meals != null){
-				b.putSerializable(TASKID_MEALS_GET, meals.toArray());
+				b.putSerializable(TASKID_MEALS_GET, meals);
 			}
 			else{
 				b.putSerializable(TASKID_MEALS_GET, null);
@@ -312,7 +313,7 @@ public class EndpointsHelper
 		}
 
 		@Override
-		protected List<Meal> doInBackground(Date... dates) {
+		protected ArrayList<Meal> doInBackground(Date... dates) {
 			try {
 				Date startDate = dates[0];
 				Date endDate = dates[1];

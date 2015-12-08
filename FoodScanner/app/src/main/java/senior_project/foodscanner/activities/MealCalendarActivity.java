@@ -41,6 +41,7 @@ import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
 import senior_project.foodscanner.fragments.AlertDialogFragment;
+import senior_project.foodscanner.fragments.LoadingDialogFragment;
 import senior_project.foodscanner.fragments.MessageDialogFragment;
 import senior_project.foodscanner.fragments.ErrorDialogFragment;
 import senior_project.foodscanner.fragments.CalendarDialogFragment;
@@ -83,6 +84,8 @@ import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
  *  TODO Optimization:
  *      Backend server should support bulk deletes and save queries.
  *      It may be better to have some sort of locally stored data structure to check off the days that are not synced.
+ *      loadMeals_Total algorithm might be improved.
+ *      Storing a time-zone independent timestamp for lastChanged in Meal would prevent conflicts.
  */
 public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, CalendarDialogFragment.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
     private static final String SAVE_DATE = "currentDate";
@@ -108,6 +111,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private ArrayList<Meal> meals = new ArrayList<>();
     private AsyncTaskList syncTasks = new AsyncTaskList();
     private AsyncTask loadTask;
+    LoadingDialogFragment dialog_total_loading;
 
     private enum WarningBarUIState{
         WARNING, SYNCING, HIDDEN;
@@ -359,33 +363,113 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    private void loadMeals_Total_Start(int days){
+    private void loadMeals_Total_Cancel(){
+        Log.d("MealCalendarActivity", "LOADING TOTAL CANCEL");
+        cancelLoadingTask();
+        if(dialog_total_loading != null){
+            dialog_total_loading.dismiss();
+        }
+    }
+
+    private void loadMeals_Total_Start(final int days){
         cancelLoadingTask();
 
-        //TODO load dialog for total that is cancellable
-
-        GregorianCalendar day1 = new GregorianCalendar();
+        final GregorianCalendar day1 = new GregorianCalendar();
         day1.setTimeInMillis(currentDate);
-        day1.add(Calendar.DATE, -(days-1));// x days ago, including today
+        day1.add(Calendar.DATE, -(days - 1));// x days ago, including today
 
-        GregorianCalendar day2 = new GregorianCalendar();
+        final GregorianCalendar day2 = new GregorianCalendar();
         day2.setTimeInMillis(currentDate);// today
 
-        List<Meal> meals = SQLQueryHelper.getMeals(day1, day2, true);
+        GregorianCalendar day3 = new GregorianCalendar();
+        day3.add(Calendar.DATE, -1);
+        final CharSequence title = Html.fromHtml("<b>Total "+MONTH+" Day Nutrition</b><br>"+Settings.getInstance().formatDate(day1, Settings.DateFormat.mn_dn_yn) + " - " + Settings.getInstance().formatDate(day3, Settings.DateFormat.mn_dn_yn));
 
-        day2.add(Calendar.DATE, -1);
-        String title = "<b>Total "+MONTH+" Day Nutrition</b><br>"+Settings.getInstance().formatDate(day1, Settings.DateFormat.mn_dn_yn) + " - " + Settings.getInstance().formatDate(day2, Settings.DateFormat.mn_dn_yn);
-        MessageDialogFragment dialog = MessageDialogFragment.newInstance(Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)), Html.fromHtml(title), 0);
-        dialog.show(getFragmentManager(), "Total");
+        dialog_total_loading = new LoadingDialogFragment();
+        dialog_total_loading.setTitle(title);
+        dialog_total_loading.setMessage("Loading meals from server...");
+        dialog_total_loading.setPositiveButton("Cancel", new AlertDialogFragment.OnClickListener() {
+            @Override
+            public void onClick(AlertDialogFragment dialog, int which) {
+                loadMeals_Total_Cancel();
+            }
+        });
+        dialog_total_loading.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                loadMeals_Total_Cancel();
+            }
+        });
+        dialog_total_loading.show(getFragmentManager(), "Loading Dialog");
 
-        // TODO download meals
-        //TODO store meals locally
-        //TODO hide loading dialog
-        //TODO display totals
-        //TODO handle loading dialog cancel
+        // download meals
+        loadTask = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
+            @Override
+            public void onTaskCompleted(AsyncTask task, Bundle b) {
+                if(task.isCancelled()) {
+                    Log.d("MealCalendarActivity","LOADING TOTAL: CANCELLED");
+                    return;
+                }
+                Log.d("MealCalendarActivity", "LOADING TOTAL: RETURNED");
+                boolean error = false;
+                List<Meal> meals = new ArrayList<>();
+                ArrayList<Meal> mealsServer = (ArrayList<Meal>) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET);
+                if(mealsServer != null) {
+                    // get all local meals, add server meals to list if dont exist locally (incorrect if user is using multiple devices)
+                    meals = SQLQueryHelper.getMeals(day1, day2, true);
+                    for(Meal serverMeal : mealsServer) {
+                        boolean existsLocally = false;
+                        for(Meal localMeal:meals){
+                            if(serverMeal.getId() == localMeal.getId()){
+                                existsLocally = true;
+                                break;
+                            }
+                        }
+                        if(!existsLocally){
+                            serverMeal.setId(SQLQueryHelper.insertMeal(serverMeal));// store server meals locally
+                            meals.add(serverMeal);
+                        }
+                    }
+                } else {
+                    // search all days locally, if day is empty then error
+                    for(int i = 0; i < days; i++){
+                        GregorianCalendar day2 = new GregorianCalendar();
+                        day2.setTimeInMillis(day1.getTimeInMillis());
+                        day2.add(Calendar.DATE, i);
+                        List<Meal> localMeals = SQLQueryHelper.getMeals(day1, day2,true);
+                        if(!localMeals.isEmpty()){
+                            meals.addAll(localMeals);
+                        }
+                        else{
+                            error = true;
+                            break;
+                        }
+                    }
+                }
+                if(error) {
+                    String message = "Unknown Reason";
+                    String title = "Error: Loading meals from server failed";
+                    int icon = R.drawable.ic_error_outline_black;
+                    Exception e = (Exception) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET_EXCEPTION);
+                    if(e != null) {
+                        if(isConnectedToInternet()) {
+                            message = "Network error.";
+                        } else {
+                            message = "You are not connected to the internet.";
+                        }
+                    }
+                    MessageDialogFragment.newInstance(message, title, icon).show(getFragmentManager(), "Server Load Fail");
+                }
+                else {
+                    dialog_total_loading.dismiss();
+                    MessageDialogFragment dialog = MessageDialogFragment.newInstance(Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)), title, 0);
+                    dialog.show(getFragmentManager(), "Total");
+                }
+            }
+        }).execute(new Date(day1.getTimeInMillis()), new Date(day2.getTimeInMillis()));
 
         //TODO test activity leaving behavior
-
+        //TODO test correctness
     }
 
     private void loadMeals_Calendar_Finish(){
@@ -434,8 +518,9 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                     }
                     Log.d("MealCalendarActivity", "LOADING BACKEND: RETURNED");
                     // save meals locally and add them to ui
-                    Object[] meals = (Object[]) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET);
-                    if(meals != null) {
+                    ArrayList<Meal> mealsList = (ArrayList<Meal>) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET);
+                    if(mealsList != null) {
+                        Object[] meals = mealsList.toArray();
                         Arrays.sort(meals);
                         for(Object obj : meals) {
                             Meal meal = (Meal) obj;
@@ -613,7 +698,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 container_warning.setBackgroundResource(R.color.Syncing);
                 imageView_warning.setVisibility(View.GONE);
                 progressBar_syncing.setVisibility(View.VISIBLE);
-                textView_warning.setText("Syncing meals with server...");
+                textView_warning.setText("Sync in progress...");
                 container_warning.setEnabled(false);
                 break;
             default:
