@@ -79,15 +79,18 @@ import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
  *
  *
  *  TODO Unhandled Edge Cases:
- *         // race condition server side untested
- *         // multiple devices logged in as same user can cause syncing conflicts
- *         // moving between time zones may cause inconsistencies
- *         // saving meal when storage full
+ *      Race condition server side untested
+ *      Multiple devices logged in as same user can cause syncing conflicts
+ *      Moving between time zones may cause inconsistencies
+ *      Saving meal when storage full
  *  TODO Optimization:
  *      Backend server should support bulk deletes and save queries.
  *      It may be better to have some sort of locally stored data structure to check off the days that are not synced.
  *      loadMeals_Total algorithm might be improved.
  *      Storing a time-zone independent timestamp for lastChanged in Meal would prevent conflicts.
+ *  TODO Useful Unimplemented Features:
+ *      Able to create custom food item with custom nutrition values and quantity type.
+ *      Camera level UI so user can align perfectly vertical and horizontal.
  */
 public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, CalendarDialogFragment.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
     private static final String SAVE_DATE = "currentDate";
