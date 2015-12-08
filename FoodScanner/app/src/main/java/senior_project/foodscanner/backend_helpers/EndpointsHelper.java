@@ -3,6 +3,8 @@ package senior_project.foodscanner.backend_helpers;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
+import android.os.CountDownTimer;
 import android.widget.Toast;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
@@ -15,12 +17,11 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.util.DateTime;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.Meal;
@@ -31,6 +32,16 @@ import senior_project.foodscanner.FoodItem;
  */
 public class EndpointsHelper
 {
+	public static final String TASKID_MEAL_SAVE = "save_meal";
+	public static final String TASKID_MEAL_SAVE_EXCEPTION = "save_meal_exception";
+	public static final String TASKID_MEAL_SAVE_SUCCESS = "save_meal_success";
+	public static final String TASKID_MEAL_DELETE = "delete_meal";
+	public static final String TASKID_MEAL_DELETE_EXCEPTION = "delete_meal_exception";
+	public static final String TASKID_MEAL_DELETE_SUCCESS = "delete_meal_success";
+	public static final String TASKID_MEALS_GET = "meals";
+	public static final String TASKID_MEALS_GET_EXCEPTION = "meals_exception";
+
+
 	public static EndpointsHelper mEndpoints;
 	public FoodScannerBackendAPI mAPI;
 
@@ -85,7 +96,7 @@ public class EndpointsHelper
 				Bundle b = new Bundle();
 				if(testBean != null)
 					b.putString("test", testBean.getData());
-				mListener.onTaskCompleted(b);
+				mListener.onTaskCompleted(this, b);
 			}
 		}
 	}
@@ -104,6 +115,7 @@ public class EndpointsHelper
 
 	public class GetAllDensityEntriesTask extends AsyncTask<Void, Void, Boolean> {
 		private Activity act;
+		private boolean downloaded = false;
 
 		public GetAllDensityEntriesTask(Activity act) {
 			this.act = act;
@@ -112,6 +124,25 @@ public class EndpointsHelper
 		@Override
 		protected void onPreExecute() {
 			densityDownloaded = Constants.DENSITY_DOWNLOADING;
+
+			new CountDownTimer(15000, 15000) {
+				public void onTick(long millisUntilFinished) {
+					// You can monitor the progress here as well by changing the onTick() time
+				}
+				public void onFinish() {
+					// stop async task if the data hasn't been downloaded yet
+					synchronized (mEndpoints) {
+						if (GetAllDensityEntriesTask.this.getStatus() == AsyncTask.Status.RUNNING) {
+							if (!downloaded) {
+								GetAllDensityEntriesTask.this.cancel(true);
+								onPostExecute(false);
+							}
+
+							// Add any specific task you wish to do as your extended class variable works here as well.
+						}
+					}
+				}
+			}.start();
 		}
 
 		@Override
@@ -137,10 +168,18 @@ public class EndpointsHelper
 		}
 
 		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+		}
+
+		@Override
 		protected Boolean doInBackground(Void... params) {
 			List<DensityEntry> results;
 			try {
 				results = mAPI.getAllDensityEntries().execute().getItems();
+				synchronized (mEndpoints) {
+					downloaded = true;
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 				return false;
@@ -177,44 +216,184 @@ public class EndpointsHelper
 		}
 	}
 
+	/**
+	 * Saves/updates meal in backend. Always returns success boolean and meal. Returns exception on failure.
+	 */
 	public class SaveMealTask extends AsyncTask<Meal, Void, Meal> {
+		private TaskCompletionListener mListener;
+		private boolean success = false;
+		private Exception exception;
+		private boolean fakeQuery = false;
+
+		public SaveMealTask(TaskCompletionListener listener) {
+			mListener = listener;
+		}
+
+		public SaveMealTask(TaskCompletionListener listener, boolean fakeQuery) {
+			mListener = listener;
+			this.fakeQuery = fakeQuery;
+		}
+
+		@Override
+		protected void onCancelled(Meal meal) {
+			Bundle b = new Bundle();
+			b.putSerializable(TASKID_MEAL_SAVE_EXCEPTION, exception);
+			b.putSerializable(TASKID_MEAL_SAVE, meal);
+			b.putBoolean(TASKID_MEAL_SAVE_SUCCESS, false);
+			mListener.onTaskCompleted(this, b);
+		}
+
+		@Override
+		protected void onPostExecute(Meal meal) {
+			Bundle b = new Bundle();
+			b.putSerializable(TASKID_MEAL_SAVE_EXCEPTION, exception);
+			b.putSerializable(TASKID_MEAL_SAVE, meal);
+			b.putBoolean(TASKID_MEAL_SAVE_SUCCESS, success);
+			mListener.onTaskCompleted(this, b);
+		}
+
+		@Override
+		protected Meal doInBackground(Meal... meals) {
+			Meal meal = meals[0];
+			try {
+				BackendMeal backendMealToSave = convertToBackendMeal(meal);
+				BackendMeal savedBackendMeal = null;
+				if(fakeQuery) {
+					Thread.sleep(7000);
+				}
+				else{
+					savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();
+					meal.setServerId(savedBackendMeal.getId());
+				}
+				success = true;
+				return meal;
+			} catch (Exception e) {
+				if(!isCancelled()) {
+					Log.e("EndpointsHelper", "SaveMealTask", e);
+					exception = e;
+				}
+				return meal;
+			}
+		}
+	}
+
+	/**
+	 * Deletes meal from backend. Always returns meal and success boolean and meal. Returns exception on failure.
+	 */
+	public class DeleteMealTask extends AsyncTask<Meal, Void, Meal> {
+		private TaskCompletionListener mListener;
+		private boolean success = false;
+		private Exception exception;
+		private boolean fakeQuery = false;
+
+		public DeleteMealTask(TaskCompletionListener listener) {
+			mListener = listener;
+		}
+
+		public DeleteMealTask(TaskCompletionListener listener, boolean fakeQuery) {
+			mListener = listener;
+			this.fakeQuery = fakeQuery;
+		}
+
+		@Override
+		protected void onCancelled(Meal meal) {
+			Bundle b = new Bundle();
+			b.putSerializable(TASKID_MEAL_DELETE_EXCEPTION, exception);
+			b.putSerializable(TASKID_MEAL_DELETE, meal);
+			b.putBoolean(TASKID_MEAL_DELETE_SUCCESS, false);
+			mListener.onTaskCompleted(this, b);
+		}
+
+		@Override
+		protected void onPostExecute(Meal meal) {
+			Bundle b = new Bundle();
+			b.putSerializable(TASKID_MEAL_DELETE_EXCEPTION, exception);
+			b.putSerializable(TASKID_MEAL_DELETE, meal);
+			b.putBoolean(TASKID_MEAL_DELETE_SUCCESS, success);
+			mListener.onTaskCompleted(this, b);
+		}
+
 		@Override
 		protected Meal doInBackground(Meal... meals) {
 			try {
 				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
-				mAPI.saveMeal(backendMeal).execute();
+				if(fakeQuery) {
+					Thread.sleep(7000);
+				}
+				else{
+					mAPI.deleteMeal(backendMeal).execute();
+				}
+				success = true;
 				return meals[0];
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
+			} catch (Exception e) {
+				if(!isCancelled()) {
+					Log.e("EndpointsHelper", "DeleteMealTask", e);
+					exception = e;
+				}
+				return meals[0];
 			}
 		}
 	}
 
-	public class DeleteMealTask extends AsyncTask<Meal, Void, Boolean> {
-		@Override
-		protected Boolean doInBackground(Meal... meals) {
-			try {
-				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
-				mAPI.deleteMeal(backendMeal).execute();
-				return true;
-			} catch (IOException e) {
-				e.printStackTrace();
-				return false;
-			}
-		}
-	}
+	/**
+	 * Gets all meals in backend between two dates inclusive. Null and exception on failure.
+	 */
+	public class GetMealsWithinDatesTask extends AsyncTask<Date, Void, ArrayList<Meal>> {
+		private TaskCompletionListener mListener;
+		private Exception exception;
+		private boolean fakeQuery = false;
 
-	public class GetMealsWithinDates extends AsyncTask<Date, Void, List<Meal>> {
+		public GetMealsWithinDatesTask(TaskCompletionListener listener) {
+			mListener = listener;
+		}
+
+		public GetMealsWithinDatesTask(TaskCompletionListener listener, boolean fakeQuery) {
+			mListener = listener;
+			this.fakeQuery = fakeQuery;
+		}
+
 		@Override
-		protected List<Meal> doInBackground(Date... dates) {
+		protected void onCancelled(){
+			Bundle b = new Bundle();
+			b.putSerializable(TASKID_MEALS_GET, null);
+			b.putSerializable(TASKID_MEALS_GET_EXCEPTION, exception);
+			mListener.onTaskCompleted(this, b);
+		}
+
+		@Override
+		protected void onPostExecute(ArrayList<Meal> meals) {
+			Bundle b = new Bundle();
+			if(meals != null){
+				b.putSerializable(TASKID_MEALS_GET, meals);
+			}
+			else{
+				b.putSerializable(TASKID_MEALS_GET, null);
+			}
+			b.putSerializable(TASKID_MEALS_GET_EXCEPTION, exception);
+			mListener.onTaskCompleted(this, b);
+		}
+
+		@Override
+		protected ArrayList<Meal> doInBackground(Date... dates) {
 			try {
 				Date startDate = dates[0];
 				Date endDate = dates[1];
-				List<BackendMeal> backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+				List<BackendMeal> backendMeals = null;
+				if(fakeQuery){
+					Thread.sleep(7000);
+				}
+				else {
+					backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+				}
+				if(backendMeals == null) {
+					backendMeals = new ArrayList<>();
+				}
 				return convertToFrontEndMeals(backendMeals);
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				if(!isCancelled()) {
+					Log.e("EndpointsHelper", "GetMealsWithinDatesTask", e);
+					exception = e;
+				}
 				return null;
 			}
 		}
@@ -226,7 +405,7 @@ public class EndpointsHelper
 	 * Bundle is optional and can hold any primitive making the callback flexible.
 	 */
 	public interface TaskCompletionListener {
-		void onTaskCompleted(Bundle b);
+		void onTaskCompleted(AsyncTask task, Bundle b);
 	}
 
 	public interface densityDownloadObserver {
@@ -238,20 +417,27 @@ public class EndpointsHelper
 	public Meal convertToFrontEndMeal(BackendMeal backendMeal)
 	{
 		Meal meal = new Meal(
-				backendMeal.getId(),
+				backendMeal.getClientDBId(),
 				backendMeal.getDate(),
 				backendMeal.getType(),
 				convertToFrontEndFoodItems(backendMeal.getFoodItems()),
 				backendMeal.getIsNew(),
-				backendMeal.getIsChanged()
+				backendMeal.getIsChanged(),
+				false
 		);
+
+		meal.setServerId(backendMeal.getId());
 
 		return meal;
 	}
 
 	public BackendMeal convertToBackendMeal(Meal meal)
 	{
+		assert(meal.getServerId() != 0) : "Bad developer, cannot make convert to BackendMeal without a valid ID from the server ";
+
 		BackendMeal backendMeal = new BackendMeal();
+		backendMeal.setId(meal.getServerId());
+		backendMeal.setClientDBId(meal.getId());
 		backendMeal.setDate(meal.getDate());
 		backendMeal.setMealType(meal.getType().getName());
 		backendMeal.setFoodItems(convertToBackendFoodItems(meal.getFood()));

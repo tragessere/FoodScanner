@@ -1,6 +1,7 @@
 package senior_project.foodscanner.ui.components.mealcalendar;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +29,7 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
     private static final int deleteButtonId = R.id.button_delete;
     private static final int warnButtonId = R.id.imageButton_warning;
     private MealArrayAdapterListener listener = null;
+    private boolean warningsEnabled = true;
 
     public MealArrayAdapter(Context context) {
         super(context, layoutId);
@@ -85,15 +87,24 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
             buttonDel.setVisibility(View.GONE);
             buttonWarn.setVisibility(View.GONE);
         } else {
-            if(meal.isChanged()){
+            if(meal.isChanged() && warningsEnabled) {
                 buttonWarn.setVisibility(View.VISIBLE);
-            }
-            else{
+            } else {
                 buttonWarn.setVisibility(View.GONE);
             }
         }
 
         return convertView;
+    }
+
+    public void setWarningsEnabled(boolean enabled){
+        Log.d("warns", ""+enabled);
+        warningsEnabled = enabled;
+        super.notifyDataSetChanged();
+    }
+
+    public boolean areWarningsEnabled(){
+        return warningsEnabled;
     }
 
     private String nutrString(Meal meal) {

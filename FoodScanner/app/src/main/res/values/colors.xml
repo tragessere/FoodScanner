@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="AppColor">#2757aa</color>
-    <color name="Primary">#03A9F4</color>
+    <color name="Primary">#03a1e9</color>
     <color name="Primary.Dark">#0288D1</color>
     <color name="Primary.Light">#B3E5FC</color>
-    <color name="Accent">#FF5252</color>
+    <color name="Accent">#ff8f4f</color>
+    <color name="AccentOLD">#FF5252</color>
 
     <color name="Warning">#DFDF00</color>
+    <color name="Syncing">#649aff</color>
 
     <color name="Text.Primary">#212121</color>
     <color name="Text.Primary.Disabled">#8A8A8A</color>

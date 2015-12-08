@@ -19,9 +19,12 @@ import android.widget.Toast;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
 
+import java.util.List;
+
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
+import senior_project.foodscanner.TestingModeService;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
@@ -33,7 +36,6 @@ import senior_project.foodscanner.fragments.MessageDialogFragment;
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
 	private static final int REQUEST_ACCOUNT_PICKER = 2;
 	private static final int REQUEST_READ_CONTACTS = 3;
-    public static final String EXTRA_ACCOUNT_NAME = "account_name";
 
 	SharedPreferences prefs;
 	GoogleAccountCredential credential;
@@ -44,6 +46,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		TestingModeService.init();
+
 		setContentView(R.layout.activity_login);
 
 		googleButton = (Button) findViewById(R.id.login_google_plus_button);
@@ -123,7 +128,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 		Intent intent = new Intent(activity, MealCalendarActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.putExtra(EXTRA_ACCOUNT_NAME, credential.getSelectedAccountName());
 		activity.startActivity(intent);
 		activity.finish();
 	}
