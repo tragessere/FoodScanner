@@ -216,15 +216,17 @@ public class EndpointsHelper
 
 		@Override
 		protected Meal doInBackground(Meal... meals) {
+			Meal meal = meals[0];
 			try {
-				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
-				mAPI.saveMeal(backendMeal).execute();
+				BackendMeal backendMealToSave = convertToBackendMeal(meal);
+				BackendMeal savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();
 				success = true;
-				return meals[0];
+				meal.setServerId(savedBackendMeal.getId());
+				return meal;
 			} catch (Exception e) {
 				Log.e("EndpointsHelper", "SaveMealTask", e);
 				exception = e;
-				return meals[0];
+				return meal;
 			}
 		}
 	}
@@ -340,7 +342,7 @@ public class EndpointsHelper
 	public Meal convertToFrontEndMeal(BackendMeal backendMeal)
 	{
 		Meal meal = new Meal(
-				backendMeal.getId(),
+				backendMeal.getClientDBId(),
 				backendMeal.getDate(),
 				backendMeal.getType(),
 				convertToFrontEndFoodItems(backendMeal.getFoodItems()),
@@ -349,12 +351,18 @@ public class EndpointsHelper
 				false
 		);
 
+		meal.setServerId(backendMeal.getId());
+
 		return meal;
 	}
 
 	public BackendMeal convertToBackendMeal(Meal meal)
 	{
+		assert(meal.getServerId() != 0) : "Bad developer, cannot make convert to BackendMeal without a valid ID from the server ";
+
 		BackendMeal backendMeal = new BackendMeal();
+		backendMeal.setId(meal.getServerId());
+		backendMeal.setClientDBId(meal.getId());
 		backendMeal.setDate(meal.getDate());
 		backendMeal.setMealType(meal.getType().getName());
 		backendMeal.setFoodItems(convertToBackendFoodItems(meal.getFood()));

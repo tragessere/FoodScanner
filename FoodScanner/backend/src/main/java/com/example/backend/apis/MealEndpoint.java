@@ -42,9 +42,10 @@ import static com.example.backend.OfyService.ofy;
 public class MealEndpoint {
 
     @ApiMethod(name = "saveMeal")
-    public void saveMeal(BackendMeal meal, User user) throws ServiceException {
+    public BackendMeal saveMeal(BackendMeal meal, User user) throws ServiceException {
         AuthUtil.throwIfNotAuthenticated(user);
-        ofy().save().entity(meal).now();
+        ofy().save().entity(meal).now();    //A synchronous save() will populate the generated id value on the entity instance
+        return meal;
     }
 
     @ApiMethod(name = "deleteMeal")

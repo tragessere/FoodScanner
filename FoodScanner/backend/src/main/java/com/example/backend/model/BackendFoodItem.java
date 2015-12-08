@@ -73,6 +73,4 @@ public class BackendFoodItem {
     public void setActualServingSizeUnit(String actualServingSizeUnit) { this.actualServingSizeUnit = actualServingSizeUnit; }
     public void setCalculatedNutrition(Map<String, Double> nutritionFields) { this.calculatedNutrition = new HashMap<String, Double>(nutritionFields); }
     public void setUncalculatedNutrition(Map<String, Double> nutritionFields) { this.uncalculatedNutrition = new HashMap<String, Double>(nutritionFields); }
-
-    public BackendFoodItem() {}
 }
