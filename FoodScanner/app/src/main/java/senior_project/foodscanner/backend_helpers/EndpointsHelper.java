@@ -102,7 +102,6 @@ public class EndpointsHelper
 	}
 
 	public class GetAllDensityEntriesTask extends AsyncTask<Void, Void, Boolean> {
-		List<DensityEntry> results;
 		private Activity act;
 		private boolean downloaded = false;
 
@@ -163,6 +162,7 @@ public class EndpointsHelper
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
+			List<DensityEntry> results;
 			try {
 				results = mAPI.getAllDensityEntries().execute().getItems();
 				synchronized (mEndpoints) {
