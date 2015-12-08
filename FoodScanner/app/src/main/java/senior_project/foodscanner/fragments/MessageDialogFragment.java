@@ -31,6 +31,7 @@ public class MessageDialogFragment extends DialogFragment {
         d.setMessage(message);
         d.setTitle(title);
         d.setIcon(iconId);
+        d.setPositiveButton("OK",null);
         return d.create();
     }
 }

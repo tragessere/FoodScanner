@@ -160,6 +160,8 @@ public class FoodItem extends Nutritious implements Serializable {
             //check that each substring is not in either, e.g. 'cups (chopped)'
             boolean stopCheck = false;
 
+            // TODO: Change substrings to just each word in the string (split it)
+
             //check that substring is not in massUnits
             for(int i = 1; i <= maxMassLen; i++) {
                 if(i > formattedUnit.length()) {

@@ -150,6 +150,10 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         if (replacedFood == null) {
             // First prompt for density or servings
             if (frag.food.usesMass()) {
+                if (FoodItem.getAllDensities() == null) {
+                    displayToast("Error: Cannot access densities.", this);
+                    return;
+                }
                 findDensityMatches(frag.food);
             } else if (!frag.food.usesVolume()) {
                 DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food);
@@ -164,6 +168,10 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         } else {
             // Replace previously added food item
             if (frag.food.usesMass()) {
+                if (FoodItem.getAllDensities() == null) {
+                    displayToast("Error: Cannot access densities.", this);
+                    return;
+                }
                 findDensityMatches(frag.food);
             } else if (!frag.food.usesVolume()) {
                 DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food);
