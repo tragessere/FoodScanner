@@ -2,8 +2,6 @@ package senior_project.foodscanner;
 
 import android.text.Html;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.List;
 import java.util.Map;
 
