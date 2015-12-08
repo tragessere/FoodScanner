@@ -150,6 +150,10 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         if (replacedFood == null) {
             // First prompt for density or servings
             if (frag.food.usesMass()) {
+                if (FoodItem.getAllDensities() == null) {
+                    displayToast("Error: Cannot access densities.", this);
+                    return;
+                }
                 findDensityMatches(frag.food);
             } else if (!frag.food.usesVolume()) {
                 DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food);
@@ -164,6 +168,10 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         } else {
             // Replace previously added food item
             if (frag.food.usesMass()) {
+                if (FoodItem.getAllDensities() == null) {
+                    displayToast("Error: Cannot access densities.", this);
+                    return;
+                }
                 findDensityMatches(frag.food);
             } else if (!frag.food.usesVolume()) {
                 DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food);
@@ -231,30 +239,6 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
 
     private void findDensityMatches(FoodItem food) {
         new getDensityPartialMatches(this, food).execute();
-
-//        Map<String, Double> matches = FoodItem.getDensityPartialMatches(food.getName());
-//        if (matches.size() == 0) {
-//            displayToast("Error: No density matches found.", this);
-//        } else if (matches.size() == 1) {
-//            // Only one match found, add it automatically
-//            Map.Entry<String, Double> entry = matches.entrySet().iterator().next();
-//            food.setDensity(entry.getValue());
-//            food.setDensityName(entry.getKey());
-//            if (replacedFood == null) {
-//                meal.addFoodItem(food);
-//                displayToast("Added to meal.", this);
-//                saveAndFinish();
-//            } else {
-//                meal.replaceFoodItem(replacedFood, food);
-//                displayToast("Replaced food item.", this);
-//                saveAndFinish();
-//            }
-//        } else {
-//            // Multiple matches. Display dialog list to allow user to pick
-//            displayToast("Multiple densities found.", this);
-//            DialogFragment dialog = FoodDensityFragment.newInstance(food, matches);
-//            dialog.show(getFragmentManager(), "FoodDensityFragment");
-//        }
     }
 
     public void findDensityMatchesCallback(Map<String, Double> matches, FoodItem food) {

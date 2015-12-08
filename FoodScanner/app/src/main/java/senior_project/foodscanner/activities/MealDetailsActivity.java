@@ -9,7 +9,9 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
@@ -28,17 +31,23 @@ import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.Meal;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import senior_project.foodscanner.Nutritious;
 import senior_project.foodscanner.R;
+import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
 import senior_project.foodscanner.fragments.FoodDensityFragment;
 import senior_project.foodscanner.fragments.FoodInfoFragment;
 import senior_project.foodscanner.fragments.FoodServingFragment;
 import senior_project.foodscanner.fragments.FoodVolumeFragment;
+import senior_project.foodscanner.fragments.MessageDialogFragment;
 import senior_project.foodscanner.fragments.PreviousPhotoFragment;
+import senior_project.foodscanner.ui.components.fooditem.FoodArrayAdapter;
 
 /**
  * Shows details of the meal and allows editing.
@@ -62,7 +71,7 @@ import senior_project.foodscanner.fragments.PreviousPhotoFragment;
  */
 public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener,
         FoodInfoFragment.FoodInfoDialogListener, FoodServingFragment.FoodServingDialogListener,
-        PreviousPhotoFragment.PreviousPhotoDialogListener {
+        PreviousPhotoFragment.PreviousPhotoDialogListener, FoodArrayAdapter.FoodArrayAdapterListener {
 
     private Meal meal;
     private static final int REQUEST_FOODSCANNER = 0;
@@ -73,14 +82,12 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     public static final String RESULT_VOLUME = "volume";
 
-    private double volume;
     private String[] meals;
     private Spinner mealSpinner;
     private FoodItem removedFood;
     private FoodItem lastClickedFood;
 
     ProgressDialog dialog;
-    // TODO add ui to display date of meal (Settings class has some useful functions to format a date)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,13 +99,21 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
         setContentView(R.layout.activity_meal_details);
 
-        // Set up FoodScanner button
-        //Button scan_button = (Button) findViewById(R.id.button_foodscanner);
-        //scan_button.setOnClickListener(this);
+        // Set up Total Nutrition button
+        Button total_button = (Button) findViewById(R.id.button_total_meal);
+        total_button.setOnClickListener(this);
 
-        // Set up Add Food button
-        Button add_button = (Button) findViewById(R.id.button_addfood);
-        add_button.setOnClickListener(this);
+        // Set up Finish button
+        Button finish_button = (Button) findViewById(R.id.button_finish);
+        finish_button.setOnClickListener(this);
+
+        // Set up date text
+        TextView meal_date = (TextView) findViewById(R.id.textView_date);
+        GregorianCalendar day = new GregorianCalendar();
+        day.setTimeInMillis(meal.getDate());
+        String date_text = "<b>" + Settings.getInstance().
+                formatDate(day) + "</b>";
+        meal_date.setText(Html.fromHtml(date_text));
 
         // Set up meal selection spinner
         mealSpinner = (Spinner) findViewById(R.id.spinner_meal);
@@ -165,48 +180,35 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
         // Set up list of food items
         ListView lv = (ListView) findViewById(R.id.food_list);
-        ArrayAdapter<FoodItem> arrayAdapter = new ArrayAdapter<>(
-                getApplicationContext(),
-                R.layout.list_layout_added_food,
-                R.id.foodListText,
-                meal.getFood());
-        lv.setAdapter(arrayAdapter);
+        List<FoodItem> tempFood = new ArrayList<>(meal.getFood());
+        FoodArrayAdapter adapter = new FoodArrayAdapter(MealDetailsActivity.this, tempFood);
+        adapter.setOnDeleteListener(this);
+        lv.setAdapter(adapter);
+
+        // Set up background
+        if (meal.getFood().size() == 0) {
+            lv.setBackgroundResource(R.drawable.background_add_food);
+        } else {
+            lv.setBackgroundResource(0);
+        }
 
         // Set up what happens when you click a list item
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                // Open appropriate dialog for this food item
-//                lastClickedFood = meal.getFoodItem(position);
-//                if (lastClickedFood.usesMass()) {
-//                    // Bring up density dialog
-//                    // Check that densities have been successfully retrieved
-//                    if (FoodItem.getDensityKeys() == null) {
-//                        Toast butteredToast = Toast.makeText(getApplicationContext(),
-//                                "Error: Cannot set density at this time.", Toast.LENGTH_LONG);
-//                        butteredToast.show();
-//                    } else {
-//                        //DialogFragment dialog = FoodDensityFragment.newInstance(food);
-//                        //dialog.show(getFragmentManager(), "FoodDensityFragment");
-//                        Intent intent = new Intent(MealDetailsActivity.this, FoodDensityActivity.class);
-//                        intent.putExtra("food", lastClickedFood);
-//                        intent.putExtra("meal", meal);
-//                        startActivityForResult(intent, REQUEST_DENSITY);
-//                    }
-//                } else if (lastClickedFood.usesVolume()) {
-//                    // Bring up (temporary) volume dialog
-//                    DialogFragment dialog = FoodVolumeFragment.newInstance(lastClickedFood);
-//                    dialog.show(getFragmentManager(), "FoodVolumeFragment");
-//                } else {
-//                    // Bring up servings dialog
-//                    DialogFragment dialog = FoodServingFragment.newInstance(lastClickedFood);
-//                    dialog.show(getFragmentManager(), "FoodServingFragment");
-//                }
-
-                //View nutrition info & give option to scan/enter servings, or replace
-                lastClickedFood = meal.getFoodItem(position);
-                FoodItem food = meal.getFoodItem(position);
-                DialogFragment dialog = FoodInfoFragment.newInstance(food, true);
-                dialog.show(getFragmentManager(), "FoodInfoFragment");
+                // Check if null, i.e. the "+" was pressed
+                if (position >= meal.getFood().size() || meal.getFoodItem(position) == null) {
+                    // Add new food item
+                    Intent intent = new Intent(MealDetailsActivity.this, FoodItemActivity.class);
+                    intent.putExtra("meal", meal);
+                    intent.putExtra("requestCode", NEW_FOOD_ITEM);
+                    startActivityForResult(intent, NEW_FOOD_ITEM);
+                } else {
+                    // View nutrition info & give option to scan/enter servings, or replace
+                    lastClickedFood = meal.getFoodItem(position);
+                    FoodItem food = meal.getFoodItem(position);
+                    DialogFragment dialog = FoodInfoFragment.newInstance(food, true);
+                    dialog.show(getFragmentManager(), "FoodInfoFragment");
+                }
 
             }
         });
@@ -257,20 +259,35 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View v) {
-//        if(v.getId() == R.id.button_foodscanner) {
-////            Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
-////            intent.putExtra("pic_names", new String[]{"Top", "Side"});
-////            startActivityForResult(intent, REQUEST_FOODSCANNER);
-//            Toast butteredToast = Toast.makeText(getApplicationContext(), "Please choose food item first.",
-//                    Toast.LENGTH_SHORT);
-//            butteredToast.show();
-//
-//        } else
-        if(v.getId() == R.id.button_addfood) {
-            Intent intent = new Intent(MealDetailsActivity.this, FoodItemActivity.class);
-            intent.putExtra("meal", meal);
-            intent.putExtra("requestCode", NEW_FOOD_ITEM);
-            startActivityForResult(intent, NEW_FOOD_ITEM);
+        if(v.getId() == R.id.button_total_meal) {
+            // Display total nutrition for the meal
+            if (meal.getFood() == null || meal.getFood().size() == 0) {
+                Toast butteredToast = Toast.makeText(this,
+                        "No nutrition info to show.", Toast.LENGTH_SHORT);
+                butteredToast.show();
+                return;
+            }
+
+            List<FoodItem> foodList = meal.getFood();
+
+            if (foodList.size() == 1) {
+                FoodItem onlyFood = foodList.get(0);
+                if ((onlyFood.usesVolume() || onlyFood.usesMass()) && onlyFood.getVolume() == 0.0) {
+                    Toast butteredToast = Toast.makeText(this,
+                            "Scan food item first.", Toast.LENGTH_SHORT);
+                    butteredToast.setGravity(Gravity.CENTER, 0, 0);
+                    butteredToast.show();
+                    return;
+                }
+            }
+
+            String title = "<b>Total Meal Nutrition</b>";
+            MessageDialogFragment dialog = MessageDialogFragment.newInstance(Nutritious.nutritionText
+                    (Nutritious.calculateTotalNutrition(foodList)), Html.fromHtml(title), 0);
+            dialog.show(getFragmentManager(), "Total Meal");
+
+        } else if (v.getId() == R.id.button_finish) {
+            onBackPressed();
         }
     }
 
@@ -317,18 +334,6 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     // This is for the food info dialog
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
-//        // User touched the dialog's positive button - "Replace"
-//        // Save FoodItem being edited
-//        FoodInfoFragment frag = (FoodInfoFragment)dialog;
-//        removedFood = frag.food;
-//
-//        // Open food searching page
-//        Intent intent = new Intent(MealDetailsActivity.this, FoodItemActivity.class);
-//        intent.putExtra("meal", meal);
-//        intent.putExtra("requestCode", REPLACE_FOOD_ITEM);
-//        intent.putExtra("foodItem", removedFood);
-//        startActivityForResult(intent, REPLACE_FOOD_ITEM);
-
         // User touched the dialog's positive button - "Scan" or "Servings"
         FoodInfoFragment foodFrag = (FoodInfoFragment)dialog;
         if (foodFrag.food.usesMass() || foodFrag.food.usesVolume()) {
@@ -360,46 +365,6 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     // This is for the food info dialog
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
-//        // User touched the dialog's negative button - "Delete"
-//
-//        FoodInfoFragment frag = (FoodInfoFragment)dialog;
-//        removedFood = frag.food;
-//
-//        // Create confirmation dialog
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setMessage("Are you sure you want to delete \"" + removedFood.getName() + " (" +
-//                removedFood.getBrand() + ")\"?")
-//                .setTitle("Confirm Food Deletion");
-//        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int id) {
-//                // User clicked 'Delete' button
-//                // Delete food item from meal
-//                meal.removeFoodItem(removedFood);
-//
-//                // Update listview
-//                ListView lv = (ListView) findViewById(R.id.food_list);
-//                ArrayAdapter<FoodItem> arrayAdapter = new ArrayAdapter<>(
-//                        getApplicationContext(),
-//                        R.layout.list_layout_added_food,
-//                        R.id.foodListText,
-//                        meal.getFood());
-//                lv.setAdapter(arrayAdapter);
-//
-//                Toast butteredToast = Toast.makeText(getApplicationContext(), "Removed from meal.",
-//                        Toast.LENGTH_SHORT);
-//                butteredToast.show();
-//            }
-//        });
-//        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int id) {
-//                // User cancelled the dialog
-//            }
-//        });
-//
-//        // Create the AlertDialog
-//        AlertDialog confirmDialog = builder.create();
-//        confirmDialog.show();
-
         // User touched the dialog's positive button - "Replace"
         // Save FoodItem being edited
         FoodInfoFragment frag = (FoodInfoFragment)dialog;
@@ -419,40 +384,6 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         // User touched the dialog's neutral button - "Cancel"
         // Do nothing, besides exit dialog.
     }
-
-    //region No longer used dialogs
-    /*
-    // This is for the food density dialog
-    @Override
-    public void onDensityDialogPositiveClick(DialogFragment dialog) {
-        // User touched the dialog's positive button - "Scan Food"
-        // TODO: Start FoodScanner for result. Save volume to selected FoodItem.
-    }
-
-    // This is for the food density dialog
-    @Override
-    public void onDensityDialogNeutralClick(DialogFragment dialog) {
-        // User touched the dialog's neutral button - "Cancel"
-        // Do nothing, besides exit dialog.
-    }
-
-    // This is for the food volume dialog
-    @Override
-    public void onVolumeDialogPositiveClick(DialogFragment dialog) {
-        // User touched the dialog's positive button - "Scan Food"
-        Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
-        intent.putExtra("pic_names", new String[]{"Top", "Side"});
-        startActivityForResult(intent, REQUEST_FOODSCANNER);
-    }
-
-    // This is for the food volume dialog
-    @Override
-    public void onVolumeDialogNeutralClick(DialogFragment dialog) {
-        // User touched the dialog's neutral button - "Cancel"
-        // Do nothing, besides exit dialog.
-    }
-    */
-    //endregion
 
     // This is for the food serving dialog
     @Override
@@ -499,5 +430,77 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     }
 
     //endregion
+
+    // This is for handling food items
+    @Override
+    public void onDelete(FoodArrayAdapter adapter, int position) {
+        // Prompt for deleting of the select FoodItem
+
+        removedFood = adapter.getItem(position);
+
+        // Create confirmation dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to delete \"" + removedFood.getName() + " (" +
+                removedFood.getBrand() + ")\"?")
+                .setTitle("Confirm Food Deletion");
+        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked 'Delete' button
+                // Delete food item from meal
+                meal.removeFoodItem(removedFood);
+
+                // Update listview
+                ListView lv = (ListView) findViewById(R.id.food_list);
+                List<FoodItem> tempFood = new ArrayList<>(meal.getFood());
+                FoodArrayAdapter adapter = new FoodArrayAdapter(MealDetailsActivity.this, tempFood);
+                adapter.setOnDeleteListener(MealDetailsActivity.this);
+                lv.setAdapter(adapter);
+
+                // Set up background
+                if (meal.getFood().size() == 0) {
+                    lv.setBackgroundResource(R.drawable.background_add_food);
+                } else {
+                    lv.setBackgroundResource(0);
+                }
+
+                Toast butteredToast = Toast.makeText(getApplicationContext(), "Removed from meal.",
+                        Toast.LENGTH_SHORT);
+                butteredToast.show();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
+
+        // Create the AlertDialog
+        AlertDialog confirmDialog = builder.create();
+        confirmDialog.show();
+    }
+
+    // This is for handling food items
+    @Override
+    public void onWarning(FoodArrayAdapter adapter, int position) {
+        // Go to foodscanner; same as tapping "Scan" in FoodInfoFragment
+
+        lastClickedFood = adapter.getItem(position);
+
+        File topImage = new File(ImageDirectoryManager.
+                getImageDirectory(getApplicationContext()).getPath() + "/Top.png");
+        File sideImage = new File(ImageDirectoryManager.
+                getImageDirectory(getApplicationContext()).getPath() + "/Side.png");
+
+        if (!topImage.exists() || !sideImage.exists()) {
+            // No previous images, go straight to photo taker
+            Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
+            intent.putExtra("pic_names", new String[]{"Top", "Side"});
+            startActivityForResult(intent, REQUEST_FOODSCANNER);
+        } else {
+            // Ask user if they want to use previous images before proceeding
+            DialogFragment photoDialog = PreviousPhotoFragment.newInstance();
+            photoDialog.show(getFragmentManager(), "PreviousPhotoFragment");
+        }
+    }
 
 }
