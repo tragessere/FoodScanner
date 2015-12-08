@@ -1,6 +1,5 @@
 package com.example.backend.model;
 
-import com.google.appengine.repackaged.com.google.common.base.Flag;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -73,6 +72,4 @@ public class BackendFoodItem {
     public void setActualServingSizeUnit(String actualServingSizeUnit) { this.actualServingSizeUnit = actualServingSizeUnit; }
     public void setCalculatedNutrition(Map<String, Double> nutritionFields) { this.calculatedNutrition = new HashMap<String, Double>(nutritionFields); }
     public void setUncalculatedNutrition(Map<String, Double> nutritionFields) { this.uncalculatedNutrition = new HashMap<String, Double>(nutritionFields); }
-
-    public BackendFoodItem() {}
 }
