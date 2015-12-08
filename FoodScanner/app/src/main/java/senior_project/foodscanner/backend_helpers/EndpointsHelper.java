@@ -223,9 +223,15 @@ public class EndpointsHelper
 		private TaskCompletionListener mListener;
 		private boolean success = false;
 		private Exception exception;
+		private boolean fakeQuery = false;
 
 		public SaveMealTask(TaskCompletionListener listener) {
 			mListener = listener;
+		}
+
+		public SaveMealTask(TaskCompletionListener listener, boolean fakeQuery) {
+			mListener = listener;
+			this.fakeQuery = fakeQuery;
 		}
 
 		@Override
@@ -251,9 +257,15 @@ public class EndpointsHelper
 			Meal meal = meals[0];
 			try {
 				BackendMeal backendMealToSave = convertToBackendMeal(meal);
-				BackendMeal savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();
+				BackendMeal savedBackendMeal = null;
+				if(fakeQuery) {
+					Thread.sleep(7000);
+				}
+				else{
+					savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();
+					meal.setServerId(savedBackendMeal.getId());
+				}
 				success = true;
-				meal.setServerId(savedBackendMeal.getId());
 				return meal;
 			} catch (Exception e) {
 				if(!isCancelled()) {
@@ -272,9 +284,15 @@ public class EndpointsHelper
 		private TaskCompletionListener mListener;
 		private boolean success = false;
 		private Exception exception;
+		private boolean fakeQuery = false;
 
 		public DeleteMealTask(TaskCompletionListener listener) {
 			mListener = listener;
+		}
+
+		public DeleteMealTask(TaskCompletionListener listener, boolean fakeQuery) {
+			mListener = listener;
+			this.fakeQuery = fakeQuery;
 		}
 
 		@Override
@@ -299,7 +317,12 @@ public class EndpointsHelper
 		protected Meal doInBackground(Meal... meals) {
 			try {
 				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
-				mAPI.deleteMeal(backendMeal).execute();
+				if(fakeQuery) {
+					Thread.sleep(7000);
+				}
+				else{
+					mAPI.deleteMeal(backendMeal).execute();
+				}
 				success = true;
 				return meals[0];
 			} catch (Exception e) {
@@ -318,11 +341,16 @@ public class EndpointsHelper
 	public class GetMealsWithinDatesTask extends AsyncTask<Date, Void, ArrayList<Meal>> {
 		private TaskCompletionListener mListener;
 		private Exception exception;
+		private boolean fakeQuery = false;
 
 		public GetMealsWithinDatesTask(TaskCompletionListener listener) {
 			mListener = listener;
 		}
 
+		public GetMealsWithinDatesTask(TaskCompletionListener listener, boolean fakeQuery) {
+			mListener = listener;
+			this.fakeQuery = fakeQuery;
+		}
 
 		@Override
 		protected void onCancelled(){
@@ -350,7 +378,13 @@ public class EndpointsHelper
 			try {
 				Date startDate = dates[0];
 				Date endDate = dates[1];
-				List<BackendMeal> backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+				List<BackendMeal> backendMeals = null;
+				if(fakeQuery){
+					Thread.sleep(7000);
+				}
+				else {
+					backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+				}
 				if(backendMeals == null) {
 					backendMeals = new ArrayList<>();
 				}

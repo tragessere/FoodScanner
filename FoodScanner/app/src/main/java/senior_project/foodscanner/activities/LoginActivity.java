@@ -19,9 +19,12 @@ import android.widget.Toast;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
 
+import java.util.List;
+
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
+import senior_project.foodscanner.TestingModeService;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
@@ -43,6 +46,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		TestingModeService.init();
+
 		setContentView(R.layout.activity_login);
 
 		googleButton = (Button) findViewById(R.id.login_google_plus_button);

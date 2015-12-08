@@ -38,6 +38,7 @@ import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.Nutritious;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
+import senior_project.foodscanner.TestingModeService;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
 import senior_project.foodscanner.fragments.AlertDialogFragment;
@@ -74,6 +75,7 @@ import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
  *      Background Task: Sync Meals with Server
  *          Always continues running in background even after user leaves activity.
  *          Cancelled when another syn meals task is started.
+ *          Cancelled when user goes to SettingsActivity, because syncing should not run if the user logs out.
  *      Old Meal Deletion:
  *          Whenever user
  *
@@ -253,6 +255,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         int id = item.getItemId();
 
         if(id == R.id.action_settings) {
+            cancelSyncingTasks();
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
@@ -380,7 +383,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void loadMeals_Total_Cancel(){
-        Log.d("MealCalendarActivity", "LOADING TOTAL CANCEL");
         cancelLoadingTask_Total();
         if(dialog_total_loading != null){
             dialog_total_loading.dismiss();
@@ -480,7 +482,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                     dialog.show(getFragmentManager(), "Total");
                 }
             }
-        }).execute(new Date(day1.getTimeInMillis()), new Date(day2.getTimeInMillis()));
+        }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER).execute(new Date(day1.getTimeInMillis()), new Date(day2.getTimeInMillis()));
     }
 
     private void loadMeals_Calendar_Finish(){
@@ -554,7 +556,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                     }
                     loadMeals_Calendar_Finish();
                 }
-            }).execute(new Date(date), new Date(date));
+            }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER).execute(new Date(date), new Date(date));
         }
         updateUI();
     }
@@ -648,7 +650,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                                 }
                                 syncMeals_End();
                             }
-                        }).execute(meal));
+                        }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER).execute(meal));
                     } else {// save/update meal in backend
                         //TODO 400 Bad Request
                         Log.d("MealCalendarActivity", "SYNC SAVE " + meal);
@@ -681,7 +683,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                                 }
                                 syncMeals_End();
                             }
-                        }).execute(meal));
+                        }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER).execute(meal));
                     }
                 }
             }
