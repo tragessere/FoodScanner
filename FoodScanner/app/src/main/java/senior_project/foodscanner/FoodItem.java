@@ -157,23 +157,19 @@ public class FoodItem extends Nutritious implements Serializable {
             needCalculateServings = true;
             actualServingSizeUnit = formattedUnit;
         } else {
-            //check that each substring is not in either, e.g. 'cups (chopped)'
+            //check that each word is not in either, e.g. 'cups (chopped)'
             boolean stopCheck = false;
+            String[] unitWords = formattedUnit.split("\\s+");
 
-            // TODO: Change substrings to just each word in the string (split it)
-
-            //check that substring is not in massUnits
-            for(int i = 1; i <= maxMassLen; i++) {
-                if(i > formattedUnit.length()) {
-                    break;
-                }
-                if(massUnits.contains(formattedUnit.substring(0, i))) {
+            //check that words are not in massUnits
+            for(String word : unitWords) {
+                if(massUnits.contains(word)) {
                     stopCheck = true;
                     usesMass = true;
                     usesVol = false;
                     needConvertVol = true;
                     needCalculateServings = true;
-                    actualServingSizeUnit = formattedUnit.substring(0, i);
+                    actualServingSizeUnit = word;
                     break;
                 }
             }
@@ -181,18 +177,15 @@ public class FoodItem extends Nutritious implements Serializable {
                 return;
             }
 
-            //check that substring is not in volUnits
-            for(int i = 1; i <= maxVolLen; i++) {
-                if(i > formattedUnit.length()) {
-                    break;
-                }
-                if(volUnits.contains(formattedUnit.substring(0, i))) {
+            //check that words are not in volUnits
+            for(String word: unitWords) {
+                if(volUnits.contains(word)) {
                     stopCheck = true;
                     usesMass = false;
                     usesVol = true;
                     needConvertVol = true;
                     needCalculateServings = true;
-                    actualServingSizeUnit = formattedUnit.substring(0, i);
+                    actualServingSizeUnit = word;
                     break;
                 }
             }
