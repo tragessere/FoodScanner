@@ -66,9 +66,11 @@ import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
  *          Queries for meals should always be for the entire day, not part of a day.
  *          The app uses this assumption by only pulling meals from the server if there are no meals found locally for that day.
  *          This is not best practice.
- *      Background Task: Load Meals from Server
+ *      Background Task: Load Meals from Server for Calendar
  *          Always gets cancelled as soon as user leaves activity.
  *          Cancelled when another loadMeals task is started.
+ *      Background Task: Load Meals from Server for Total Dialog
+ *          Same as above.
  *      Background Task: Sync Meals with Server
  *          Always continues running in background even after user leaves activity.
  *          Cancelled when another syn meals task is started.
@@ -110,7 +112,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private long currentDate;
     private ArrayList<Meal> meals = new ArrayList<>();
     private AsyncTaskList syncTasks = new AsyncTaskList();
-    private AsyncTask loadTask;
+    private AsyncTask loadTask_Calendar;
+    private AsyncTask loadTask_Total;
     LoadingDialogFragment dialog_total_loading;
 
     private enum WarningBarUIState{
@@ -354,25 +357,34 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    private void cancelLoadingTask(){
-        if(loadTask != null){
-            if(!loadTask.isCancelled() && loadTask.getStatus() != AsyncTask.Status.FINISHED) {
-                loadTask.cancel(true);
-                loadTask = null;
+    private void cancelLoadingTask_Total(){
+        if(loadTask_Total != null){
+            if(!loadTask_Total.isCancelled() && loadTask_Total.getStatus() != AsyncTask.Status.FINISHED) {
+                loadTask_Total.cancel(true);
+                loadTask_Total = null;
+            }
+        }
+    }
+
+    private void cancelLoadingTask_Calendar(){
+        if(loadTask_Calendar != null){
+            if(!loadTask_Calendar.isCancelled() && loadTask_Calendar.getStatus() != AsyncTask.Status.FINISHED) {
+                loadTask_Calendar.cancel(true);
+                loadTask_Calendar = null;
             }
         }
     }
 
     private void loadMeals_Total_Cancel(){
         Log.d("MealCalendarActivity", "LOADING TOTAL CANCEL");
-        cancelLoadingTask();
+        cancelLoadingTask_Total();
         if(dialog_total_loading != null){
             dialog_total_loading.dismiss();
         }
     }
 
-    private void loadMeals_Total_Start(final int days){
-        cancelLoadingTask();
+    private void loadMeals_Total_Start(final int days){//TODO test correctness: server pull
+        cancelLoadingTask_Total();
 
         final GregorianCalendar day1 = new GregorianCalendar();
         day1.setTimeInMillis(currentDate);
@@ -381,9 +393,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         final GregorianCalendar day2 = new GregorianCalendar();
         day2.setTimeInMillis(currentDate);// today
 
-        GregorianCalendar day3 = new GregorianCalendar();
-        day3.add(Calendar.DATE, -1);
-        final CharSequence title = Html.fromHtml("<b>Total "+MONTH+" Day Nutrition</b><br>"+Settings.getInstance().formatDate(day1, Settings.DateFormat.mn_dn_yn) + " - " + Settings.getInstance().formatDate(day3, Settings.DateFormat.mn_dn_yn));
+        final CharSequence title = Html.fromHtml("<b>Total "+days+" Day Nutrition</b><br>"+Settings.getInstance().formatDate(day1, Settings.DateFormat.mn_dn_yn) + " - " + Settings.getInstance().formatDate(day2, Settings.DateFormat.mn_dn_yn));
 
         dialog_total_loading = new LoadingDialogFragment();
         dialog_total_loading.setTitle(title);
@@ -403,7 +413,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         dialog_total_loading.show(getFragmentManager(), "Loading Dialog");
 
         // download meals
-        loadTask = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
+        loadTask_Total = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
             @Override
             public void onTaskCompleted(AsyncTask task, Bundle b) {
                 if(task.isCancelled()) {
@@ -467,9 +477,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 }
             }
         }).execute(new Date(day1.getTimeInMillis()), new Date(day2.getTimeInMillis()));
-
-        //TODO test activity leaving behavior
-        //TODO test correctness
     }
 
     private void loadMeals_Calendar_Finish(){
@@ -482,7 +489,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void loadMeals_Calendar_Cancel(){
-        cancelLoadingTask();
+        cancelLoadingTask_Calendar();
         loadMeals_Calendar_Finish();
     }
 
@@ -509,7 +516,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         else{// no meals found locally, check the server
             Log.d("MealCalendarActivity","LOADING BACKEND");
             loadingIndicator.setVisibility(View.VISIBLE);
-            loadTask = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
+            loadTask_Calendar = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
                 @Override
                 public void onTaskCompleted(AsyncTask task, Bundle b) {
                     if(task.isCancelled()) {
@@ -589,7 +596,6 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
             }
         }
         else{
-
             // update warning bar ui
             adapter.setWarningsEnabled(false);
             setWarningBarUIState(WarningBarUIState.SYNCING);
