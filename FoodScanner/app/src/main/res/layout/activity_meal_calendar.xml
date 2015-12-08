@@ -66,13 +66,19 @@
 
         </LinearLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/container_meals"
+            android:layout_below="@+id/container_date">
+
         <ListView
             android:id="@+id/listView_meals"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/container_warning"
-            android:layout_below="@+id/container_date"
-            android:background="@drawable/tap_add_meal"/>
+            android:background="@drawable/background_add_meal"
+            android:layout_alignParentTop="true"/>
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -81,7 +87,7 @@
             android:layout_alignParentStart="true"
             android:id="@+id/container_warning"
             android:layout_above="@+id/container_total"
-            android:background="@color/Warning"
+            android:background="@color/Syncing"
             android:padding="10dp"
             >
 
@@ -91,18 +97,27 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center">
 
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/progressBar_syncing"
+                    android:visibility="visible"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_gravity="center_vertical"/>
+
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/imageView2"
+                    android:id="@+id/imageView_icon"
                     android:src="@android:drawable/ic_dialog_alert"
-                    android:layout_gravity="center_vertical"/>
+                    android:layout_gravity="center_vertical"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Meals are not synced with the server!"
-                    android:id="@+id/textView2"
+                    android:text="Sync in progress..."
+                    android:id="@+id/textView"
                     android:textStyle="bold"
                     android:textAlignment="center"
                     android:layout_gravity="center_vertical"
@@ -158,5 +173,25 @@
 
         </LinearLayout>
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/loading"
+            android:visibility="gone"
+            android:background="#80ffffff"
+            >
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/progressBar"
+                android:layout_gravity="center"
+                android:background="@drawable/progress_background"
+                android:padding="15dp"/>
+        </FrameLayout>
+
+        </RelativeLayout>
+
     </RelativeLayout>
+
 </RelativeLayout>

@@ -11,6 +11,8 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.response.CollectionResponse;
+import com.google.api.server.spi.response.ConflictException;
+import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.appengine.api.users.User;
 import com.googlecode.objectify.cmd.Query;
@@ -42,15 +44,24 @@ import static com.example.backend.OfyService.ofy;
 public class MealEndpoint {
 
     @ApiMethod(name = "saveMeal")
-    public void saveMeal(BackendMeal meal, User user) throws ServiceException {
+    public BackendMeal saveMeal(BackendMeal meal, User user) throws ServiceException {
         AuthUtil.throwIfNotAuthenticated(user);
-        ofy().save().entity(meal).now();
+
+        if (findBackendMeal(meal.getId()) != null) throw new ConflictException("Meal already exists.");
+
+        ofy().save().entity(meal).now();    //A synchronous save() will populate the generated id value on the entity instance
+        return meal;
     }
 
     @ApiMethod(name = "deleteMeal")
     public void deleteMeal(BackendMeal meal, User user) throws ServiceException {
         AuthUtil.throwIfNotAuthenticated(user);
-        ofy().delete().entity(meal).now();
+
+        if (findBackendMeal(meal.getId()) == null) throw new NotFoundException("Meal does not exist.");
+
+        BackendMeal backendMeal = ofy().load().type(BackendMeal.class).id(meal.getId()).now();
+        ofy().delete().entity(backendMeal).now();
+        //ofy().delete().entity(meal).now();
     }
 
     @ApiMethod(name = "getAllMeals")
@@ -77,5 +88,9 @@ public class MealEndpoint {
         }
 
         return CollectionResponse.<BackendMeal>builder().setItems(results).build();
+    }
+
+    private BackendMeal findBackendMeal(Long id) {
+        return ofy().load().type(BackendMeal.class).id(id).now();
     }
 }
