@@ -96,7 +96,7 @@ public class EndpointsHelper
 				Bundle b = new Bundle();
 				if(testBean != null)
 					b.putString("test", testBean.getData());
-				mListener.onTaskCompleted(b);
+				mListener.onTaskCompleted(b,isCancelled());
 			}
 		}
 	}
@@ -163,7 +163,7 @@ public class EndpointsHelper
 
 			// Save results to density map
 			for (DensityEntry entry : results) {
-				senior_project.foodscanner.FoodItem.addDensity(entry.getName(), (double) (entry.getDensity()));
+				//senior_project.foodscanner.FoodItem.addDensity(entry.getName(), (double) (entry.getDensity()));TODO uncomment
 			}
 
 			// TODO: Save densities locally, in case a later query fails
@@ -202,7 +202,7 @@ public class EndpointsHelper
 			b.putSerializable(TASKID_MEAL_SAVE_EXCEPTION, exception);
 			b.putSerializable(TASKID_MEAL_SAVE, meal);
 			b.putBoolean(TASKID_MEAL_SAVE_SUCCESS, false);
-			mListener.onTaskCompleted(b);
+			mListener.onTaskCompleted(b, isCancelled());
 		}
 
 		@Override
@@ -211,7 +211,7 @@ public class EndpointsHelper
 			b.putSerializable(TASKID_MEAL_SAVE_EXCEPTION, exception);
 			b.putSerializable(TASKID_MEAL_SAVE, meal);
 			b.putBoolean(TASKID_MEAL_SAVE_SUCCESS, success);
-			mListener.onTaskCompleted(b);
+			mListener.onTaskCompleted(b, isCancelled());
 		}
 
 		@Override
@@ -222,8 +222,10 @@ public class EndpointsHelper
 				success = true;
 				return meals[0];
 			} catch (Exception e) {
-				Log.e("EndpointsHelper", "SaveMealTask", e);
-				exception = e;
+				if(!isCancelled()) {
+					Log.e("EndpointsHelper", "SaveMealTask", e);
+					exception = e;
+				}
 				return meals[0];
 			}
 		}
@@ -247,7 +249,7 @@ public class EndpointsHelper
 			b.putSerializable(TASKID_MEAL_DELETE_EXCEPTION, exception);
 			b.putSerializable(TASKID_MEAL_DELETE, meal);
 			b.putBoolean(TASKID_MEAL_DELETE_SUCCESS, false);
-			mListener.onTaskCompleted(b);
+			mListener.onTaskCompleted(b, isCancelled());
 		}
 
 		@Override
@@ -256,7 +258,7 @@ public class EndpointsHelper
 			b.putSerializable(TASKID_MEAL_DELETE_EXCEPTION, exception);
 			b.putSerializable(TASKID_MEAL_DELETE, meal);
 			b.putBoolean(TASKID_MEAL_DELETE_SUCCESS, success);
-			mListener.onTaskCompleted(b);
+			mListener.onTaskCompleted(b, isCancelled());
 		}
 
 		@Override
@@ -267,8 +269,10 @@ public class EndpointsHelper
 				success = true;
 				return meals[0];
 			} catch (Exception e) {
-				Log.e("EndpointsHelper", "DeleteMealTask", e);
-				exception = e;
+				if(!isCancelled()) {
+					Log.e("EndpointsHelper", "DeleteMealTask", e);
+					exception = e;
+				}
 				return meals[0];
 			}
 		}
@@ -291,7 +295,7 @@ public class EndpointsHelper
 			Bundle b = new Bundle();
 			b.putSerializable(TASKID_MEALS_GET, null);
 			b.putSerializable(TASKID_MEALS_GET_EXCEPTION, exception);
-			mListener.onTaskCompleted(b);
+			mListener.onTaskCompleted(b, isCancelled());
 		}
 
 		@Override
@@ -304,7 +308,7 @@ public class EndpointsHelper
 				b.putSerializable(TASKID_MEALS_GET, null);
 			}
 			b.putSerializable(TASKID_MEALS_GET_EXCEPTION, exception);
-			mListener.onTaskCompleted(b);
+			mListener.onTaskCompleted(b, isCancelled());
 		}
 
 		@Override
@@ -318,8 +322,10 @@ public class EndpointsHelper
 				}
 				return convertToFrontEndMeals(backendMeals);
 			} catch (Exception e) {
-				Log.e("EndpointsHelper","GetMealsWithinDatesTask",e);
-				exception = e;
+				if(!isCancelled()) {
+					Log.e("EndpointsHelper", "GetMealsWithinDatesTask", e);
+					exception = e;
+				}
 				return null;
 			}
 		}
@@ -331,7 +337,7 @@ public class EndpointsHelper
 	 * Bundle is optional and can hold any primitive making the callback flexible.
 	 */
 	public interface TaskCompletionListener {
-		void onTaskCompleted(Bundle b);
+		void onTaskCompleted(Bundle b, boolean isCancelled);
 	}
 
 	public interface densityDownloadObserver {

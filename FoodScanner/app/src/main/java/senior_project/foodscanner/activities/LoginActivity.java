@@ -125,7 +125,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 		//Example usage of an API call
 		helper.new ExampleTask(new EndpointsHelper.TaskCompletionListener() {
 			@Override
-			public void onTaskCompleted(Bundle b) {
+			public void onTaskCompleted(Bundle b, boolean isCancelled) {
 				progressBar.setVisibility(View.GONE);
 				Toast.makeText(activity, b.getString("test", "failure"), Toast.LENGTH_SHORT).show();
 
