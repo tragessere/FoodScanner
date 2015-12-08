@@ -33,6 +33,7 @@ public class FoodServingFragment extends DialogFragment {
 
     public interface FoodServingDialogListener {
         public void onServingDialogNeutralClick(DialogFragment dialog);
+        public void onServingDialogPositiveClick(DialogFragment dialog);
     }
 
     // Use this instance of the interface to deliver Serving events
@@ -90,9 +91,10 @@ public class FoodServingFragment extends DialogFragment {
                         }
 
                         food.setNumServings(numServings);
-                        Toast butteredToast = Toast.makeText(getActivity(),
-                                "Saved servings.", Toast.LENGTH_SHORT);
-                        butteredToast.show();
+                        mListener.onServingDialogPositiveClick(FoodServingFragment.this);
+//                        Toast butteredToast = Toast.makeText(getActivity(),
+//                                "Saved servings.", Toast.LENGTH_SHORT);
+//                        butteredToast.show();
                     }
                 })
                 .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
