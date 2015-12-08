@@ -21,6 +21,7 @@ public class Units {
 
     static final double OZ_IN_GRAM = 0.035274;
     static final double GRAM_IN_GRAM = 1.0;
+    static final double LB_IN_GRAM = 0.00220462;
     static final double MG_IN_GRAM = 1000.0;
     //endregion
 
@@ -82,6 +83,8 @@ public class Units {
             conversion = OZ_IN_GRAM;
         } else if (unit.equals("g") || unit.equals("gram")) {
             conversion = GRAM_IN_GRAM;
+        } else if (unit.equals("lb") || unit.equals("pound")) {
+            conversion = LB_IN_GRAM;
         } else {  //unit is mg
             conversion = MG_IN_GRAM;
         }

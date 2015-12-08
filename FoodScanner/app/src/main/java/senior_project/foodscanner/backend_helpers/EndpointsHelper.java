@@ -15,6 +15,11 @@ import com.example.backend.foodScannerBackendAPI.model.MyBean;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.util.DateTime;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import senior_project.foodscanner.Constants;
+import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.FoodItem;
 
@@ -162,6 +168,61 @@ public class EndpointsHelper
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
+            // Before querying, check if densities are saved locally,
+            // so density queries don't max out our api limit.
+
+            // Open local density file, and check if it exists
+            File localDensities = new File(ImageDirectoryManager.
+                    getDensityDirectory(act).getPath() + "/densities.txt");
+            Boolean downloadDensities = true;
+
+            if (localDensities.exists()) {
+                // Read from file and save to density map
+                downloadDensities = false;
+                try {
+                    BufferedReader br = new BufferedReader(new FileReader(localDensities));
+                    String line;
+                    String name = null;
+                    boolean isName = true;
+                    while ((line = br.readLine()) != null) {
+                        if (isName) {
+                            // Line contains name of new density entry
+                            isName = false;
+                            name = line;
+                        } else {
+                            // Line contains value of previous density entry
+                            isName = true;
+                            double value = Double.parseDouble(line);
+                            // Add density entry to map
+                            senior_project.foodscanner.FoodItem.addDensity(name, value);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    act.runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast butteredToast = Toast.makeText(act.getApplicationContext(),
+                                    "Error: Could not read cached densities.", Toast.LENGTH_SHORT);
+                            butteredToast.show();
+                        }
+                    });
+                    downloadDensities = true;
+                    // Clear density list to avoid errors
+                    senior_project.foodscanner.FoodItem.clearAllDensities();
+                }
+            }
+
+            if (!downloadDensities) {
+                // Successfully retrieved densities from cache
+                // Set downloaded to true, so client thinks it was successful
+                synchronized (mEndpoints) {
+                    downloaded = true;
+                }
+                return true;
+            }
+
+            // Densities were not retrieved from local cache; query the database
+
 			List<DensityEntry> results;
 			try {
 				results = mAPI.getAllDensityEntries().execute().getItems();
@@ -186,7 +247,47 @@ public class EndpointsHelper
 				//senior_project.foodscanner.FoodItem.addDensity(entry.getName(), (double) (entry.getDensity()));
 			}
 
-			// TODO: Save densities locally, in case a later query fails
+			// Save densities locally, so density queries don't max out our api limit
+
+            // Delete local density file, if it already exists
+            // NOTE: With our current set up, it should never have to delete previous cache
+            if (localDensities.exists()) {
+                boolean result = localDensities.delete();
+                if (!result) {
+                    act.runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast butteredToast = Toast.makeText(act.getApplicationContext(),
+                                    "Error: Could not replace cached densities.", Toast.LENGTH_SHORT);
+                            butteredToast.show();
+                        }
+                    });
+                    return true;  // Still return true, because download was successful at least
+                }
+            }
+
+            // Write density name, value pairs to file
+            try {
+                BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(localDensities));
+                for (DensityEntry entry : results) {
+                    if (entry.getDensity() != null) {
+                        stream.write(entry.getName().getBytes());
+                        stream.write("\n".getBytes());  // Couldn't use 'System.lineSeparator()'
+                        stream.write(("" + (double) entry.getDensity()).getBytes());
+                        stream.write("\n".getBytes());
+                    }
+                }
+                stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                act.runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast butteredToast = Toast.makeText(act.getApplicationContext(),
+                                "Error: Could not cache densities.", Toast.LENGTH_SHORT);
+                        butteredToast.show();
+                    }
+                });
+                return true;  // Still return true, because download was successful at least
+            }
 
 			return true;
 		}
