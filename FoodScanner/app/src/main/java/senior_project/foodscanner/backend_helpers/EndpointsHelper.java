@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.os.CountDownTimer;
 import android.widget.Toast;
 
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
@@ -113,6 +114,7 @@ public class EndpointsHelper
 
 	public class GetAllDensityEntriesTask extends AsyncTask<Void, Void, Boolean> {
 		private Activity act;
+		private boolean downloaded = false;
 
 		public GetAllDensityEntriesTask(Activity act) {
 			this.act = act;
@@ -121,6 +123,25 @@ public class EndpointsHelper
 		@Override
 		protected void onPreExecute() {
 			densityDownloaded = Constants.DENSITY_DOWNLOADING;
+
+			new CountDownTimer(15000, 15000) {
+				public void onTick(long millisUntilFinished) {
+					// You can monitor the progress here as well by changing the onTick() time
+				}
+				public void onFinish() {
+					// stop async task if the data hasn't been downloaded yet
+					synchronized (mEndpoints) {
+						if (GetAllDensityEntriesTask.this.getStatus() == AsyncTask.Status.RUNNING) {
+							if (!downloaded) {
+								GetAllDensityEntriesTask.this.cancel(true);
+								onPostExecute(false);
+							}
+
+							// Add any specific task you wish to do as your extended class variable works here as well.
+						}
+					}
+				}
+			}.start();
 		}
 
 		@Override
@@ -146,10 +167,18 @@ public class EndpointsHelper
 		}
 
 		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+		}
+
+		@Override
 		protected Boolean doInBackground(Void... params) {
 			List<DensityEntry> results;
 			try {
 				results = mAPI.getAllDensityEntries().execute().getItems();
+				synchronized (mEndpoints) {
+					downloaded = true;
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 				return false;
@@ -161,7 +190,11 @@ public class EndpointsHelper
 
 			// Save results to density map
 			for (DensityEntry entry : results) {
-				senior_project.foodscanner.FoodItem.addDensity(entry.getName(), (double) (entry.getDensity()));
+				if (entry.getDensity() != null) {
+					senior_project.foodscanner.FoodItem.addDensity(entry.getName(),
+							(double) (entry.getDensity()));
+				}
+				//senior_project.foodscanner.FoodItem.addDensity(entry.getName(), (double) (entry.getDensity()));
 			}
 
 			// TODO: Save densities locally, in case a later query fails
