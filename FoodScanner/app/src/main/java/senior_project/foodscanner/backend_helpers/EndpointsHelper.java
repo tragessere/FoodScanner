@@ -94,7 +94,7 @@ public class EndpointsHelper
 				Bundle b = new Bundle();
 				if(testBean != null)
 					b.putString("test", testBean.getData());
-				mListener.onTaskCompleted(b,isCancelled());
+				mListener.onTaskCompleted(this, b);
 			}
 		}
 	}
@@ -200,7 +200,7 @@ public class EndpointsHelper
 			b.putSerializable(TASKID_MEAL_SAVE_EXCEPTION, exception);
 			b.putSerializable(TASKID_MEAL_SAVE, meal);
 			b.putBoolean(TASKID_MEAL_SAVE_SUCCESS, false);
-			mListener.onTaskCompleted(b, isCancelled());
+			mListener.onTaskCompleted(this, b);
 		}
 
 		@Override
@@ -209,7 +209,7 @@ public class EndpointsHelper
 			b.putSerializable(TASKID_MEAL_SAVE_EXCEPTION, exception);
 			b.putSerializable(TASKID_MEAL_SAVE, meal);
 			b.putBoolean(TASKID_MEAL_SAVE_SUCCESS, success);
-			mListener.onTaskCompleted(b, isCancelled());
+			mListener.onTaskCompleted(this, b);
 		}
 
 		@Override
@@ -217,9 +217,9 @@ public class EndpointsHelper
 			Meal meal = meals[0];
 			try {
 				BackendMeal backendMealToSave = convertToBackendMeal(meal);
-				BackendMeal savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();
+				Thread.sleep(10000);//BackendMeal savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();TODO
 				success = true;
-				meal.setServerId(savedBackendMeal.getId());
+				//meal.setServerId(savedBackendMeal.getId());TODO
 				return meal;
 			} catch (Exception e) {
 				if(!isCancelled()) {
@@ -249,7 +249,7 @@ public class EndpointsHelper
 			b.putSerializable(TASKID_MEAL_DELETE_EXCEPTION, exception);
 			b.putSerializable(TASKID_MEAL_DELETE, meal);
 			b.putBoolean(TASKID_MEAL_DELETE_SUCCESS, false);
-			mListener.onTaskCompleted(b, isCancelled());
+			mListener.onTaskCompleted(this, b);
 		}
 
 		@Override
@@ -258,14 +258,14 @@ public class EndpointsHelper
 			b.putSerializable(TASKID_MEAL_DELETE_EXCEPTION, exception);
 			b.putSerializable(TASKID_MEAL_DELETE, meal);
 			b.putBoolean(TASKID_MEAL_DELETE_SUCCESS, success);
-			mListener.onTaskCompleted(b, isCancelled());
+			mListener.onTaskCompleted(this, b);
 		}
 
 		@Override
 		protected Meal doInBackground(Meal... meals) {
 			try {
 				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
-				mAPI.deleteMeal(backendMeal).execute();
+				Thread.sleep(10000);//mAPI.deleteMeal(backendMeal).execute();TODO
 				success = true;
 				return meals[0];
 			} catch (Exception e) {
@@ -295,7 +295,7 @@ public class EndpointsHelper
 			Bundle b = new Bundle();
 			b.putSerializable(TASKID_MEALS_GET, null);
 			b.putSerializable(TASKID_MEALS_GET_EXCEPTION, exception);
-			mListener.onTaskCompleted(b, isCancelled());
+			mListener.onTaskCompleted(this, b);
 		}
 
 		@Override
@@ -308,7 +308,7 @@ public class EndpointsHelper
 				b.putSerializable(TASKID_MEALS_GET, null);
 			}
 			b.putSerializable(TASKID_MEALS_GET_EXCEPTION, exception);
-			mListener.onTaskCompleted(b, isCancelled());
+			mListener.onTaskCompleted(this, b);
 		}
 
 		@Override
@@ -316,7 +316,8 @@ public class EndpointsHelper
 			try {
 				Date startDate = dates[0];
 				Date endDate = dates[1];
-				List<BackendMeal> backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+				Thread.sleep(10000);
+				List<BackendMeal> backendMeals = null;//mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();TODO
 				if(backendMeals == null) {
 					backendMeals = new ArrayList<>();
 				}
@@ -337,7 +338,7 @@ public class EndpointsHelper
 	 * Bundle is optional and can hold any primitive making the callback flexible.
 	 */
 	public interface TaskCompletionListener {
-		void onTaskCompleted(Bundle b, boolean isCancelled);
+		void onTaskCompleted(AsyncTask task, Bundle b);
 	}
 
 	public interface densityDownloadObserver {

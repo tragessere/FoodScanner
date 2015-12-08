@@ -60,17 +60,29 @@ import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
  * - Clicking this will log out the user
  * - Maybe a drop down menu for account settings
  *
- * TODO Unhandled Edge Cases:
- *         // race condition server side untested
- *         // multiple devices logged in as same user can cause syncing conflicts
- *         // moving between time zones may cause inconsistencies
- *         // saving meal when storage full
- *
  * Implementation Notes:
  *      Meal Queries By Day:
  *          Queries for meals should always be for the entire day, not part of a day.
  *          The app uses this assumption by only pulling meals from the server if there are no meals found locally for that day.
- *          This is not best practice. It may be better to have some sort of locally stored data structure to check off the days that are not
+ *          This is not best practice.
+ *      Background Task: Load Meals from Server
+ *          Always gets cancelled as soon as user leaves activity.
+ *          Cancelled when another loadMeals task is started.
+ *      Background Task: Sync Meals with Server
+ *          Always continues running in background even after user leaves activity.
+ *          Cancelled when another syn meals task is started.
+ *      Old Meal Deletion:
+ *          Whenever user
+ *
+ *
+ *  TODO Unhandled Edge Cases:
+ *         // race condition server side untested
+ *         // multiple devices logged in as same user can cause syncing conflicts
+ *         // moving between time zones may cause inconsistencies
+ *         // saving meal when storage full
+ *  TODO Optimization:
+ *      Backend server should support bulk deletes and save queries.
+ *      It may be better to have some sort of locally stored data structure to check off the days that are not synced.
  */
 public class MealCalendarActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, CalendarDialogFragment.CalendarDialogListener, AdapterView.OnItemClickListener, MealArrayAdapter.MealArrayAdapterListener, ErrorDialogFragment.ErrorDialogListener {
     private static final String SAVE_DATE = "currentDate";
@@ -106,11 +118,13 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         super.onCreate(savedInstanceState);
         Log.d("MealCalendarActivity", "onCreate()");
 
-        setContentView(R.layout.activity_meal_calendar);
-
         if (EndpointsHelper.getDownloadStatus() == Constants.DENSITY_NOT_DOWNLOADED) {
             EndpointsHelper.mEndpoints.new GetAllDensityEntriesTask(this).execute();
         }
+
+        deleteOldMeals();
+
+        setContentView(R.layout.activity_meal_calendar);
 
         loadingIndicator = findViewById(R.id.loading);
         button_calendar = (Button) findViewById(R.id.button_calendar);
@@ -145,8 +159,14 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         mealListView.setAdapter(adapter);
         mealListView.setOnItemClickListener(this);
 
-        //TODO move this to run later?
-        // delete old Meals
+        if(savedInstanceState == null) {
+            changeSelectedDay(System.currentTimeMillis(), false);
+        } else {
+            changeSelectedDay(savedInstanceState.getLong(SAVE_DATE), false);
+        }
+    }
+
+    private void deleteOldMeals(){
         GregorianCalendar day = new GregorianCalendar();
         day.add(Calendar.DATE, -LOCAL_STORAGE_LIMIT);
         List<Meal> meals = SQLQueryHelper.getMealsBefore(day, true);
@@ -160,29 +180,52 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         if(allSynced) {
             SQLQueryHelper.deleteMeals(meals);
         }
-
-        if(savedInstanceState == null) {
-            changeSelectedDay(System.currentTimeMillis(), false);
-        } else {
-            changeSelectedDay(savedInstanceState.getLong(SAVE_DATE), false);
-        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle saved) {
         Log.d("MealCalendarActivity", "onSavedInstanceState()");
         saved.putLong(SAVE_DATE, currentDate);
-        //TODO test this for proper behavior
-        cancelSyncingTasks();
-        cancelLoadingTask();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d("MealCalendarActivity", "onRestart()");
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.d("MealCalendarActivity", "onStart()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("MealCalendarActivity", "onResume()");
         loadMeals_Calendar_Start();
-        syncMeals();
+        syncMeals_Start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("MealCalendarActivity", "onPause()");
+        loadMeals_Calendar_Cancel();
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+        Log.d("MealCalendarActivity", "onStop()");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("MealCalendarActivity", "onDestroy()");
+        deleteOldMeals();
     }
 
     @Override
@@ -251,7 +294,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         SQLQueryHelper.updateMeal(meal);
 
         // delete from backend and on success, delete from local
-        syncMeals();//TODO yes or no to do this?
+        syncMeals_Start();
     }
 
 
@@ -310,18 +353,13 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private void cancelLoadingTask(){
         if(loadTask != null){
             if(!loadTask.isCancelled() && loadTask.getStatus() != AsyncTask.Status.FINISHED) {
-                boolean s = loadTask.cancel(true);
-                if(!s){
-                    Log.e("MealCalendarActivity", "Cancel loading task failed. Status: "+loadTask.getStatus());
-                }
-                else{
-                    Log.d("MealCalendarActivity", "Cancel loading task success. Status: "+loadTask.getStatus());
-                }
+                loadTask.cancel(true);
+                loadTask = null;
             }
         }
     }
 
-    private void loadMeals_Total(int days){
+    private void loadMeals_Total_Start(int days){
         cancelLoadingTask();
 
         //TODO load dialog for total that is cancellable
@@ -345,6 +383,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         //TODO hide loading dialog
         //TODO display totals
         //TODO handle loading dialog cancel
+
+        //TODO test activity leaving behavior
 
     }
 
@@ -387,8 +427,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
             loadingIndicator.setVisibility(View.VISIBLE);
             loadTask = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
                 @Override
-                public void onTaskCompleted(Bundle b, boolean isCancelled) {
-                    if(isCancelled) {
+                public void onTaskCompleted(AsyncTask task, Bundle b) {
+                    if(task.isCancelled()) {
                         Log.d("MealCalendarActivity","LOADING BACKEND: CANCELLED");
                         return;
                     }
@@ -444,16 +484,39 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         for(AsyncTask task:syncTasks){
             task.cancel(true);
         }
+        syncTasks.clear();
+    }
+
+    private void syncMeals_End(){
+        if(!isSyncing()){
+            // reload meals into calendar since their states have been changed
+            loadMeals_Calendar_Start();
+
+            // update warning bar ui
+            adapter.setWarningsEnabled(true);
+            List<Meal> unsyncedMeals =  SQLQueryHelper.getChangedMeals();
+            if(!unsyncedMeals.isEmpty()) {
+                setWarningBarUIState(WarningBarUIState.WARNING);
+            }
+            else {
+                container_warning.setVisibility(View.GONE);
+                setWarningBarUIState(WarningBarUIState.HIDDEN);
+            }
+        }
+        else{
+
+            // update warning bar ui
+            adapter.setWarningsEnabled(false);
+            setWarningBarUIState(WarningBarUIState.SYNCING);
+        }
     }
 
     /**
      * Syncs meals with server.
      * Uploads changed meals, and deletes changed meals to be deleted.
      */
-    private void syncMeals(){
+    private void syncMeals_Start(){
         // TODO test deleting a nonuploaded meal
-        // TODO test what happens when activity changed
-        // TODO test what happens to tasks when the app process is killed by the user or phone powers off
         Log.d("MealCalendarActivity", "SYNC START");
         cancelSyncingTasks();
 
@@ -468,8 +531,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                         Log.d("MealCalendarActivity", "SYNC DELETE " + meal);
                         syncTasks.add(EndpointsHelper.mEndpoints.new DeleteMealTask(new EndpointsHelper.TaskCompletionListener() {
                             @Override
-                            public void onTaskCompleted(Bundle b, boolean isCancelled) {
-                                if(!isCancelled) {
+                            public void onTaskCompleted(AsyncTask task, Bundle b) {
+                                if(!task.isCancelled()) {
                                     Meal meal = (Meal) b.getSerializable(EndpointsHelper.TASKID_MEAL_DELETE);
                                     Log.d("MealCalendarActivity", "SYNC DELETE RETURNED " + meal);
                                     if(meal != null) {
@@ -482,8 +545,13 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                                 else{
                                     Log.d("MealCalendarActivity", "SYNC DELETE CANCELLED");
                                 }
-                                syncTasks.setFinished(syncTasks.get(currentIndex), true);
-                                updateSyncUI();
+                                try {
+                                    syncTasks.setFinished(task, true);
+                                }
+                                catch(IndexOutOfBoundsException e){
+                                    // Do nothing, this task doesn't matter anymore
+                                }
+                                syncMeals_End();
                             }
                         }).execute(meal));
                     } else {// save/update meal in backend
@@ -493,8 +561,8 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                         meal.setUnchanged();
                         syncTasks.add(EndpointsHelper.mEndpoints.new SaveMealTask(new EndpointsHelper.TaskCompletionListener() {
                             @Override
-                            public void onTaskCompleted(Bundle b, boolean isCancelled) {
-                                if(!isCancelled) {
+                            public void onTaskCompleted(AsyncTask task, Bundle b) {
+                                if(!task.isCancelled()) {
                                     Meal meal = (Meal) b.getSerializable(EndpointsHelper.TASKID_MEAL_SAVE);
                                     Log.d("MealCalendarActivity", "SYNC SAVE RETURNED " + meal);
                                     if(meal != null) {
@@ -510,8 +578,13 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                                 else{
                                     Log.d("MealCalendarActivity", "SYNC SAVE CANCELLED");
                                 }
-                                syncTasks.setFinished(syncTasks.get(currentIndex), true);
-                                updateSyncUI();
+                                try {
+                                    syncTasks.setFinished(task, true);
+                                }
+                                catch(IndexOutOfBoundsException e){
+                                    // Do nothing, this task doesn't matter anymore
+                                }
+                                syncMeals_End();
                             }
                         }).execute(meal));
                     }
@@ -519,25 +592,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
             }
         }
 
-        updateSyncUI();
-    }
-
-    private void updateSyncUI(){
-        if(!isSyncing()){
-            adapter.setWarningsEnabled(true);
-            List<Meal> unsyncedMeals =  SQLQueryHelper.getChangedMeals();
-            if(!unsyncedMeals.isEmpty()) {
-                setWarningBarUIState(WarningBarUIState.WARNING);
-            }
-            else {
-                container_warning.setVisibility(View.GONE);
-                setWarningBarUIState(WarningBarUIState.HIDDEN);
-            }
-        }
-        else{
-            adapter.setWarningsEnabled(false);
-            setWarningBarUIState(WarningBarUIState.SYNCING);
-        }
+        syncMeals_End();
     }
 
     private void setWarningBarUIState(WarningBarUIState state){
@@ -592,10 +647,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                 dialog.show(getFragmentManager(), "Total Day");
                 break;}
             case R.id.button_total_week:{
-                loadMeals_Total(WEEK);
+                loadMeals_Total_Start(WEEK);
                 break;}
             case R.id.button_total_month:{
-                loadMeals_Total(MONTH);
+                loadMeals_Total_Start(MONTH);
                 break;}
             case R.id.imageButton_prev:{
                 GregorianCalendar cal = new GregorianCalendar();
@@ -679,7 +734,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         d.setPositiveButton("Sync", new AlertDialogFragment.OnClickListener() {
             @Override
             public void onClick(AlertDialogFragment dialog, int which) {
-                syncMeals();
+                syncMeals_Start();
             }
         });
         d.setNegativeButton("Cancel", null);
