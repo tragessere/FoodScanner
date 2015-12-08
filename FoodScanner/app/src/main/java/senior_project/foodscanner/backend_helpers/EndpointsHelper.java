@@ -162,7 +162,7 @@ public class EndpointsHelper
 
 			// Save results to density map
 			for (DensityEntry entry : results) {
-				//senior_project.foodscanner.FoodItem.addDensity(entry.getName(), (double) (entry.getDensity()));TODO uncomment
+				senior_project.foodscanner.FoodItem.addDensity(entry.getName(), (double) (entry.getDensity()));
 			}
 
 			// TODO: Save densities locally, in case a later query fails
@@ -218,9 +218,9 @@ public class EndpointsHelper
 			Meal meal = meals[0];
 			try {
 				BackendMeal backendMealToSave = convertToBackendMeal(meal);
-				Thread.sleep(10000);//BackendMeal savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();TODO
+				BackendMeal savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();
 				success = true;
-				//meal.setServerId(savedBackendMeal.getId());TODO
+				meal.setServerId(savedBackendMeal.getId());
 				return meal;
 			} catch (Exception e) {
 				if(!isCancelled()) {
@@ -266,7 +266,7 @@ public class EndpointsHelper
 		protected Meal doInBackground(Meal... meals) {
 			try {
 				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
-				Thread.sleep(10000);//mAPI.deleteMeal(backendMeal).execute();TODO
+				mAPI.deleteMeal(backendMeal).execute();
 				success = true;
 				return meals[0];
 			} catch (Exception e) {
@@ -317,8 +317,7 @@ public class EndpointsHelper
 			try {
 				Date startDate = dates[0];
 				Date endDate = dates[1];
-				Thread.sleep(10000);
-				List<BackendMeal> backendMeals = null;//mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();TODO
+				List<BackendMeal> backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
 				if(backendMeals == null) {
 					backendMeals = new ArrayList<>();
 				}
