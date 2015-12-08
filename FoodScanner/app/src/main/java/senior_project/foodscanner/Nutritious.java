@@ -54,7 +54,6 @@ public abstract class Nutritious {
                     isFirst = false;
                 }
                 s.append("<b>" + key + ": </b>");
-                s.append(Math.round(nutr.get(key)) + "<br>");
                 s.append(Math.round(nutr.get(key)));
                 if (key.equals("Sodium")) {
                     s.append(" mg");
