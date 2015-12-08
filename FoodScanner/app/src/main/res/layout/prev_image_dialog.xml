@@ -19,6 +19,7 @@
         android:layout_height="125dp"
         android:layout_marginTop="20dp"
         android:layout_marginLeft="30dp"
+        android:layout_marginBottom="5dp"
         android:layout_below="@+id/photoTitle"
         android:id="@+id/imageView_top"
         android:layout_alignParentLeft="true"
@@ -30,6 +31,7 @@
         android:layout_below="@+id/photoTitle"
         android:layout_marginTop="20dp"
         android:layout_marginRight="30dp"
+        android:layout_marginBottom="5dp"
         android:id="@+id/imageView_side"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
