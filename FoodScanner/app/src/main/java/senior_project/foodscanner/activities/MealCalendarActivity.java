@@ -77,7 +77,9 @@ import senior_project.foodscanner.ui.components.mealcalendar.MealArrayAdapter;
  *          Cancelled when another syn meals task is started.
  *          Cancelled when user goes to SettingsActivity, because syncing should not run if the user logs out.
  *      Old Meal Deletion:
- *          Whenever user
+ *          Whenever the "user session" ends, because old meals that have been downloaded will probably only be needed for that immediate session.
+ *          onDestroy() because that is when the app is killed (sometimes).
+ *          onCreate() just in case onDestroy() has not been called before.
  *
  *
  *  TODO Unhandled Edge Cases:
