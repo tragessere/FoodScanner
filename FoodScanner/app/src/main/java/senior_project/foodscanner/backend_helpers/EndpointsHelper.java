@@ -18,10 +18,8 @@ import com.google.api.client.util.DateTime;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.Meal;
