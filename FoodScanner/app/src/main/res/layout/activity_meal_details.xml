@@ -11,16 +11,21 @@
         android:layout_height="wrap_content"
         android:id="@+id/spinner_meal"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/button_addfood"
-        android:layout_toEndOf="@+id/button_addfood" />
+        android:layout_marginLeft="35dp"
+        android:layout_toEndOf="@+id/button_total_meal"
+        android:layout_alignLeft="@+id/button_finish"
+        android:layout_alignStart="@+id/button_finish" />
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="125dp"
         android:layout_height="wrap_content"
-        android:text="Add Food"
-        android:id="@+id/button_addfood"
+        android:text="Total"
+        android:id="@+id/button_total_meal"
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <ListView
         android:layout_width="wrap_content"
@@ -29,7 +34,34 @@
         android:layout_below="@+id/spinner_meal"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="4dp"
-        android:layout_above="@+id/button_addfood" />
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="15dp"
+        android:layout_above="@+id/button_total_meal"
+        android:background="@drawable/background_add_food" />
+
+    <Button
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:text="Finish"
+        android:id="@+id/button_finish"
+        android:layout_marginRight="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/food_list"
+        android:layout_alignEnd="@+id/food_list" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/Text.Primary"
+        android:text="Meal Date"
+        android:id="@+id/textView_date"
+        android:layout_alignParentTop="true"
+        android:layout_alignLeft="@+id/button_total_meal"
+        android:layout_alignStart="@+id/button_total_meal"
+        android:layout_alignBottom="@+id/spinner_meal"
+        android:layout_toLeftOf="@+id/spinner_meal"
+        android:layout_toStartOf="@+id/spinner_meal" />
 
 </RelativeLayout>
