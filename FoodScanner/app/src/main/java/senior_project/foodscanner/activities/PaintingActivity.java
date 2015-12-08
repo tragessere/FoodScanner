@@ -3,31 +3,26 @@
 
 package senior_project.foodscanner.activities;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.RectF;
-import android.provider.ContactsContract;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.Serializable;
 
 import senior_project.foodscanner.DrawView;
 import senior_project.foodscanner.PaintingView;
 import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.ui.components.ImageBrowser;
+import senior_project.foodscanner.ui.components.tutorial.TutorialBaseActivity;
+import senior_project.foodscanner.ui.components.tutorial.TutorialCard;
 
-public class PaintingActivity extends AppCompatActivity
+public class PaintingActivity extends TutorialBaseActivity
 {
     //region Variable Declaration
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
@@ -59,6 +54,16 @@ public class PaintingActivity extends AppCompatActivity
         setupUndoButton();
     }
 
+    @Override
+    public void setupTutorial() {
+        TutorialCard page1 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_card)).setHighlightPadding(-20);
+        TutorialCard page2 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_food)).setHighlightPadding(-20);
+        TutorialCard page3 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_second_picture)).setHighlightPadding(-20);
+
+        sequence.addCard(page1);
+        sequence.addCard(page2);
+        sequence.addCard(page3);
+    }
 
     private void setupRectangleButton()
    {
@@ -94,10 +99,11 @@ public class PaintingActivity extends AppCompatActivity
     }
 
     @Override
-    public void onBackPressed()
+    public boolean backButtonPressed()
     {
         PaintingView p = (PaintingView)findViewById(R.id.paintingView);
         p.undoLast();
+        return true;
     }
 
     //TODO: make sure to not allow user to press this button before they place 2 lines
@@ -126,25 +132,8 @@ public class PaintingActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu)
     {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_painting, menu);
+        getMenuInflater().inflate(R.menu.menu_tutorial, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
-        {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public Point setupDrawing()
