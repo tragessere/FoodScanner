@@ -45,6 +45,7 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
 
     // Data Management
     private long id;    //Database ID
+    private long serverId; // GAE ID
     private int isChanged = 1;// Flag that is incremented whenever meal details are changed. Must be manually set to 0 when meal is uploaded to backend.
     private boolean isDeleted = false;// Flag that is set to true when the Meal should be deleted from the backend
     private boolean isNew; // Flag determining whether or not the Meal was just created.
@@ -80,7 +81,10 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
     public long getId() {
         return id;
     }
-    
+
+    public void setServerId(long id) { this.serverId =  id; }
+    public long getServerId() { return serverId; }
+
     public void setType(MealType type) {
         if(!this.type.equals(type)) {
             this.type = type;

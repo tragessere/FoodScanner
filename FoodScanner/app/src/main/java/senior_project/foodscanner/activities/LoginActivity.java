@@ -114,28 +114,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 
 	public static void finishLogin(final AppCompatActivity activity, final GoogleAccountCredential credential, final View progressBar) {
-		progressBar.setVisibility(View.VISIBLE);
-
 		//Create endpoints helper singleton on login to set the user's credentials
 		EndpointsHelper helper = EndpointsHelper.initEndpoints(credential);
 		SQLHelper.initialize(activity);
 
 		Settings.initialize(activity);
 
-		//Example usage of an API call
-		helper.new ExampleTask(new EndpointsHelper.TaskCompletionListener() {
-			@Override
-			public void onTaskCompleted(Bundle b, boolean isCancelled) {
-				progressBar.setVisibility(View.GONE);
-				Toast.makeText(activity, b.getString("test", "failure"), Toast.LENGTH_SHORT).show();
-
-				Intent intent = new Intent(activity, MealCalendarActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				activity.startActivity(intent);
-				activity.finish();
-			}
-		}).execute();
-
+		Intent intent = new Intent(activity, MealCalendarActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		activity.startActivity(intent);
+		activity.finish();
 	}
 
 	public static void logout(final AppCompatActivity activity) {
