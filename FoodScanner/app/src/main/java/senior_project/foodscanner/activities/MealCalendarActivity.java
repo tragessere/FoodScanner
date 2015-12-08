@@ -18,7 +18,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -36,7 +39,6 @@ import senior_project.foodscanner.Nutritious;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
-import senior_project.foodscanner.database.SQLHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
 import senior_project.foodscanner.fragments.AlertDialogFragment;
 import senior_project.foodscanner.fragments.MessageDialogFragment;
@@ -82,6 +84,9 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private Button button_totalWeek;
     private Button button_totalMonth;
     private View container_warning;
+    private TextView textView_warning;
+    private ImageView imageView_warning;
+    private ProgressBar progressBar_syncing;
     private ListView mealListView;
     private View loadingIndicator;
 
@@ -91,6 +96,10 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     private ArrayList<Meal> meals = new ArrayList<>();
     private AsyncTaskList syncTasks = new AsyncTaskList();
     private AsyncTask loadTask;
+
+    private enum WarningBarUIState{
+        WARNING, SYNCING, HIDDEN;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +119,9 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         button_totalMonth = (Button) findViewById(R.id.button_total_month);
         mealListView = (ListView) findViewById(R.id.listView_meals);
         container_warning = findViewById(R.id.container_warning);
+        progressBar_syncing = (ProgressBar)container_warning.findViewById(R.id.progressBar_syncing);
+        imageView_warning = (ImageView)container_warning.findViewById(R.id.imageView_icon);
+        textView_warning = (TextView)container_warning.findViewById(R.id.textView);
 
         button_totalMonth.setText(MONTH + " Day");
         button_totalWeek.setText(WEEK + " Day");
@@ -161,15 +173,15 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         Log.d("MealCalendarActivity", "onSavedInstanceState()");
         saved.putLong(SAVE_DATE, currentDate);
         //TODO test this for proper behavior
-        cancelSyncing();
-        cancelLoading();
+        cancelSyncingTasks();
+        cancelLoadingTask();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.d("MealCalendarActivity", "onStart()");
-        loadMealsForUI();
+        loadMeals_Calendar_Start();
         syncMeals();
     }
 
@@ -286,34 +298,33 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void changeSelectedDay(long date, boolean loadMeals) {
-        cancelLoading();
+        loadMeals_Calendar_Cancel();
 
         currentDate = date;
         button_calendar.setText(Settings.getInstance().formatDate(date));
         if(loadMeals) {
-            loadMealsForUI();
+            loadMeals_Calendar_Start();
         }
     }
 
-    private void cancelLoading(){
+    private void cancelLoadingTask(){
         if(loadTask != null){
             if(!loadTask.isCancelled() && loadTask.getStatus() != AsyncTask.Status.FINISHED) {
                 boolean s = loadTask.cancel(true);
                 if(!s){
-                    Log.e("MealCalendarActivity", "Cancel load failed.");
+                    Log.e("MealCalendarActivity", "Cancel loading task failed. Status: "+loadTask.getStatus());
                 }
                 else{
-                    Log.d("MealCalendarActivity", "Cancel load success.");
+                    Log.d("MealCalendarActivity", "Cancel loading task success. Status: "+loadTask.getStatus());
                 }
             }
         }
     }
 
     private void loadMeals_Total(int days){
-        cancelLoading();
+        cancelLoadingTask();
 
         //TODO load dialog for total that is cancellable
-        //TODO store meals locally
 
         GregorianCalendar day1 = new GregorianCalendar();
         day1.setTimeInMillis(currentDate);
@@ -329,63 +340,30 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         MessageDialogFragment dialog = MessageDialogFragment.newInstance(Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)), Html.fromHtml(title), 0);
         dialog.show(getFragmentManager(), "Total");
 
-/*
-        loadTask = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
-            @Override
-            public void onTaskCompleted(Bundle b) {
-                Log.d("LOADING","BACKEND: RETURNED");
-                // save meals locally and add them to ui
-                Object[] mealsServer = (Object[]) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET);
-                if(mealsServer != null) {
-                    meals = new ArrayList<Meal>();
-                    for(Object obj:mealsServer){
-                        Meal meal = (Meal)obj;
-                        mea
-                        // get local meal
-                        // if local meal.isChanged
-                        //use local meal
-                        meal.setId(SQLQueryHelper.insertMeal(meal));
-                        adapter.add(meal);
-                    }
-
-                    // hide loading dialog
-                    // show dialog
-                }
-                else{
-                    // on fail
-                    // for each day
-                    // query local
-                    // if local no meals
-                    // error
-                    String message = "Unknown Reason";
-                    String title = "Error: Loading meals from server failed";
-                    int icon = R.drawable.ic_error_outline_black;
-                    Exception e = (Exception)b.getSerializable(EndpointsHelper.TASKID_MEALS_GET_EXCEPTION);
-                    if(e != null) {
-                        if(isConnectedToInternet()){
-                            message = "Network error.";
-                        }
-                        else{
-                            message = "You are not connected to the internet.";
-                        }
-                    }
-                    //TODO dialog or red bar?
-                    MessageDialogFragment.newInstance(message, title, icon).show(getFragmentManager(), "Server Load Fail");
-                }
-                loadingIndicator.setVisibility(View.GONE);
-                updateUI();
-                updateSyncWarnings();
-            }
-        }).execute(new Date(date), new Date(date));*/
+        // TODO download meals
+        //TODO store meals locally
+        //TODO hide loading dialog
+        //TODO display totals
+        //TODO handle loading dialog cancel
 
     }
 
-    private void loadMealsForUI() {
-        loadMealsForUI(currentDate);
+    private void loadMeals_Calendar_Finish(){
+        loadingIndicator.setVisibility(View.GONE);
+        updateUI();
     }
 
-    private void loadMealsForUI(long date) {
-        cancelLoading();
+    private void loadMeals_Calendar_Start() {
+        loadMeals_Calendar_Start(currentDate);
+    }
+
+    private void loadMeals_Calendar_Cancel(){
+        cancelLoadingTask();
+        loadMeals_Calendar_Finish();
+    }
+
+    private void loadMeals_Calendar_Start(long date) {
+        loadMeals_Calendar_Cancel();
 
         GregorianCalendar day1 = new GregorianCalendar();
         day1.setTimeInMillis(date);
@@ -398,59 +376,51 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         // load meals from local into ui
         Object[] meals = SQLQueryHelper.getMeals(day1, day2, true).toArray();
         if(meals.length > 0) {
-            Log.d("LOADING","LOCAL");
+            Log.d("MealCalendarActivity", "LOADING LOCAL");
             Arrays.sort(meals);
             for(Object meal : meals) {
                 adapter.add((Meal) meal);
             }
-            updateUI();
         }
         else{// no meals found locally, check the server
-            // TODO test successive calls
-            // TODO test no connection
-            Log.d("LOADING","BACKEND");
+            Log.d("MealCalendarActivity","LOADING BACKEND");
             loadingIndicator.setVisibility(View.VISIBLE);
             loadTask = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
                 @Override
                 public void onTaskCompleted(Bundle b, boolean isCancelled) {
-                    if(isCancelled){
-                        Log.d("LOADING","BACKEND: CANCELLED");
+                    if(isCancelled) {
+                        Log.d("MealCalendarActivity","LOADING BACKEND: CANCELLED");
                         return;
                     }
-                    Log.d("LOADING","BACKEND: RETURNED");
-                    //TODO save meals locally
+                    Log.d("MealCalendarActivity", "LOADING BACKEND: RETURNED");
                     // save meals locally and add them to ui
                     Object[] meals = (Object[]) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET);
                     if(meals != null) {
                         Arrays.sort(meals);
-                        for(Object obj:meals){
-                            Meal meal = (Meal)obj;
+                        for(Object obj : meals) {
+                            Meal meal = (Meal) obj;
                             meal.setId(SQLQueryHelper.insertMeal(meal));
                             adapter.add(meal);
                         }
-                    }
-                    else{
+                    } else {
                         String message = "Unknown Reason";
                         String title = "Error: Loading meals from server failed";
                         int icon = R.drawable.ic_error_outline_black;
-                        Exception e = (Exception)b.getSerializable(EndpointsHelper.TASKID_MEALS_GET_EXCEPTION);
+                        Exception e = (Exception) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET_EXCEPTION);
                         if(e != null) {
-                            if(isConnectedToInternet()){
+                            if(isConnectedToInternet()) {
                                 message = "Network error.";
-                            }
-                            else{
+                            } else {
                                 message = "You are not connected to the internet.";
                             }
                         }
-                        //TODO dialog or red bar?
                         MessageDialogFragment.newInstance(message, title, icon).show(getFragmentManager(), "Server Load Fail");
                     }
-                    loadingIndicator.setVisibility(View.GONE);
-                    updateUI();
-                    updateSyncWarnings();
+                    loadMeals_Calendar_Finish();
                 }
             }).execute(new Date(date), new Date(date));
         }
+        updateUI();
     }
 
     private boolean isConnectedToInternet(){
@@ -469,25 +439,23 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
         return false;
     }
 
-    private void cancelSyncing(){
+    private void cancelSyncingTasks(){
         // cancel all previous syncing tasks
         for(AsyncTask task:syncTasks){
             task.cancel(true);
         }
     }
+
     /**
      * Syncs meals with server.
      * Uploads changed meals, and deletes changed meals to be deleted.
      */
     private void syncMeals(){
         // TODO test deleting a nonuploaded meal
-        // TODO test multiple calls to syncing before finished
-        // TODO test no connection
         // TODO test what happens when activity changed
         // TODO test what happens to tasks when the app process is killed by the user or phone powers off
-        // TODO indicator for syncing in progress
-        Log.d("SYNCING", "START");
-        cancelSyncing();
+        Log.d("MealCalendarActivity", "SYNC START");
+        cancelSyncingTasks();
 
         List<Meal> unsyncedMeals = SQLQueryHelper.getChangedMeals();
         syncTasks.clear();
@@ -497,78 +465,104 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
                     final int currentIndex = unsyncedMeals.indexOf(meal);
                     if(meal.isDeleted()) {// delete meal from backend
                         //TODO java.lang.IllegalArgumentException: DELETE with non-zero content length is not supported
-                        /*Log.d("SYNCING", "DELETE " + meal);
+                        Log.d("MealCalendarActivity", "SYNC DELETE " + meal);
                         syncTasks.add(EndpointsHelper.mEndpoints.new DeleteMealTask(new EndpointsHelper.TaskCompletionListener() {
                             @Override
                             public void onTaskCompleted(Bundle b, boolean isCancelled) {
-                                if(isCancelled){
-                                    Log.d("SYNCING", "DELETE CANCELLED");
-                                    return;
-                                }
-                                Meal meal = (Meal) b.getSerializable(EndpointsHelper.TASKID_MEAL_DELETE);
-                                Log.d("SYNCING","DELETE: RETURNED "+meal);
-                                if(meal != null) {
-                                    if(b.getBoolean(EndpointsHelper.TASKID_MEAL_DELETE_SUCCESS, false)) {
-                                        // delete from local storage
-                                        SQLQueryHelper.deleteMeal(meal);
+                                if(!isCancelled) {
+                                    Meal meal = (Meal) b.getSerializable(EndpointsHelper.TASKID_MEAL_DELETE);
+                                    Log.d("MealCalendarActivity", "SYNC DELETE RETURNED " + meal);
+                                    if(meal != null) {
+                                        if(b.getBoolean(EndpointsHelper.TASKID_MEAL_DELETE_SUCCESS, false)) {
+                                            // delete from local storage
+                                            SQLQueryHelper.deleteMeal(meal);
+                                        }
                                     }
                                 }
+                                else{
+                                    Log.d("MealCalendarActivity", "SYNC DELETE CANCELLED");
+                                }
                                 syncTasks.setFinished(syncTasks.get(currentIndex), true);
-                                updateSyncWarnings();
+                                updateSyncUI();
                             }
-                        }).execute(meal));*/
+                        }).execute(meal));
                     } else {// save/update meal in backend
                         //TODO 400 Bad Request
-                        /*Log.d("SYNCING", "SAVE " + meal);
+                        Log.d("MealCalendarActivity", "SYNC SAVE " + meal);
                         final int changed = meal.isChangedCount();
                         meal.setUnchanged();
                         syncTasks.add(EndpointsHelper.mEndpoints.new SaveMealTask(new EndpointsHelper.TaskCompletionListener() {
                             @Override
                             public void onTaskCompleted(Bundle b, boolean isCancelled) {
-                                if(isCancelled){
-                                    Log.d("SYNCING", "SAVE CANCELLED");
-                                    return;
-                                }
-                                Meal meal = (Meal) b.getSerializable(EndpointsHelper.TASKID_MEAL_SAVE);
-                                Log.d("SYNCING","SAVE: RETURNED "+meal);
-                                if(meal != null) {
-                                    if(b.getBoolean(EndpointsHelper.TASKID_MEAL_SAVE_SUCCESS, false)) {
-                                        // update local storage
-                                        Meal localMeal = SQLQueryHelper.getMeal(meal.getId());
-                                        if(changed == localMeal.isChangedCount()){ // only update locally if it was not changed during syncing
-                                            SQLQueryHelper.updateMeal(meal);
+                                if(!isCancelled) {
+                                    Meal meal = (Meal) b.getSerializable(EndpointsHelper.TASKID_MEAL_SAVE);
+                                    Log.d("MealCalendarActivity", "SYNC SAVE RETURNED " + meal);
+                                    if(meal != null) {
+                                        if(b.getBoolean(EndpointsHelper.TASKID_MEAL_SAVE_SUCCESS, false)) {
+                                            // update local storage
+                                            Meal localMeal = SQLQueryHelper.getMeal(meal.getId());
+                                            if(changed == localMeal.isChangedCount()) { // only update locally if it was not changed during syncing
+                                                SQLQueryHelper.updateMeal(meal);
+                                            }
                                         }
                                     }
                                 }
+                                else{
+                                    Log.d("MealCalendarActivity", "SYNC SAVE CANCELLED");
+                                }
                                 syncTasks.setFinished(syncTasks.get(currentIndex), true);
-                                updateSyncWarnings();
+                                updateSyncUI();
                             }
-                        }).execute(meal));*/
+                        }).execute(meal));
                     }
                 }
             }
         }
 
-        updateSyncWarnings();
+        updateSyncUI();
     }
 
-    /**
-     * Enables or disables sync warnings depending on whether or not the app is syncing.
-     */
-    private void updateSyncWarnings(){
+    private void updateSyncUI(){
         if(!isSyncing()){
             adapter.setWarningsEnabled(true);
             List<Meal> unsyncedMeals =  SQLQueryHelper.getChangedMeals();
             if(!unsyncedMeals.isEmpty()) {
-                container_warning.setVisibility(View.VISIBLE);
+                setWarningBarUIState(WarningBarUIState.WARNING);
             }
             else {
                 container_warning.setVisibility(View.GONE);
+                setWarningBarUIState(WarningBarUIState.HIDDEN);
             }
         }
         else{
             adapter.setWarningsEnabled(false);
-            container_warning.setVisibility(View.GONE);
+            setWarningBarUIState(WarningBarUIState.SYNCING);
+        }
+    }
+
+    private void setWarningBarUIState(WarningBarUIState state){
+        switch(state){
+            case HIDDEN:
+                container_warning.setVisibility(View.GONE);
+                break;
+            case WARNING:
+                container_warning.setVisibility(View.VISIBLE);
+                container_warning.setBackgroundResource(R.color.Warning);
+                progressBar_syncing.setVisibility(View.GONE);
+                imageView_warning.setVisibility(View.VISIBLE);
+                textView_warning.setText("Meals are not synced with the server!");
+                container_warning.setEnabled(true);
+                break;
+            case SYNCING:
+                container_warning.setVisibility(View.VISIBLE);
+                container_warning.setBackgroundResource(R.color.Syncing);
+                imageView_warning.setVisibility(View.GONE);
+                progressBar_syncing.setVisibility(View.VISIBLE);
+                textView_warning.setText("Syncing meals with server...");
+                container_warning.setEnabled(false);
+                break;
+            default:
+                break;
         }
     }
 
@@ -586,7 +580,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
 
     @Override
-    public void onClick(View v) {//TODO totals with backend meals
+    public void onClick(View v) {
         switch(v.getId()) {
             case R.id.button_calendar:
                 CalendarDialogFragment d = CalendarDialogFragment.newInstance(currentDate);
@@ -736,10 +730,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
 
         public boolean isFinished(AsyncTask task){
             int i = indexOf(task);
-            if(syncTasks_Finished.get(i)){
-                return true;
-            }
-            return !task.isCancelled() && task.getStatus() != AsyncTask.Status.FINISHED;
+            return syncTasks_Finished.get(i) || task.getStatus() == AsyncTask.Status.FINISHED || task.isCancelled();
         }
 
         public void setFinished(AsyncTask task, boolean isFinished){
