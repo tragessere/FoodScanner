@@ -133,9 +133,6 @@ public class ImageBrowser extends FrameLayout implements View.OnClickListener {
         imgSwitcher = ((ImageSwitcher) browser.findViewById(R.id.imageSwitcher));
         imgSwitcher.addView(new ImageView(context), new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         imgSwitcher.addView(new ImageView(context), new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        //TODO animations
-       // imgSwitcher.setInAnimation(context, android.R.anim.slide_in_left);
-       // imgSwitcher.setOutAnimation(context, android.R.anim.slide_out_right);
     }
 
     private void setEnabledButton_Next(boolean enabled){

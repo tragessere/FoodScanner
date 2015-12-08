@@ -45,7 +45,9 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
 
     // Data Management
     private long id;    //Database ID
-    private boolean isChanged = true;// Flag that is set to false whenever meal details are changed. Must be manually set to false when meal is uploaded to backend.
+    private long serverId; // GAE ID
+    private int isChanged = 1;// Flag that is incremented whenever meal details are changed. Must be manually set to 0 when meal is uploaded to backend.
+    private boolean isDeleted = false;// Flag that is set to true when the Meal should be deleted from the backend
     private boolean isNew; // Flag determining whether or not the Meal was just created.
 
     // Meal Details
@@ -61,12 +63,13 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         setIsNew(true);
     }
 
-    public Meal(long id, long date, String type, ArrayList<FoodItem> foodItems,  boolean isNew, boolean isChanged) {
+    public Meal(long id, long date, String type, ArrayList<FoodItem> foodItems,  boolean isNew, int isChanged, boolean isDeleted) {
         this.id = id;
         this.date = date;
         this.type = MealType.valueOf(type);
         food = foodItems;
         this.isChanged = isChanged;
+        this.isDeleted = isDeleted;
         this.isNew = isNew;
         setIsNew(false);
     }
@@ -78,11 +81,14 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
     public long getId() {
         return id;
     }
-    
+
+    public void setServerId(long id) { this.serverId =  id; }
+    public long getServerId() { return serverId; }
+
     public void setType(MealType type) {
         if(!this.type.equals(type)) {
             this.type = type;
-            setIsChanged(true);
+            isChanged++;
         }
     }
 
@@ -109,13 +115,13 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         // Food item hasn't already been added
         item.calculateNutrition();
         food.add(item);
-        setIsChanged(true);
+        isChanged++;
         return true;
     }
 
     public void removeFoodItem(FoodItem item) {
         food.remove(item);
-        setIsChanged(true);
+        isChanged++;
     }
 
     public FoodItem getFoodItem(int index) {
@@ -131,7 +137,7 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         newFood.calculateNutrition();
         this.removeFoodItem(oldFood);
         this.addFoodItem(newFood);
-        setIsChanged(true);
+        isChanged++;
     }
 
     public boolean isNew() {
@@ -143,11 +149,27 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
     }
 
     public boolean isChanged() {
+        return isChanged > 0;
+    }
+
+    public int isChangedCount(){
         return isChanged;
     }
 
-    public void setIsChanged(boolean isChanged) {
-        this.isChanged = isChanged;
+    public void setUnchanged() {
+        isChanged = 0;
+        if(isDeleted) {
+            isChanged = 1;
+        }
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted() {
+        isChanged++;
+        isDeleted = true;
     }
 
     @Override
@@ -162,6 +184,7 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         cv.put(SQLHelper.COLUMN_FOOD_LIST, SQLQueryHelper.foodListToBytes(food));
         cv.put(SQLHelper.COLUMN_NEW, isNew);
         cv.put(SQLHelper.COLUMN_CHANGED, isChanged);
+        cv.put(SQLHelper.COLUMN_DELETED, isDeleted);
         return cv;
     }
 
