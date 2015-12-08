@@ -259,7 +259,7 @@ public class TutorialSequence implements SpringListener {
 		float radius = (float) Math.sqrt(
 				viewHalfWidth * viewHalfWidth +
 				viewHalfHeight * viewHalfHeight);
-		radius += currentPage.getHighlightPadding();
+		radius += currentPage.getHighlightPaddingPx();
 
 		viewCenter[1] -= parentTop;
 		background.enter(viewCenter, radius);
@@ -302,7 +302,7 @@ public class TutorialSequence implements SpringListener {
 			radius = (float) Math.sqrt(
 					screenWidth * screenWidth +
 					screenHeight * screenHeight);
-			radius += currentPage.getHighlightPadding();
+			radius += currentPage.getHighlightPaddingPx();
 		}
 
 		viewCenter[1] -= parentTop;
@@ -377,7 +377,7 @@ public class TutorialSequence implements SpringListener {
 				float radius = (float) Math.sqrt(
 						viewHalfWidth * viewHalfWidth +
 								viewHalfHeight * viewHalfHeight);
-				radius += currentPage.getHighlightPadding();
+				radius += currentPage.getHighlightPaddingPx();
 
 				viewCenter[1] -= parentTop;
 				background.move(viewCenter, radius);

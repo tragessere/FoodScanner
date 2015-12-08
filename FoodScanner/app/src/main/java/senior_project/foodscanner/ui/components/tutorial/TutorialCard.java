@@ -1,5 +1,7 @@
 package senior_project.foodscanner.ui.components.tutorial;
 
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
 import android.view.View;
 
 /**
@@ -107,6 +109,11 @@ public class TutorialCard {
 		return highlightPadding;
 	}
 
+	public int getHighlightPaddingPx() {
+		DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+		return (int) (highlightPadding * (metrics.densityDpi / 160f));
+	}
+
 	public TutorialCard setPosition(int position) {
 		if(!(position >= POSITION_DEFAULT && position <= POSITION_BOTTOM))
 			cardPosition = POSITION_DEFAULT;
@@ -127,6 +134,11 @@ public class TutorialCard {
 
 	public int getCardMargin() {
 		return cardMargin;
+	}
+
+	public int getCardMarginPx() {
+		DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+		return (int) (cardMargin * (metrics.densityDpi / 160f));
 	}
 
 }
