@@ -152,7 +152,11 @@ public class EndpointsHelper
 
 			// Save results to density map
 			for (DensityEntry entry : results) {
-				senior_project.foodscanner.FoodItem.addDensity(entry.getName(), (double) (entry.getDensity()));
+				if (entry.getDensity() != null) {
+					senior_project.foodscanner.FoodItem.addDensity(entry.getName(),
+							(double) (entry.getDensity()));
+				}
+				//senior_project.foodscanner.FoodItem.addDensity(entry.getName(), (double) (entry.getDensity()));
 			}
 
 			// TODO: Save densities locally, in case a later query fails

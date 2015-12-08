@@ -66,7 +66,7 @@ public class FoodInfoFragment extends DialogFragment {
         info.append("<b>Brand:</b>  ");
         info.append(food.getBrand());
 
-        if (isSaved && food.getNumServings() != 0) {
+        if (isSaved && food.getNumServings() != 0.0) {
             info.append("<br><b>Servings:</b> ");
             NumberFormat formatter = new DecimalFormat("#0.00");
             info.append(formatter.format(food.getNumServings()));
@@ -77,29 +77,51 @@ public class FoodInfoFragment extends DialogFragment {
         info.append(" ");
         info.append(food.getServingSizeUnit());
 
-        for (Map.Entry<String, Double> field : food.getSet()) {
-            info.append("<br><b>");
-            info.append(field.getKey());
-            info.append(":</b>  ");
-            info.append(field.getValue());
-            if (field.getKey() == "Sodium") {  //if additional fields added, add here if in mg
-                info.append(" mg");
-            } else {
-                info.append(" g");
+        NumberFormat formatter = new DecimalFormat("#0.0");
+
+        if (!isSaved || ((food.usesMass() || food.usesVolume()) && food.getVolume() == 0.0)) {
+            // Display uncalculated nutrition info
+            for (Map.Entry<String, Double> field : food.getSet()) {
+                info.append("<br><b>");
+                info.append(field.getKey());
+                info.append(":</b>  ");
+                info.append(formatter.format(field.getValue()));
+                if (field.getKey().equals("Sodium")) {  //if additional fields added, add here if in mg
+                    info.append(" mg");
+                } else if (!field.getKey().equals("Calories")) {
+                    info.append(" g");
+                }
+            }
+        } else {
+            // Display calculated nutrition info
+            Map<String, Double> calculatedNutr = food.getNutrition();
+            for (Map.Entry<String, Double> field : calculatedNutr.entrySet()) {
+                info.append("<br><b>");
+                info.append(field.getKey());
+                info.append(":</b>  ");
+                info.append(formatter.format(field.getValue()));
+                if (field.getKey().equals("Sodium")) {  //if additional fields added, add here if in mg
+                    info.append(" mg");
+                } else if (!field.getKey().equals("Calories")) {
+                    info.append(" g");
+                }
             }
         }
 
-        // TEMP?: Display mass & volume
+        NumberFormat formatterTwo = new DecimalFormat("#0.00");
+
+        // Display mass & volume
         if (food.usesVolume() && !food.usesMass() && food.getVolume() != 0.0) {
             info.append("<br><b>Volume:</b> ");
-            NumberFormat formatter = new DecimalFormat("#0.00");
-            info.append(formatter.format(food.getVolume()) + " " + food.getActualServingSizeUnit());
+            info.append(formatterTwo.format(food.getVolume()) + " " + food.getActualServingSizeUnit());
         } else if ((food.usesMass()) && food.getMass() != 0.0) {
             info.append("<br><b>Volume:</b> ");
-            NumberFormat formatter = new DecimalFormat("#0.00");
-            info.append(formatter.format(food.getVolume()) + " ml");
+            info.append(formatterTwo.format(food.getVolume()) + " ml");
             info.append("<br><b>Mass:</b> ");
             info.append(formatter.format(food.getMass()) + " " + food.getActualServingSizeUnit());
+        } else if ((food.usesMass() || food.usesVolume()) && isSaved) {
+            // Food has not yet been scanned, add message
+            info.append("<br><b><i>This needs to be scanned</b></i>");
         }
 
         Spanned nutritionInfo = Html.fromHtml(info.toString());
