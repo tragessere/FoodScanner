@@ -219,6 +219,7 @@ public class MealCalendarActivity extends AppCompatActivity implements View.OnCl
     protected void onPause() {
         super.onPause();
         Log.d("MealCalendarActivity", "onPause()");
+        loadMeals_Total_Cancel();
         loadMeals_Calendar_Cancel();
     }
 
