@@ -4,13 +4,15 @@ package com.example.backend.apis;
  * Created by mlenarto on 10/29/15.
  */
 import com.example.backend.Constants;
-import com.example.backend.model.Meal;
+import com.example.backend.model.BackendMeal;
 import com.example.backend.utils.AuthUtil;
 import com.google.api.server.spi.ServiceException;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.response.CollectionResponse;
+import com.google.api.server.spi.response.ConflictException;
+import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.appengine.api.users.User;
 import com.googlecode.objectify.cmd.Query;
@@ -42,34 +44,53 @@ import static com.example.backend.OfyService.ofy;
 public class MealEndpoint {
 
     @ApiMethod(name = "saveMeal")
-    public void saveMeal(Meal meal, User user) throws ServiceException {
+    public BackendMeal saveMeal(BackendMeal meal, User user) throws ServiceException {
         AuthUtil.throwIfNotAuthenticated(user);
-        ofy().save().entity(meal).now();
+
+        if (findBackendMeal(meal.getId()) != null) throw new ConflictException("Meal already exists.");
+
+        ofy().save().entity(meal).now();    //A synchronous save() will populate the generated id value on the entity instance
+        return meal;
+    }
+
+    @ApiMethod(name = "deleteMeal")
+    public void deleteMeal(BackendMeal meal, User user) throws ServiceException {
+        AuthUtil.throwIfNotAuthenticated(user);
+
+        if (findBackendMeal(meal.getId()) == null) throw new NotFoundException("Meal does not exist.");
+
+        BackendMeal backendMeal = ofy().load().type(BackendMeal.class).id(meal.getId()).now();
+        ofy().delete().entity(backendMeal).now();
+        //ofy().delete().entity(meal).now();
     }
 
     @ApiMethod(name = "getAllMeals")
-    public CollectionResponse<Meal> getAllMeals (User user) throws ServiceException {
-        Query<Meal> query = ofy().load().type(Meal.class);
-        List<Meal> results = new ArrayList<Meal>();
-        QueryResultIterator<Meal> iterator = query.iterator();
+    public CollectionResponse<BackendMeal> getAllMeals (User user) throws ServiceException {
+        Query<BackendMeal> query = ofy().load().type(BackendMeal.class);
+        List<BackendMeal> results = new ArrayList<BackendMeal>();
+        QueryResultIterator<BackendMeal> iterator = query.iterator();
 
         while (iterator.hasNext()) {
             results.add(iterator.next());
         }
 
-        return CollectionResponse.<Meal>builder().setItems(results).build();
+        return CollectionResponse.<BackendMeal>builder().setItems(results).build();
     }
 
     @ApiMethod(name = "getMealsWithinDates")
-    public CollectionResponse<Meal> getMealsWithinDates (@Named("startDate")Date startDate, @Named("endDate")Date endDate, User user) throws ServiceException {
-        Query<Meal> query = ofy().load().type(Meal.class).filter("date >=", startDate).filter("date <=", endDate);
-        List<Meal> results = new ArrayList<Meal>();
-        QueryResultIterator<Meal> iterator = query.iterator();
+    public CollectionResponse<BackendMeal> getMealsWithinDates (@Named("startDate")Date startDate, @Named("endDate")Date endDate, User user) throws ServiceException {
+        Query<BackendMeal> query = ofy().load().type(BackendMeal.class).filter("date >=", startDate).filter("date <=", endDate);
+        List<BackendMeal> results = new ArrayList<BackendMeal>();
+        QueryResultIterator<BackendMeal> iterator = query.iterator();
 
         while (iterator.hasNext()) {
             results.add(iterator.next());
         }
 
-        return CollectionResponse.<Meal>builder().setItems(results).build();
+        return CollectionResponse.<BackendMeal>builder().setItems(results).build();
+    }
+
+    private BackendMeal findBackendMeal(Long id) {
+        return ofy().load().type(BackendMeal.class).id(id).now();
     }
 }

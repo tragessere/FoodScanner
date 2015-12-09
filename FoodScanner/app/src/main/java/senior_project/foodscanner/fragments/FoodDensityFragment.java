@@ -12,7 +12,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.R;
@@ -26,15 +31,18 @@ public class FoodDensityFragment extends DialogFragment {
 
     public FoodItem food;
     private View view;
+    private Map<String, Double> matches;
+    private List<String> stringList;
 
-    public static FoodDensityFragment newInstance(FoodItem food) {
+    public static FoodDensityFragment newInstance(FoodItem food, Map<String, Double> matches) {
         FoodDensityFragment frag = new FoodDensityFragment();
         frag.food = food;
+        frag.matches = matches;
         return frag;
     }
 
     public interface FoodDensityDialogListener {
-        public void onDensityDialogPositiveClick(DialogFragment dialog);
+        public void onDensityDialogPositiveClick(DialogFragment dialog, String name, Double value);
         public void onDensityDialogNeutralClick(DialogFragment dialog);
     }
 
@@ -69,52 +77,29 @@ public class FoodDensityFragment extends DialogFragment {
 
         builder.setView(view)
                 // Add Density buttons
-                .setPositiveButton("Scan Food", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onDensityDialogPositiveClick(FoodDensityFragment.this);
-                    }
-                })
-                .setNeutralButton("Dismiss", new DialogInterface.OnClickListener() {
+                .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         mListener.onDensityDialogNeutralClick(FoodDensityFragment.this);
                     }
                 });
 
-        TextView densityTitle = (TextView) view.findViewById(R.id.densityTitle);
-        densityTitle.setText(Html.fromHtml("<b>Density Info</b>"));
 
-        final TextView densityValue = (TextView) view.findViewById(R.id.densityValue);
-        final TextView densityEntry = (TextView) view.findViewById(R.id.densityEntry);
-        final AutoCompleteTextView autoView = (AutoCompleteTextView)view.findViewById(R.id.densitySearch);
+        // Set up listview of density results
+        stringList = new ArrayList<>(matches.keySet());
+        ListView lv = (ListView) view.findViewById(R.id.listView_densities);  //this is null
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
+                getActivity().getApplicationContext(),
+                R.layout.list_layout,
+                R.id.foodListText,
+                stringList);
+        lv.setAdapter(arrayAdapter);
 
-        // If density not yet found, display default text for density
-        if (food.getDensity() == 0.0) {
-            densityValue.setText(Html.fromHtml("<b>Value:</b> Please search for entry."));
-            densityEntry.setText(Html.fromHtml("<b>Entry:</b> Please search for entry."));
-        } else {
-            densityValue.setText(Html.fromHtml("<b>Value:</b> " + food.getDensity() + " g/ml"));
-            densityEntry.setText(Html.fromHtml("<b>Entry:</b> " + food.getDensityName()));
-        }
-
-        // Set up AutoCompleteTextView for densities
-        String[] densityKeys = FoodItem.getDensityKeys();
-
-        final AutoCompleteTextView auto =(AutoCompleteTextView)view.findViewById(R.id.densitySearch);
-        ArrayAdapter adapter = new ArrayAdapter(getActivity(),android.R.layout.simple_list_item_1, densityKeys);
-        auto.setAdapter(adapter);
-        auto.setThreshold(1);
-        auto.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        // set up happens when you click a list item
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // User selected density entry to use for this FoodItem
-
-                String selectedEntry = auto.getText().toString();
-                food.setDensityName(selectedEntry);
-                food.setDensity(FoodItem.getDensityValue(selectedEntry));
-
-                // Update dialog
-                densityValue.setText(Html.fromHtml("<b>Value:</b> " + food.getDensity() + " g/ml"));
-                densityEntry.setText(Html.fromHtml("<b>Entry:</b> " + food.getDensityName()));
+                // Create FoodItem with the selected density
+                String name = stringList.get(position);
+                mListener.onDensityDialogPositiveClick(FoodDensityFragment.this, name, matches.get(name));
             }
         });
 

@@ -114,6 +114,13 @@
             android:textColor="@color/Text.Primary"
             android:text="@string/action_logout" />
 
+        <TextView
+            android:id="@+id/logout_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@color/Text.Secondary"/>
+
     </LinearLayout>
 
     <View

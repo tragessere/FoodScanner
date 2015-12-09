@@ -1,6 +1,7 @@
 package senior_project.foodscanner.ui.components.mealcalendar;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,10 @@ import senior_project.foodscanner.Meal;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
 
+/**
+ * Contains a list of meals plus a null meal to represent the add button.
+ * As a result, iEmpty() will never return true and getCount() will always be > 0.
+ */
 public class MealArrayAdapter extends ArrayAdapter<Meal> {
     private static final int layoutId = R.layout.list_layout_meal;
     private static final int textViewId = R.id.meal_text;
@@ -24,6 +29,7 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
     private static final int deleteButtonId = R.id.button_delete;
     private static final int warnButtonId = R.id.imageButton_warning;
     private MealArrayAdapterListener listener = null;
+    private boolean warningsEnabled = true;
 
     public MealArrayAdapter(Context context) {
         super(context, layoutId);
@@ -40,7 +46,7 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         final Meal meal = getItem(position);
 
         // view inflation
-        if(convertView == null) {
+        if(convertView == null || ((TextView)convertView.findViewById(textViewId)).getText().equals("+")) { // create new view if convertView is null or is the "add button"
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(layoutId, parent, false);
         }
@@ -49,13 +55,12 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
         final TextView text = (TextView) convertView.findViewById(textViewId);
         final TextView textNutr = (TextView) convertView.findViewById(textViewNutrId);
         if(meal != null) {
-            text.setGravity(Gravity.CENTER_VERTICAL);
             text.setText(mealString(meal));
             textNutr.setText(nutrString(meal));
-            textNutr.setVisibility(View.VISIBLE);
         } else {
             text.setGravity(Gravity.CENTER);
             text.setText("+");
+            text.setTextColor(getContext().getResources().getColor(R.color.Accent));
             textNutr.setVisibility(View.GONE);
         }
 
@@ -82,16 +87,24 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
             buttonDel.setVisibility(View.GONE);
             buttonWarn.setVisibility(View.GONE);
         } else {
-            buttonDel.setVisibility(View.VISIBLE);
-            if(meal.isChanged()){
+            if(meal.isChanged() && warningsEnabled) {
                 buttonWarn.setVisibility(View.VISIBLE);
-            }
-            else{
+            } else {
                 buttonWarn.setVisibility(View.GONE);
             }
         }
 
         return convertView;
+    }
+
+    public void setWarningsEnabled(boolean enabled){
+        Log.d("warns", ""+enabled);
+        warningsEnabled = enabled;
+        super.notifyDataSetChanged();
+    }
+
+    public boolean areWarningsEnabled(){
+        return warningsEnabled;
     }
 
     private String nutrString(Meal meal) {
@@ -104,7 +117,7 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
     }
 
     private String mealString(Meal meal) {
-        return Settings.getInstance().formatTime(meal) + " - " + meal.getType().getName();
+        return meal.getType().getName();
     }
 
     @Override
@@ -118,6 +131,11 @@ public class MealArrayAdapter extends ArrayAdapter<Meal> {
     public void clear() {
         super.clear();
         addAddItem();
+    }
+
+    @Override @Deprecated
+    public boolean isEmpty(){
+        return super.isEmpty();
     }
 
     public void setOnDeleteListener(MealArrayAdapterListener l) {

@@ -66,9 +66,10 @@ public class FoodInfoFragment extends DialogFragment {
         info.append("<b>Brand:</b>  ");
         info.append(food.getBrand());
 
-        if (isSaved) {
-            info.append("<br><b>Portions:</b> ");
-            info.append(food.getNumPortions());
+        if (isSaved && food.getNumServings() != 0.0) {
+            info.append("<br><b>Servings:</b> ");
+            NumberFormat formatter = new DecimalFormat("#0.00");
+            info.append(formatter.format(food.getNumServings()));
         }
 
         info.append("<br><b>Serving Size:</b>  ");
@@ -76,34 +77,51 @@ public class FoodInfoFragment extends DialogFragment {
         info.append(" ");
         info.append(food.getServingSizeUnit());
 
-        for (Map.Entry<String, Double> field : food.getSet()) {
-            info.append("<br><b>");
-            info.append(field.getKey());
-            info.append(":</b>  ");
-            info.append(field.getValue());
-            if (field.getKey() == "Sodium") {  //if additional fields added, add here if in mg
-                info.append(" mg");
-            } else {
-                info.append(" g");
+        NumberFormat formatter = new DecimalFormat("#0.0");
+
+        if (!isSaved || ((food.usesMass() || food.usesVolume()) && food.getVolume() == 0.0)) {
+            // Display uncalculated nutrition info
+            for (Map.Entry<String, Double> field : food.getSet()) {
+                info.append("<br><b>");
+                info.append(field.getKey());
+                info.append(":</b>  ");
+                info.append(formatter.format(field.getValue()));
+                if (field.getKey().equals("Sodium")) {  //if additional fields added, add here if in mg
+                    info.append(" mg");
+                } else if (!field.getKey().equals("Calories")) {
+                    info.append(" g");
+                }
+            }
+        } else {
+            // Display calculated nutrition info
+            Map<String, Double> calculatedNutr = food.getNutrition();
+            for (Map.Entry<String, Double> field : calculatedNutr.entrySet()) {
+                info.append("<br><b>");
+                info.append(field.getKey());
+                info.append(":</b>  ");
+                info.append(formatter.format(field.getValue()));
+                if (field.getKey().equals("Sodium")) {  //if additional fields added, add here if in mg
+                    info.append(" mg");
+                } else if (!field.getKey().equals("Calories")) {
+                    info.append(" g");
+                }
             }
         }
 
-        // TEMP: Display whether volume, mass, or neither need to be calculated.
-//        info.append("<br><b>Calculate:</b> ");
-//        if (food.needCalculateMass()) {
-//            info.append("mass");
-//        } else if(food.needCalculateVol()) {
-//            info.append("volume");
-//        } else {
-//            info.append("nothing");
-//        }
+        NumberFormat formatterTwo = new DecimalFormat("#0.00");
 
-        // TEMP: Display volume
-        if (food.needCalculateVol() && food.getVolume() != 0.0) {
+        // Display mass & volume
+        if (food.usesVolume() && !food.usesMass() && food.getVolume() != 0.0) {
             info.append("<br><b>Volume:</b> ");
-            NumberFormat formatter = new DecimalFormat("#0.00");
-            info.append(formatter.format(food.getVolume()) +
-                    " in<sup><small><small>2</small></small></sup>");
+            info.append(formatterTwo.format(food.getVolume()) + " " + food.getActualServingSizeUnit());
+        } else if ((food.usesMass()) && food.getMass() != 0.0) {
+            info.append("<br><b>Volume:</b> ");
+            info.append(formatterTwo.format(food.getVolume()) + " ml");
+            info.append("<br><b>Mass:</b> ");
+            info.append(formatterTwo.format(food.getMass()) + " " + food.getActualServingSizeUnit());
+        } else if ((food.usesMass() || food.usesVolume()) && isSaved) {
+            // Food has not yet been scanned, add message
+            info.append("<br><b><i>This needs to be scanned</b></i>");
         }
 
         Spanned nutritionInfo = Html.fromHtml(info.toString());
@@ -125,23 +143,46 @@ public class FoodInfoFragment extends DialogFragment {
                     });
         } else {
             // Dialog displayed after food item is added
-            builder.setTitle(food.getName())
-                    .setMessage(nutritionInfo)
-                    .setPositiveButton("Replace", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            mListener.onDialogPositiveClick(FoodInfoFragment.this);
-                        }
-                    })
-                    .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            mListener.onDialogNegativeClick(FoodInfoFragment.this);
-                        }
-                    })
-                    .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            mListener.onDialogNeutralClick(FoodInfoFragment.this);
-                        }
-                    });
+            // Two versions: (1) food uses mass or volume, (2) food has manual servings
+
+            if (food.usesMass() || food.usesVolume()) {
+                builder.setTitle(food.getName())
+                        .setMessage(nutritionInfo)
+                        .setPositiveButton("Scan", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogPositiveClick(FoodInfoFragment.this);
+                            }
+                        })
+                        .setNegativeButton("Replace", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogNegativeClick(FoodInfoFragment.this);
+                            }
+                        })
+                        .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogNeutralClick(FoodInfoFragment.this);
+                            }
+                        });
+            }
+            else {
+                builder.setTitle(food.getName())
+                        .setMessage(nutritionInfo)
+                        .setPositiveButton("Servings", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogPositiveClick(FoodInfoFragment.this);
+                            }
+                        })
+                        .setNegativeButton("Replace", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogNegativeClick(FoodInfoFragment.this);
+                            }
+                        })
+                        .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                mListener.onDialogNeutralClick(FoodInfoFragment.this);
+                            }
+                        });
+            }
         }
 
         // Create the AlertDialog object and return it

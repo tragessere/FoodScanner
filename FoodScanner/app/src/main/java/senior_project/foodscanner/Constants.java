@@ -25,6 +25,10 @@ public class Constants {
 	public static final String SETTINGS_DINNER_START_AUTO = "senior_project.foodscanner.settings_dinner_start_auto";
 	public static final String SETTINGS_DINNER_END_AUTO = "senior_project.foodscanner.settings_dinner_end_auto";
 
+	public static final int DENSITY_NOT_DOWNLOADED = 0;
+	public static final int DENSITY_DOWNLOADING = 1;
+	public static final int DENSITY_DOWNLOADED = 2;
+
 	public static final String DEFAULT_TIME_FORMAT = Settings.TimeFormat._12.toString();
 	public static final String DEFAULT_DATE_FORMAT = Settings.DateFormat.dw_mw_dn.toString();
 	public static final boolean DEFAULT_DATE_TYT = true;
@@ -39,5 +43,7 @@ public class Constants {
 	public static final int MILLIS_IN_DAY = 86400000;
 	public static final int MILLIS_IN_HOUR = 3600000;
 	public static final int MILLIS_IN_MIN = 60000;
+
+	public static final String LEGAL_LOGO_ATTRIBUTION_TEXT = "The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.";
 
 }

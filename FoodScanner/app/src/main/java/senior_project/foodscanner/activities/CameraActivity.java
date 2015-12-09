@@ -1,12 +1,15 @@
 package senior_project.foodscanner.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.Camera;
+import android.media.MediaActionSound;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -18,13 +21,16 @@ import android.view.Gravity;
 import android.view.Surface;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.Serializable;
 
 import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.ui.components.ErrorDialogFragment;
+import senior_project.foodscanner.fragments.ErrorDialogFragment;
 import senior_project.foodscanner.ui.components.camera.CameraView;
 
 /**
@@ -32,10 +38,13 @@ import senior_project.foodscanner.ui.components.camera.CameraView;
  * Must specify file name of the picture by putting a String extra in the Intent named EXTRA_FILENAME.
  * To get the resulting image file, get the extra named RESULT_IMAGE_FILE.
  */
-public class CameraActivity extends AppCompatActivity implements ErrorDialogFragment.ErrorDialogListener, View.OnClickListener, Camera.ShutterCallback, Camera.PictureCallback {
+public class CameraActivity extends AppCompatActivity implements ErrorDialogFragment.ErrorDialogListener, View.OnClickListener, Camera.ShutterCallback, Camera.PictureCallback, Camera.AutoFocusCallback {
 
     // Public fields
     public static final String EXTRA_FILENAME = "filename";
+    public static final String EXTRA_IMAGE_NAME = "image_name"; //optional String
+    public static final String EXTRA_IMAGE_DESCRIPTION = "image_desc"; //optional String
+    public static final String EXTRA_HELP_ACTOR = "help_actor"; //optional CameraActivity_HelpActor
     public static final String RESULT_IMAGE_FILE = "image_file";
 
     // Image file format
@@ -44,6 +53,7 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
 
     // Activity params
     private String filename;
+    private CameraActivity_HelpActor help_actor;
 
     // Private fields
     private static final int REQUEST_PERMISSION_CAMERA = 0;
@@ -51,11 +61,23 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     private int cameraId;
     private FrameLayout cameraContainer;
     private CameraView cameraView;
+    private TextView textView_Image_Title;
+    private TextView textView_Image_Desc;
+    private ImageButton button_takePicture;
+    private ImageButton button_help;
     private int shutterOrientation;
+    private MediaActionSound sound;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(Build.VERSION.SDK_INT >= 16) {
+            sound = new MediaActionSound();
+            sound.load(MediaActionSound.FOCUS_COMPLETE);
+        }
 
         if(getIntent().hasExtra(EXTRA_FILENAME)) {
             filename = getIntent().getStringExtra(EXTRA_FILENAME);
@@ -64,8 +86,36 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         }
 
         setContentView(R.layout.activity_camera);
+        textView_Image_Title = (TextView)findViewById(R.id.textView_image_title);
+        textView_Image_Desc = (TextView)findViewById(R.id.textView_image_count);
         cameraContainer = ((FrameLayout) findViewById(R.id.container_camera));
-        cameraContainer.findViewById(R.id.imageButton_takePicture).setOnClickListener(this);
+        button_help = ((ImageButton) findViewById(R.id.imageButton_help));
+        button_takePicture = (ImageButton)cameraContainer.findViewById(R.id.imageButton_takePicture);
+        button_takePicture.setOnClickListener(this);
+        button_help.setOnClickListener(this);
+        cameraContainer.setOnClickListener(this);
+
+        if(getIntent().hasExtra(EXTRA_IMAGE_NAME)) {
+            textView_Image_Title.setText(getIntent().getCharSequenceExtra(EXTRA_IMAGE_NAME));
+        }
+        else {
+            textView_Image_Title.setVisibility(View.GONE);
+        }
+
+        if(getIntent().hasExtra(EXTRA_IMAGE_DESCRIPTION)) {
+            textView_Image_Desc.setText(getIntent().getCharSequenceExtra(EXTRA_IMAGE_DESCRIPTION));
+        }
+        else {
+            textView_Image_Desc.setVisibility(View.GONE);
+        }
+
+        if(getIntent().hasExtra(EXTRA_HELP_ACTOR)) {
+            help_actor = (CameraActivity_HelpActor)getIntent().getSerializableExtra(EXTRA_HELP_ACTOR);
+        }
+        else {
+            button_help.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
@@ -102,6 +152,12 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
             case R.id.imageButton_takePicture:
                 takePicture();
                 break;
+            case R.id.imageButton_help:
+                help_actor.doHelpAction(this);
+                break;
+            case R.id.container_camera:
+                startFocus();
+                break;
             default:
                 ErrorDialogFragment.showErrorDialog(this, "Unhandled click action!");
                 break;
@@ -110,7 +166,14 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
 
     private void takePicture() {
         if(camera != null) {
+            button_takePicture.setEnabled(false);
             camera.takePicture(this, null, this);
+        }
+    }
+
+    private void startFocus(){
+        if(camera != null) {
+            camera.autoFocus(this);
         }
     }
 
@@ -119,15 +182,21 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         shutterOrientation = getScreenOrientation();
     }
 
+    @Override
+    public void onAutoFocus(boolean success, Camera camera) {
+        if(Build.VERSION.SDK_INT >= 16) {
+            sound.play(MediaActionSound.FOCUS_COMPLETE);
+        }
+    }
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
         try {
             if(data != null) {
+
                 // create bitmap from data bytes
                 Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
                 bmp = orientBitmap(bmp);
-                Log.d("TAKEN PIC", "size = " + bmp.getWidth() + "x" + bmp.getHeight());
 
                 // save to image directory
                 File imgF = new File(ImageDirectoryManager.getImageDirectory(this), filename + IMAGE_FORMAT_EXTENSION);
@@ -206,6 +275,7 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         if(camera != null) {
             setCameraOrientation();
             setPictureSizeToMin();
+            setFocusParams();
 
             // create camera view with optimal size
             if(cameraView != null) {
@@ -254,6 +324,12 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
             }
         }
         param.setPictureSize(size.width, size.height);
+        camera.setParameters(param);
+    }
+
+    private void setFocusParams(){
+        Camera.Parameters param = camera.getParameters();
+        param.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         camera.setParameters(param);
     }
 
@@ -387,6 +463,10 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
 
         params.setRotation(rPic);
         camera.setParameters(params);
+    }
+
+    public interface CameraActivity_HelpActor extends Serializable{
+        void doHelpAction(Activity activity);
     }
 
 }

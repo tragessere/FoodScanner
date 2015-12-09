@@ -1,6 +1,5 @@
 package senior_project.foodscanner.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,18 +8,17 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
 
 import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.ui.components.ErrorDialogFragment;
+import senior_project.foodscanner.fragments.ErrorDialogFragment;
 import senior_project.foodscanner.ui.components.ImageBrowser;
+import senior_project.foodscanner.ui.components.phototaker.FinishDialogFragment;
 
 /**
  * Activity for taking an X number of pictures.
@@ -46,7 +44,7 @@ import senior_project.foodscanner.ui.components.ImageBrowser;
  * -Cycle through pictures and take the rest of the pictures
  * -Finish button is enabled when all pictrues are taken
  */
-public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialogFragment.ErrorDialogListener, ImageBrowser.ActionButtonListener, ImageBrowser.FinishButtonListener {
+public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialogFragment.ErrorDialogListener, ImageBrowser.ImageBrowserListener, FinishDialogFragment.FinishDialogListener {
     public static final String EXTRA_PIC_NAMES = "pic_names";
     public static final String RESULT_IMAGE_FILES = "image_files";
     public static final String RESULT_VOLUME = "volume";
@@ -54,10 +52,22 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
     public static final int RESULT_FOOD_SCANNER = 1;
     private static final String SAVEINST_FILES = "picFiles";
     private static final String SAVEINST_INDEX = "current_index";
+    private static final String SAVEINST_FINISH_DIALOG = "finishDialogShown";
     private String[] picNames = {"Picture"};
     private ImageBrowser picBrowser;
     private File[] picFiles;
     private double volume;
+    private boolean finishDialogShown = false;
+
+    @Override
+    public void onFinishDialog_Review() {
+        picBrowser.setCurrentIndex(0);
+    }
+
+    @Override
+    public void onFinishDialog_Finish() {
+        onImageBrowserFinish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,15 +82,16 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
         Bitmap defbmp = BitmapFactory.decodeResource(getResources(), R.drawable.camera);
         Drawable defPic = new BitmapDrawable(getResources(), defbmp);
         picBrowser = new ImageBrowser(this, picNames, defPic);
-        picBrowser.setActionButtonListener(this);
-        picBrowser.setFinishButtonListener(this);
-        picBrowser.setActionButtonText("Take Picture");
+        picBrowser.setImageBrowserListener(this);
+        picBrowser.setActionButtonText("Retake Photo");
         picBrowser.setFinishButtonEnabled(false);
         ((FrameLayout) findViewById(R.id.container)).addView(picBrowser);
         picBrowser.setCurrentIndex(0);
 
 
         if(savedInstanceState != null) {
+            finishDialogShown = savedInstanceState.getBoolean(SAVEINST_FINISH_DIALOG);
+
             // restore pictures taken
             picFiles = (File[]) savedInstanceState.getSerializable(SAVEINST_FILES);
             for(int i = 0; i < picFiles.length; i++) {
@@ -98,23 +109,36 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
                 ErrorDialogFragment.showErrorDialog(this, "Clear image directory failed.");
             }
         }
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(picBrowser.getCurrentImage() == null) {
+            openCamera();
+        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putSerializable(SAVEINST_FILES, picFiles);
         savedInstanceState.putInt(SAVEINST_INDEX, picBrowser.getCurrentIndex());
+        savedInstanceState.putBoolean(SAVEINST_FINISH_DIALOG, finishDialogShown);
         super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
-    public void onActionButton() {
+    public void onImageBrowserAction() {
         openCamera();
     }
 
     @Override
-    public void onFinishButton() {
+    public void onImageBrowserIndexChanged(int oldIndex, int newIndex) {
+        // Nothing
+    }
+
+    @Override
+    public void onImageBrowserFinish() {
         //put the pic files as a return.
         Intent intent = new Intent();
         intent.putExtra(RESULT_IMAGE_FILES, picFiles);
@@ -151,6 +175,9 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
     private void openCamera() {
         Intent intent = new Intent(this, CameraActivity.class);
         intent.putExtra(CameraActivity.EXTRA_FILENAME, picBrowser.getCurrentImageName());
+        intent.putExtra(CameraActivity.EXTRA_IMAGE_NAME, picBrowser.getCurrentImageName());
+        intent.putExtra(CameraActivity.EXTRA_IMAGE_DESCRIPTION, (picBrowser.getCurrentIndex() + 1) + "/" + picBrowser.getNumImages());
+        //TODO Evan: put Extra CameraActivity.CameraActivity_HelpActor
         startActivityForResult(intent, RESULT_CAMERA);
     }
 
@@ -182,6 +209,19 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
                     if(!picBrowser.containsNullImage()) {
                         picBrowser.setFinishButtonEnabled(true);
                     }
+
+                    // automatically go to next image to take picture if next image is null
+                    int next = picBrowser.getNextIndex();
+                    if(next < picBrowser.getNumImages() && picBrowser.getImage(next) == null) {
+                        picBrowser.nextIndex();
+                    }
+                    else{
+                        if(!finishDialogShown){
+                            finishDialogShown = true;
+                            FinishDialogFragment d = new FinishDialogFragment();
+                            d.show(getFragmentManager(), "Finish Dialog");
+                        }
+                    }
                 }
                 break;
             case RESULT_FOOD_SCANNER:
@@ -192,10 +232,8 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
                     finish();
                 }
                 break;
-
             default:
                 break;
         }
     }
-
 }

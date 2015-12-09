@@ -19,20 +19,23 @@ import android.widget.Toast;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
 
+import java.util.List;
+
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
+import senior_project.foodscanner.TestingModeService;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
+import senior_project.foodscanner.fragments.MessageDialogFragment;
 
 /**
  * Created by Evan on 9/16/2015.
  */
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
 	private static final int REQUEST_ACCOUNT_PICKER = 2;
 	private static final int REQUEST_READ_CONTACTS = 3;
-    public static final String EXTRA_ACCOUNT_NAME = "account_name";
 
 	SharedPreferences prefs;
 	GoogleAccountCredential credential;
@@ -43,6 +46,9 @@ public class LoginActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		TestingModeService.init();
+
 		setContentView(R.layout.activity_login);
 
 		googleButton = (Button) findViewById(R.id.login_google_plus_button);
@@ -60,6 +66,12 @@ public class LoginActivity extends AppCompatActivity {
 		credential = GoogleAccountCredential.usingAudience(this.getApplicationContext(), "server:client_id:" + Constants.WEB_CLIENT_ID);
 		credential.setSelectedAccountName(prefs.getString(Constants.PREF_ACCOUNT_NAME, null));
 
+		if(credential.getSelectedAccountName() != null) {
+			//signed in. Finish activity and continue.
+			LoginActivity.finishLogin(this, credential, findViewById(R.id.loading));
+			return;
+		}
+
 		googleButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -73,6 +85,8 @@ public class LoginActivity extends AppCompatActivity {
 				//consumes touches
 			}
 		});
+
+		findViewById(R.id.imageView_logo).setOnClickListener(this);
 	}
 
 	private void setSelectedAccountName(String accountName) {
@@ -106,7 +120,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
 	public static void finishLogin(final AppCompatActivity activity, final GoogleAccountCredential credential, final View progressBar) {
-
 		//Create endpoints helper singleton on login to set the user's credentials
 		EndpointsHelper helper = EndpointsHelper.initEndpoints(credential);
 		SQLHelper.initialize(activity);
@@ -115,7 +128,6 @@ public class LoginActivity extends AppCompatActivity {
 
 		Intent intent = new Intent(activity, MealCalendarActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.putExtra(EXTRA_ACCOUNT_NAME, credential.getSelectedAccountName());
 		activity.startActivity(intent);
 		activity.finish();
 	}
@@ -139,7 +151,7 @@ public class LoginActivity extends AppCompatActivity {
 	}
 
 	private static void finishLogout(AppCompatActivity activity) {
-		SQLHelper.clear();
+		SQLHelper.clear(activity);
 		EndpointsHelper.clearInstance();
 		SharedPreferences.Editor editor = activity.getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE).edit();
 		editor.remove(Constants.PREF_ACCOUNT_NAME);
@@ -159,6 +171,14 @@ public class LoginActivity extends AppCompatActivity {
 					&& grantResults[0] != PackageManager.PERMISSION_GRANTED) {
 				//TODO: SHOW ERROR
 			}
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		if(v.getId() == R.id.imageView_logo) {
+			MessageDialogFragment dialog = MessageDialogFragment.newInstance(Constants.LEGAL_LOGO_ATTRIBUTION_TEXT, "FoodScanner Logo", R.drawable.ic_launcher);
+			dialog.show(getFragmentManager(), "Logo");
 		}
 	}
 

@@ -42,13 +42,24 @@ public abstract class Nutritious {
      * @return
      */
     public static CharSequence nutritionText(Map<String, Double> nutr) {
-        String s = "";
+        StringBuilder s = new StringBuilder();
         if(nutr != null && !nutr.isEmpty()) {
+            boolean isFirst = true;
             for(String key : nutr.keySet()) {
-                s += "<b>" + key + ": </b>";
-                s += nutr.get(key) + "<br>";
+                if (!isFirst) {
+                    s.append("<br>");
+                } else {
+                    isFirst = false;
+                }
+                s.append("<b>" + key + ": </b>");
+                s.append(Math.round(nutr.get(key)));
+                if (key.equals("Sodium")) {
+                    s.append(" mg");
+                } else if (!key.equals("Calories")) {
+                    s.append(" g");
+                }
             }
-            return Html.fromHtml(s);
+            return Html.fromHtml(s.toString());
         } else {
             return "No nutrition info to show.";
         }

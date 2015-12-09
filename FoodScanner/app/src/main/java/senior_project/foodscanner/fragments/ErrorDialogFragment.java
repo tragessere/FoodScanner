@@ -1,4 +1,4 @@
-package senior_project.foodscanner.ui.components;
+package senior_project.foodscanner.fragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -39,7 +39,6 @@ public class ErrorDialogFragment extends DialogFragment {
             }
         });
         return builder.create();
-
     }
 
     public interface ErrorDialogListener {

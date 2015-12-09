@@ -30,6 +30,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import senior_project.foodscanner.FoodItem;
@@ -40,9 +41,13 @@ import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
 //import com.example.backend.foodScannerBackendAPI.model.FoodItem;
 
 import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import senior_project.foodscanner.backend_helpers.EndpointBuilderHelper;
+import senior_project.foodscanner.fragments.FoodDensityFragment;
 import senior_project.foodscanner.fragments.FoodInfoFragment;
+import senior_project.foodscanner.fragments.FoodServingFragment;
 
 /**
  * Activity for manually adding a food item.
@@ -57,7 +62,8 @@ import senior_project.foodscanner.fragments.FoodInfoFragment;
  *  Ok - return to Meal Details with new food item added
  */
 public class FoodItemActivity extends AppCompatActivity implements View.OnClickListener,
-        FoodInfoFragment.FoodInfoDialogListener {
+        FoodInfoFragment.FoodInfoDialogListener, FoodServingFragment.FoodServingDialogListener,
+        FoodDensityFragment.FoodDensityDialogListener {
 
     private Meal meal;
     private FoodItem replacedFood = null;
@@ -68,6 +74,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        replacedFood = null;
         meal = (Meal) getIntent().getSerializableExtra("meal");
         int requestCode = getIntent().getIntExtra("requestCode", 0);  //0 is arbitrary
         if (requestCode == REPLACE_FOOD_ITEM) {
@@ -141,20 +148,42 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
         FoodInfoFragment frag = (FoodInfoFragment)dialog;
 
         if (replacedFood == null) {
-            // Add food item to meal
-            meal.addFoodItem(frag.food);
-            displayToast("Added to meal.", this);
+            // First prompt for density or servings
+            if (frag.food.usesMass()) {
+                if (FoodItem.getAllDensities() == null) {
+                    displayToast("Error: Cannot access densities.", this);
+                    return;
+                }
+                findDensityMatches(frag.food);
+            } else if (!frag.food.usesVolume()) {
+                DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food);
+                servingsDialog.show(getFragmentManager(), "FoodServingFragment");
+            } else {
+                // Only uses volume, nothing else needed
+                meal.addFoodItem(frag.food);
+                displayToast("Added to meal.", this);
+                saveAndFinish();
+            }
+
         } else {
             // Replace previously added food item
-            meal.replaceFoodItem(replacedFood, frag.food);
-            displayToast("Replaced food item.", this);
+            if (frag.food.usesMass()) {
+                if (FoodItem.getAllDensities() == null) {
+                    displayToast("Error: Cannot access densities.", this);
+                    return;
+                }
+                findDensityMatches(frag.food);
+            } else if (!frag.food.usesVolume()) {
+                DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food);
+                servingsDialog.show(getFragmentManager(), "FoodServingFragment");
+            } else {
+                // Only uses volume, nothing else needed
+                meal.replaceFoodItem(replacedFood, frag.food);
+                displayToast("Replaced food item.", this);
+                saveAndFinish();
+            }
         }
 
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra("meal", meal);
-        setResult(Activity.RESULT_OK, resultIntent);
-
-        finish();
     }
 
     @Override
@@ -178,6 +207,87 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
                 butteredToast.show();
             }
         });
+    }
+
+    @Override
+    public void onServingDialogNeutralClick(DialogFragment dialog) {
+        // Do nothing
+    }
+
+    @Override
+    public void onServingDialogPositiveClick(DialogFragment dialog) {
+        // Clicked "Save" in servings dialog. Add the food to meal.
+        FoodServingFragment frag = (FoodServingFragment) dialog;
+        if (replacedFood == null) {
+            meal.addFoodItem(frag.food);
+            displayToast("Added to meal.", this);
+            saveAndFinish();
+        } else {
+            meal.replaceFoodItem(replacedFood, frag.food);
+            displayToast("Replaced food item.", this);
+            saveAndFinish();
+        }
+    }
+
+    private void saveAndFinish() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("meal", meal);
+        setResult(Activity.RESULT_OK, resultIntent);
+
+        finish();
+    }
+
+    private void findDensityMatches(FoodItem food) {
+        new getDensityPartialMatches(this, food).execute();
+    }
+
+    public void findDensityMatchesCallback(Map<String, Double> matches, FoodItem food) {
+        if (matches.size() == 0) {
+            displayToast("Error: No density matches found.", this);
+        } else if (matches.size() == 1) {
+            // Only one match found, add it automatically
+            Map.Entry<String, Double> entry = matches.entrySet().iterator().next();
+            food.setDensity(entry.getValue());
+            food.setDensityName(entry.getKey());
+            if (replacedFood == null) {
+                meal.addFoodItem(food);
+                displayToast("Added to meal.", this);
+                saveAndFinish();
+            } else {
+                meal.replaceFoodItem(replacedFood, food);
+                displayToast("Replaced food item.", this);
+                saveAndFinish();
+            }
+        } else {
+            // Multiple matches. Display dialog list to allow user to pick
+            displayToast("Multiple densities found.", this);
+            DialogFragment dialog = FoodDensityFragment.newInstance(food, matches);
+            dialog.show(getFragmentManager(), "FoodDensityFragment");
+        }
+    }
+
+    // This is for the density dialog, if mulitple matches
+    @Override
+    public void onDensityDialogPositiveClick(DialogFragment dialog, String name, Double value) {
+        // User chose a density item for the food item. Save the food item.
+        FoodDensityFragment frag = (FoodDensityFragment)dialog;
+        frag.food.setDensity(value);
+        frag.food.setDensityName(name);
+        if (replacedFood == null) {
+            meal.addFoodItem(frag.food);
+            displayToast("Added to meal.", this);
+            saveAndFinish();
+        } else {
+            meal.replaceFoodItem(replacedFood, frag.food);
+            displayToast("Replaced food item.", this);
+            saveAndFinish();
+        }
+    }
+
+    // This is for the density dialog, if mulitple matches
+    @Override
+    public void onDensityDialogNeutralClick(DialogFragment dialog) {
+        // User chose "cancel"; do nothing
     }
 
     private class FoodSearch extends AsyncTask<String, Void, Boolean> {
@@ -580,6 +690,56 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
             }
             reader.endObject();
             return food;
+        }
+    }
+
+    private class getDensityPartialMatches extends AsyncTask<Void, Void, Map<String, Double>> {
+
+        private Activity act;
+        private FoodItem food;
+        private ProgressDialog dialog;
+
+        getDensityPartialMatches(Activity act, FoodItem food) {
+            this.act = act;
+            this.food = food;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog = new ProgressDialog(act);
+            dialog.setMessage("Loading...");
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(Map<String, Double> results) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+            findDensityMatchesCallback(results, food);
+        }
+
+        @Override
+        protected Map<String, Double> doInBackground(Void... params) {
+            Map<String, Double> results = new HashMap<>();
+
+            for (Map.Entry<String, Double> entry : FoodItem.getAllDensities().entrySet()) {
+                String[] words = food.getName().split("\\s+");
+                for (String word : words) {
+                    //boolean contains = entry.getKey().toLowerCase().matches(".*\\b" + word.toLowerCase() + "\\b.*");
+                    String cleanedWord = word.replaceAll("[^\\w]", "");
+                    if (cleanedWord.equals("")) {
+                        continue;
+                    }
+                    boolean contains = entry.getKey().toLowerCase().matches(".*\\b" + cleanedWord.toLowerCase() + "\\b.*");
+                    if (contains) {
+                        results.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+
+            return results;
         }
     }
 }
