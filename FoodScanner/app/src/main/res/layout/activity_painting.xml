@@ -58,4 +58,18 @@
         android:layout_alignRight="@+id/paintingView"
         android:layout_alignEnd="@+id/paintingView" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/top_label"
+        android:id="@+id/pictureLabel"
+        android:visibility="visible"
+        android:background="#9665d5ff"
+        android:autoText="false"
+        android:textSize="30dp"
+        android:layout_below="@+id/pixelButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
 </RelativeLayout>

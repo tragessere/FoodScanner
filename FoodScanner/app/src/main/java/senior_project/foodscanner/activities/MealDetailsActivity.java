@@ -217,9 +217,11 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.button_foodscanner) {
-//            Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
-//            intent.putExtra("pic_names", new String[]{"Top", "Side"});
-//            startActivityForResult(intent, REQUEST_FOODSCANNER);
+            //uncommented
+            Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
+            intent.putExtra("pic_names", new String[]{"Top", "Side"});
+            startActivityForResult(intent, REQUEST_FOODSCANNER);
+            //uncommented
             Toast butteredToast = Toast.makeText(getApplicationContext(), "Please choose food item first.",
                     Toast.LENGTH_SHORT);
             butteredToast.show();

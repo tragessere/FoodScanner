@@ -53,8 +53,14 @@ public class ColorBall
     public void setX(int x) {
         point.x = x;
     }
+    public void setX(double x) {
+        point.x = (int)x;
+    }
 
     public void setY(int y) {
         point.y = y;
+    }
+    public void setY(double y) {
+        point.y = (int)y;
     }
 }
