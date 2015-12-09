@@ -100,7 +100,7 @@
     <string name="tutorial_camera_card">For each photo, place some type of card at next to your food in the picture. This card should be the same size as a standard banking card (eg. credit card, driver\'s license, etc.)</string>
     <string name="tutorial_painting_title">Marking Food Location</string>
     <string name="tutorial_painting_card">First drag and resize the green square to outline the card you put next to your food.</string>
-    <string name="tutorial_painting_food">Next draw a "+" across the center of your food. Make sure the "+" spans the entire height and width of your food.</string>
+    <string name="tutorial_painting_food">Next draw a \"+\" across the center of your food. Make sure the \"+\" spans the entire height and width of your food.</string>
     <string name="tutorial_painting_second_picture">For the second picture, repeat the step for marking the card. Then draw a single vertical line across the center of the food.</string>
 
 </resources>
