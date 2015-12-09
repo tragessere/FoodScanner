@@ -33,7 +33,7 @@
     <string name="erase">Erase</string>
     <string name="save">Save</string>
     <string name="paint">Paint</string>
-    <string name="pixelButton">Get Pixels</string>
+    <string name="pixelButton">Done</string>
     <string name="rectangleButton">Done</string>
     <string name="undoButton">Undo</string>
     <string name="title_activity_food_adder">Add Food</string>
@@ -65,6 +65,9 @@
 
     <string name="nutritionix_api_id">4d784f94</string>
     <string name="nutritionix_api_key">a3e15aa81cdbe791ad05625dcc3d417a</string>
+
+    <string name="top_label">Top</string>
+    <string name="side_label">Side</string>
 
     <string-array name="meal_list">
         <item>Breakfast</item>
