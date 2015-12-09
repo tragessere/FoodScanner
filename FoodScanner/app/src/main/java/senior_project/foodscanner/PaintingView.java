@@ -134,7 +134,7 @@ public class PaintingView extends View
         drawPath = new Path();
         drawPath.setFillType(Path.FillType.EVEN_ODD);
         drawPaint = new Paint();
-        drawPaint.setColor(paintColor);
+        drawPaint.setColor(Color.parseColor("#ff8f4f"));
         drawPaint.setStyle(Paint.Style.FILL);
         drawCanvas = new Canvas();
         drawPaint.setAntiAlias(false);
@@ -153,6 +153,11 @@ public class PaintingView extends View
 
         setCurrentEndpoints(clone(getCurrentPointHistory().get(getCurrentPointHistory().size() - 2)));
         getCurrentPointHistory().remove(getCurrentPointHistory().size() - 1);
+
+        if(getCurrentEndpoints().equals(endpoints1)) {
+            //((PaintingActivity)getContext()).getActionBar().setTitle("Draw Lines A & B");
+            ((PaintingActivity)getContext()).getSupportActionBar().setTitle("Draw Lines A & B");
+        }
 
         for(Point p : getCurrentEndpoints())
             if(p.x == 0 || p.y == 0) {

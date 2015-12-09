@@ -139,7 +139,7 @@ public class DrawView extends View
 
         rectPaint.setAntiAlias(true);
         rectPaint.setDither(true);
-        rectPaint.setColor(Color.GREEN);
+        rectPaint.setColor(Color.parseColor("#ff8f4f"));
         rectPaint.setStyle(Paint.Style.STROKE);
         rectPaint.setStrokeJoin(Paint.Join.ROUND);
         rectPaint.setStrokeWidth(5);
