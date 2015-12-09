@@ -17,6 +17,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.R;
 
@@ -77,7 +80,8 @@ public class FoodServingFragment extends DialogFragment {
         if (food.getNumServings() == 0.0) {
             servingEntry.setHint("N/A");
         } else {
-            servingEntry.setText("" + food.getNumServings());
+            NumberFormat formatter = new DecimalFormat("#0.00");
+            servingEntry.setText(formatter.format(food.getNumServings()));
         }
 
         // Set up buttons
@@ -100,9 +104,6 @@ public class FoodServingFragment extends DialogFragment {
 
                         food.setNumServings(numServings);
                         mListener.onServingDialogPositiveClick(FoodServingFragment.this);
-//                        Toast butteredToast = Toast.makeText(getActivity(),
-//                                "Saved servings.", Toast.LENGTH_SHORT);
-//                        butteredToast.show();
                     }
                 })
                 .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
@@ -125,8 +126,14 @@ public class FoodServingFragment extends DialogFragment {
 
         // Set up serving size reminder
         TextView servingSize = (TextView) view.findViewById(R.id.food_serving);
-        servingSize.setText(Html.fromHtml("<b>Size:</b> " + Math.round(food.getServingSize())
-                + " " + food.getServingSizeUnit()));
+        if (food.usesMass() || food.usesVolume()) {
+            NumberFormat formatter = new DecimalFormat("#0.00");
+            servingSize.setText(Html.fromHtml("<b>Size:</b> " + formatter.format(food.getServingSize())
+                    + " " + food.getServingSizeUnit()));
+        } else {
+            servingSize.setText(Html.fromHtml("<b>Size:</b> " + Math.round(food.getServingSize())
+                    + " " + food.getServingSizeUnit()));
+        }
 
         // Open keyboard automatically
         EditText editServings = (EditText) view.findViewById(R.id.servingEntry);

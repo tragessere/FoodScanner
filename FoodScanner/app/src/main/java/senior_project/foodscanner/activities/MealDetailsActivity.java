@@ -213,16 +213,17 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
             }
         });
 
-//        // Set up what happens when you long click a list item
-//        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-//            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-//                //View nutrition info & give option to replace or delete
-//                FoodItem food = meal.getFoodItem(position);
-//                DialogFragment dialog = FoodInfoFragment.newInstance(food, true);
-//                dialog.show(getFragmentManager(), "FoodInfoFragment");
-//                return true;
-//            }
-//        });
+        // Set up what happens when you long click a list item
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                // Bring up servings dialog, regardless if usesMass or usesVolume
+                lastClickedFood = meal.getFoodItem(position);
+                FoodItem food = meal.getFoodItem(position);
+                DialogFragment servingsDialog = FoodServingFragment.newInstance(food, true);
+                servingsDialog.show(getFragmentManager(), "FoodServingFragment");
+                return true;
+            }
+        });
 
     }
 
@@ -272,7 +273,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
             if (foodList.size() == 1) {
                 FoodItem onlyFood = foodList.get(0);
-                if ((onlyFood.usesVolume() || onlyFood.usesMass()) && onlyFood.getVolume() == 0.0) {
+                if ((onlyFood.usesVolume() || onlyFood.usesMass()) && onlyFood.getVolume() == 0.0 && onlyFood.getNumServings() == 0.0) {
                     Toast butteredToast = Toast.makeText(this,
                             "Scan food item first.", Toast.LENGTH_SHORT);
                     butteredToast.setGravity(Gravity.CENTER, 0, 0);
@@ -440,8 +441,9 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
         // Create confirmation dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Are you sure you want to delete \"" + removedFood.getName() + " (" +
-                removedFood.getBrand() + ")\"?")
+        String messageStr = "Are you sure you want to delete <b>" + removedFood.getName() + " (" +
+                removedFood.getBrand() + ")</b>?";
+        builder.setMessage(Html.fromHtml(messageStr))
                 .setTitle("Confirm Food Deletion");
         builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
