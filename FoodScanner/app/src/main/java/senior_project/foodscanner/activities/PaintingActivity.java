@@ -54,8 +54,11 @@ public class PaintingActivity extends AppCompatActivity
 
         pictureLabel = (TextView)findViewById(R.id.pictureLabel);
 
-        //getActionBar().setTitle("Outline Card");
-        getSupportActionBar().setTitle("Outline Card");
+        if(getActionBar() != null)
+            getActionBar().setTitle("Outline Card");
+
+        if(getSupportActionBar() != null)
+            getSupportActionBar().setTitle("Outline Card");
 
         p = (PaintingView)findViewById(R.id.paintingView);
         metrics = getApplicationContext().getResources().getDisplayMetrics();
@@ -88,8 +91,11 @@ public class PaintingActivity extends AppCompatActivity
                    findViewById(R.id.rectangleView).setVisibility(View.INVISIBLE);
                    findViewById(R.id.paintingView).setVisibility(View.VISIBLE);
 
-                   //getActionBar().setTitle("Draw Lines A & B");
-                   getSupportActionBar().setTitle("Draw Lines A & B");
+                   if(getActionBar() != null)
+                    getActionBar().setTitle("Draw Lines A & B");
+
+                   if(getSupportActionBar() != null)
+                    getSupportActionBar().setTitle("Draw Lines A & B");
 
                    pixelsPerInch2 = rectangle.height() / CREDIT_CARD_HEIGHT;
                    //Toast.makeText(PaintingActivity.this, "Rectangle Height: " + rectangle.height() + " Rectangle Width: " + rectangle.width() + "\nPixels Per Inch: " + Math.min(rectangle.height(), rectangle.width()) / 2.125, Toast.LENGTH_LONG).show();
@@ -118,9 +124,11 @@ public class PaintingActivity extends AppCompatActivity
                 //have not finished drawing lines,  go to the next view
                 if (p.getLine3().getLength() == 0) {
                     p.nextPerspective();
-                    //getActionBar().setTitle("Draw Line C");
+                    if(getActionBar() != null)
+                        getActionBar().setTitle("Draw Line C");
                     getPixelsButton.setVisibility(View.INVISIBLE);
-                    getSupportActionBar().setTitle("Draw Line C");
+                    if(getSupportActionBar() != null)
+                        getSupportActionBar().setTitle("Draw Line C");
                     return;
                 }
 
@@ -132,7 +140,7 @@ public class PaintingActivity extends AppCompatActivity
 
                     volume = 4.0 / 3.0 * Math.PI * a / 2.0 * b / 2.0 * c / 2.0;
 
-                    //Toast.makeText(PaintingActivity.this, "a: " + a + " b: " + b + " c: " + c + " Approximate Volume: " + volume, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PaintingActivity.this, "Scan successful.", Toast.LENGTH_SHORT).show();
                     Intent volumeReturn = new Intent();
                     volumeReturn.putExtra(PhotoTakerActivity.RESULT_VOLUME, volume);
                     setResult(RESULT_OK, volumeReturn);

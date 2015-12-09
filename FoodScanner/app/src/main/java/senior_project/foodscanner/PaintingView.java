@@ -155,8 +155,10 @@ public class PaintingView extends View
         getCurrentPointHistory().remove(getCurrentPointHistory().size() - 1);
 
         if(getCurrentEndpoints().equals(endpoints1)) {
-            //((PaintingActivity)getContext()).getActionBar().setTitle("Draw Lines A & B");
-            ((PaintingActivity)getContext()).getSupportActionBar().setTitle("Draw Lines A & B");
+            if(((PaintingActivity)getContext()).getActionBar() != null)
+                ((PaintingActivity)getContext()).getActionBar().setTitle("Draw Lines A & B");
+            if(((PaintingActivity)getContext()).getSupportActionBar() != null)
+                ((PaintingActivity)getContext()).getSupportActionBar().setTitle("Draw Lines A & B");
         }
 
         for(Point p : getCurrentEndpoints())
