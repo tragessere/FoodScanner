@@ -83,6 +83,8 @@
     <string name="tutorial_calendar_calendar_button_description">Pick a day from the calendar to view your meals from that day.</string>
     <string name="tutorial_calendar_calories_button_title">View Nutrition Stats</string>
     <string name="tutorial_calendar_calories_button_description">See your nutrition information over the last 30 days, 7 days, or just today.</string>
+    <string name="tutorial_meal_details_type_title">Meal Type</string>
+    <string name="tutorial_meal_details_type">Here you can choose which meal you are eating. The default choice is based on the time of day. (You can change the default meal times in the settings page.)</string>
     <string name="tutorial_meal_details_title">Meal Details</string>
     <string name="tutorial_meal_details_list">This list shows all the kinds of food that you have added to this meal. A warning icon next to the food\'s name means that it still needs to be scanned. Tapping an item will bring up more information and some options.</string>
     <string name="tutorial_meal_details_scan_title">Scan</string>
@@ -91,6 +93,8 @@
     <string name="tutorial_meal_details_servings">Not all food needs to be scanned. Most foods that come in a container ready to eat will simply need to have the serving count entered in.</string>
     <string name="tutorial_meal_details_replace_title">Replace</string>
     <string name="tutorial_meal_details_replace">If you\'ve already scanned some food and realize you didn\'t pick the right food name, you can press this to do another search and replace it. This way you don\'t need to re-scan your food.</string>
+    <string name="tutorial_meal_details_total_title">Total Meal Nutrition</string>
+    <string name="tutorial_meal_details_total">After you have entered in all of the food you ate for this meal, click here to see a breakdown of the total nutritional value of this meal.</string>
     <string name="tutorial_camera_title">Scanning Your Food</string>
     <string name="tutorial_camera_overview">To scan each piece of food you need to take two pictures, one from the top and one from the front. Try to take the pictures as close to directly above or the side as you can.</string>
     <string name="tutorial_camera_card">For each photo, place some type of card at next to your food in the picture. This card should be the same size as a standard banking card (eg. credit card, driver\'s license, etc.)</string>

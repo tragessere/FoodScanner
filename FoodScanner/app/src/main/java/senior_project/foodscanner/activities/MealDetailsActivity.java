@@ -80,6 +80,7 @@ public class MealDetailsActivity extends TutorialBaseActivity implements View.On
     private ListView mealList;
     private FoodItem removedFood;
     private FoodItem lastClickedFood;
+    private Button total_button;
 
     ProgressDialog dialog;
 
@@ -94,7 +95,7 @@ public class MealDetailsActivity extends TutorialBaseActivity implements View.On
         setContentView(R.layout.activity_meal_details);
 
         // Set up Total Nutrition button
-        Button total_button = (Button) findViewById(R.id.button_total_meal);
+        total_button = (Button) findViewById(R.id.button_total_meal);
         total_button.setOnClickListener(this);
 
         // Set up Finish button
@@ -145,6 +146,7 @@ public class MealDetailsActivity extends TutorialBaseActivity implements View.On
 
     @Override
     public void setupTutorial() {
+        TutorialCard mealTypePage = new TutorialCard(mealSpinner, getString(R.string.tutorial_meal_details_type_title), getString(R.string.tutorial_meal_details_type));
         TutorialCard page1 = new TutorialCard(mealList, getString(R.string.tutorial_meal_details_title), getString(R.string.tutorial_meal_details_list))
                 .setHighlightPadding(-15)
                 .setPosition(TutorialCard.POSITION_BOTTOM);
@@ -157,11 +159,14 @@ public class MealDetailsActivity extends TutorialBaseActivity implements View.On
         TutorialCard page4 = new TutorialCard(mealList, getString(R.string.tutorial_meal_details_replace_title), getString(R.string.tutorial_meal_details_replace))
                 .setHighlightPadding(-15)
                 .setPosition(TutorialCard.POSITION_BOTTOM);
+        TutorialCard totalPage = new TutorialCard(total_button, getString(R.string.tutorial_meal_details_total_title), getString(R.string.tutorial_meal_details_total));
 
+        sequence.addCard(mealTypePage);
         sequence.addCard(page1);
         sequence.addCard(page2);
         sequence.addCard(page3);
         sequence.addCard(page4);
+        sequence.addCard(totalPage);
     }
 
     @Override
@@ -255,7 +260,7 @@ public class MealDetailsActivity extends TutorialBaseActivity implements View.On
         resultIntent.putExtra("meal", meal);
         setResult(Activity.RESULT_OK, resultIntent);
 
-        return true;
+        return false;
     }
 
     @Override
