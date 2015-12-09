@@ -14,6 +14,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -156,7 +157,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
                 }
                 findDensityMatches(frag.food);
             } else if (!frag.food.usesVolume()) {
-                DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food);
+                DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food, false);
                 servingsDialog.show(getFragmentManager(), "FoodServingFragment");
             } else {
                 // Only uses volume, nothing else needed
@@ -174,7 +175,7 @@ public class FoodItemActivity extends AppCompatActivity implements View.OnClickL
                 }
                 findDensityMatches(frag.food);
             } else if (!frag.food.usesVolume()) {
-                DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food);
+                DialogFragment servingsDialog = FoodServingFragment.newInstance(frag.food, false);
                 servingsDialog.show(getFragmentManager(), "FoodServingFragment");
             } else {
                 // Only uses volume, nothing else needed

@@ -73,7 +73,12 @@ public class FoodInfoFragment extends DialogFragment {
         }
 
         info.append("<br><b>Serving Size:</b>  ");
-        info.append(food.getServingSize());
+        if (food.usesMass() || food.usesVolume()) {
+            info.append(food.getServingSize());
+        } else {
+            // Round for manual serving sizes, e.g. "1 taco" instead of "1.0 taco"
+            info.append(Math.round(food.getServingSize()));
+        }
         info.append(" ");
         info.append(food.getServingSizeUnit());
 

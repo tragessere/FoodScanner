@@ -86,7 +86,7 @@ public class FoodDensityFragment extends DialogFragment {
 
         // Set up listview of density results
         stringList = new ArrayList<>(matches.keySet());
-        ListView lv = (ListView) view.findViewById(R.id.listView_densities);  //this is null
+        ListView lv = (ListView) view.findViewById(R.id.listView_densities);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
                 getActivity().getApplicationContext(),
                 R.layout.list_layout,
@@ -94,7 +94,7 @@ public class FoodDensityFragment extends DialogFragment {
                 stringList);
         lv.setAdapter(arrayAdapter);
 
-        // set up happens when you click a list item
+        // Set up happens when you click a list item
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Create FoodItem with the selected density
@@ -102,6 +102,11 @@ public class FoodDensityFragment extends DialogFragment {
                 mListener.onDensityDialogPositiveClick(FoodDensityFragment.this, name, matches.get(name));
             }
         });
+
+        // Set up name of food item
+        TextView foodName = (TextView) view.findViewById(R.id.food_name);
+        String foodString = "<b>" + food.getName() + "</b>";
+        foodName.setText(Html.fromHtml(foodString));
 
         return builder.create();
     }

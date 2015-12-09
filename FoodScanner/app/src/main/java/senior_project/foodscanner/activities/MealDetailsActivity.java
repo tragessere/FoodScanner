@@ -357,7 +357,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
         } else {
             // User touched "Servings" -> open servings dialog
-            DialogFragment servingsDialog = FoodServingFragment.newInstance(foodFrag.food);
+            DialogFragment servingsDialog = FoodServingFragment.newInstance(foodFrag.food, true);
             servingsDialog.show(getFragmentManager(), "FoodServingFragment");
         }
     }
