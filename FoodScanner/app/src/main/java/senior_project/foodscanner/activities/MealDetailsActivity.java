@@ -6,14 +6,10 @@ import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,8 +18,6 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
 
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.FoodItem;
@@ -34,20 +28,19 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import senior_project.foodscanner.Nutritious;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
-import senior_project.foodscanner.fragments.FoodDensityFragment;
 import senior_project.foodscanner.fragments.FoodInfoFragment;
 import senior_project.foodscanner.fragments.FoodServingFragment;
-import senior_project.foodscanner.fragments.FoodVolumeFragment;
 import senior_project.foodscanner.fragments.MessageDialogFragment;
 import senior_project.foodscanner.fragments.PreviousPhotoFragment;
 import senior_project.foodscanner.ui.components.fooditem.FoodArrayAdapter;
+import senior_project.foodscanner.ui.components.tutorial.TutorialBaseActivity;
+import senior_project.foodscanner.ui.components.tutorial.TutorialCard;
 
 /**
  * Shows details of the meal and allows editing.
@@ -69,7 +62,7 @@ import senior_project.foodscanner.ui.components.fooditem.FoodArrayAdapter;
  * Delete Meal
  * Back Button - return to Meal Calendar
  */
-public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener,
+public class MealDetailsActivity extends TutorialBaseActivity implements View.OnClickListener,
         FoodInfoFragment.FoodInfoDialogListener, FoodServingFragment.FoodServingDialogListener,
         PreviousPhotoFragment.PreviousPhotoDialogListener, FoodArrayAdapter.FoodArrayAdapterListener {
 
@@ -84,6 +77,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     private String[] meals;
     private Spinner mealSpinner;
+    private ListView mealList;
     private FoodItem removedFood;
     private FoodItem lastClickedFood;
 
@@ -124,6 +118,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         mealSpinner.setAdapter(mealAdapter);
         mealSpinner.setSelection(mealAdapter.getPosition(meal.getType().getName()));
 
+        mealList = (ListView) findViewById(R.id.food_list);
+
         // Doesn't do anything now, left in just in case.
         if (meal.isNew()) {
             meal.setIsNew(false);
@@ -148,9 +144,30 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
+    public void setupTutorial() {
+        TutorialCard page1 = new TutorialCard(mealList, getString(R.string.tutorial_meal_details_title), getString(R.string.tutorial_meal_details_list))
+                .setHighlightPadding(-15)
+                .setPosition(TutorialCard.POSITION_BOTTOM);
+        TutorialCard page2 = new TutorialCard(mealList, getString(R.string.tutorial_meal_details_scan_title), getString(R.string.tutorial_meal_details_scan))
+                .setHighlightPadding(-15)
+                .setPosition(TutorialCard.POSITION_BOTTOM);
+        TutorialCard page3 = new TutorialCard(mealList, getString(R.string.tutorial_meal_details_servings_title), getString(R.string.tutorial_meal_details_servings))
+                .setHighlightPadding(-15)
+                .setPosition(TutorialCard.POSITION_BOTTOM);
+        TutorialCard page4 = new TutorialCard(mealList, getString(R.string.tutorial_meal_details_replace_title), getString(R.string.tutorial_meal_details_replace))
+                .setHighlightPadding(-15)
+                .setPosition(TutorialCard.POSITION_BOTTOM);
+
+        sequence.addCard(page1);
+        sequence.addCard(page2);
+        sequence.addCard(page3);
+        sequence.addCard(page4);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_meal_details, menu);
+        getMenuInflater().inflate(R.menu.menu_tutorial, menu);
         return true;
     }
 
@@ -179,21 +196,20 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         }
 
         // Set up list of food items
-        ListView lv = (ListView) findViewById(R.id.food_list);
         List<FoodItem> tempFood = new ArrayList<>(meal.getFood());
         FoodArrayAdapter adapter = new FoodArrayAdapter(MealDetailsActivity.this, tempFood);
         adapter.setOnDeleteListener(this);
-        lv.setAdapter(adapter);
+        mealList.setAdapter(adapter);
 
         // Set up background
         if (meal.getFood().size() == 0) {
-            lv.setBackgroundResource(R.drawable.background_add_food);
+            mealList.setBackgroundResource(R.drawable.background_add_food);
         } else {
-            lv.setBackgroundResource(0);
+            mealList.setBackgroundResource(0);
         }
 
         // Set up what happens when you click a list item
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mealList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Check if null, i.e. the "+" was pressed
                 if (position >= meal.getFood().size() || meal.getFoodItem(position) == null) {
@@ -214,7 +230,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         });
 
 //        // Set up what happens when you long click a list item
-//        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+//        mealList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 //            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 //                //View nutrition info & give option to replace or delete
 //                FoodItem food = meal.getFoodItem(position);
@@ -234,27 +250,12 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
 
     @Override
-    public void onBackPressed() {
+    public boolean backButtonPressed() {
         Intent resultIntent = new Intent();
         resultIntent.putExtra("meal", meal);
         setResult(Activity.RESULT_OK, resultIntent);
 
-        super.onBackPressed();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if(id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
     @Override

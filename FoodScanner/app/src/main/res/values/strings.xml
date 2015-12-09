@@ -43,10 +43,10 @@
 
     <string name="settings_24_hour">Use 24-hour format</string>
     <string name="settings_meal_time">Set meal times</string>
-    <string name="settings_meal_time_automatic">Automatic</string>
+    <string name="settings_meal_time_automatic">Default</string>
     <string name="settings_meal_time_manual">Manual</string>
     <string name="settings_time_switch_title">Set meal times manually</string>
-    <string name="settings_time_switch_subtitle">When disabled, the app will track times you commonly set for meals and adjust the boundaries automatically.</string>
+    <string name="settings_time_switch_subtitle">When disabled, the app will use the default meal times rather than the custom times.</string>
     <string name="settings_set_start_time">Set start time</string>
     <string name="settings_set_end_time">Set end time</string>
     <string name="breakfast">Breakfast</string>
@@ -84,7 +84,7 @@
     <string name="tutorial_calendar_calories_button_title">View Nutrition Stats</string>
     <string name="tutorial_calendar_calories_button_description">See your nutrition information over the last 30 days, 7 days, or just today.</string>
     <string name="tutorial_meal_details_title">Meal Details</string>
-    <string name="tutorial_meal_details_list">This list shows all the kinds of food that you have added to this meal. An exclamation mark next to the food\'s name means that it still needs to be scanned. Tapping an item will bring up more information and some options.</string>
+    <string name="tutorial_meal_details_list">This list shows all the kinds of food that you have added to this meal. A warning icon next to the food\'s name means that it still needs to be scanned. Tapping an item will bring up more information and some options.</string>
     <string name="tutorial_meal_details_scan_title">Scan</string>
     <string name="tutorial_meal_details_scan">Choosing Scan will begin the process of photographing your food to get the number of servings you are eating.</string>
     <string name="tutorial_meal_details_servings_title">Servings</string>
@@ -97,6 +97,6 @@
     <string name="tutorial_painting_title">Marking Food Location</string>
     <string name="tutorial_painting_card">First drag and resize the green square to outline the card you put next to your food.</string>
     <string name="tutorial_painting_food">Next draw a "+" across the center of your food. Make sure the "+" spans the entire height and width of your food.</string>
-    <string name="tutorial_painting_second_picture">For the second picture, repeat the step for marking the card. Then on the top picture, draw a single vertical line across the center of the food.</string>
+    <string name="tutorial_painting_second_picture">For the second picture, repeat the step for marking the card. Then draw a single vertical line across the center of the food.</string>
 
 </resources>
