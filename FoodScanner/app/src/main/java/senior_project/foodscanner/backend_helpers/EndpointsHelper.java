@@ -298,6 +298,12 @@ public class EndpointsHelper
                         butteredToast.show();
                     }
                 });
+
+				if (localDensities.exists()) {
+					// Delete file, in case it was created
+					localDensities.delete();
+				}
+
                 return true;  // Still return true, because download was successful at least
             }
 
