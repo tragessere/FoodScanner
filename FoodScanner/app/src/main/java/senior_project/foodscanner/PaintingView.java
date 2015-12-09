@@ -145,7 +145,7 @@ public class PaintingView extends View
     }
 
     /*undo's the user's last line drawn.  This is called when the undo button is pressed.*/
-    //TODO: fix this
+
     public void undoLast()
     {
         if(getCurrentPointHistory().size() == 1)
@@ -161,62 +161,6 @@ public class PaintingView extends View
             }
 
         invalidate();
-
-       /* PaintingActivity p = (PaintingActivity)this.getContext();
-        switch(status)
-        {
-            case nolines:
-                p.lastRectangle(false);
-                invalidate();
-                return;
-
-            case oneLine:
-                status = lineDrawnStatus.nolines;
-                break;
-
-            case twoLines:
-                if(whyDoINeedThis && !p.inRectangleView()) {
-                    background.recycle();
-                    p.lastRectangle(true);
-                    invalidate();
-                    return;
-                }
-
-                //If we are in a rectangle view, go back to drawing
-                if(p.inRectangleView()) {
-                    whyDoINeedThis = false;
-                    p.lastPaintingView();
-                    return;
-                }
-
-                status = lineDrawnStatus.oneLine;
-                previousPerspective();
-                invalidate();
-                break;
-
-            case threeLines:
-                if(allLines) {
-                    status = lineDrawnStatus.twoLines;
-                    allLines = false;
-                }
-
-                else
-                {
-                    whyDoINeedThis = true;
-                    background.recycle();
-                    p.lastRectangle(false);
-                    invalidate();
-                    return;
-                }
-
-                break;
-        }
-
-        if(paths.size() <= 0)
-            return;
-
-        paths.remove(paths.size() - 1);
-        invalidate();*/
     }
 
     /*Goes to the next "perspective" for the user to draw more lines*/
