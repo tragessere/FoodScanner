@@ -178,7 +178,7 @@
             android:layout_height="match_parent"
             android:id="@+id/loading"
             android:visibility="gone"
-            android:background="#80ffffff"
+            android:background="#BFF0F0F0"
             >
 
             <ProgressBar
