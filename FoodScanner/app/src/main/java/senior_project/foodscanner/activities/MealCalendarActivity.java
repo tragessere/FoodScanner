@@ -809,8 +809,9 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
         // Create deletion confirmation dialog
         Meal selectedMeal = adapter.getItem(position);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Are you sure you want to delete this " +
-                selectedMeal.getType().getName() + " meal entry?")
+        String messageStr = "Are you sure you want to delete this <b>" +
+                selectedMeal.getType().getName() + "</b> meal entry?";
+        builder.setMessage(Html.fromHtml(messageStr))
                 .setTitle("Confirm Meal Deletion");
         builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {

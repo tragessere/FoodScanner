@@ -14,8 +14,9 @@
         android:layout_marginBottom="14dp"
         android:textAppearance="@android:style/TextAppearance.Large"
         android:textColor="@color/Text.Primary"
-        android:text="Serving Info"
-        android:layout_gravity="center_horizontal" />
+        android:text="Edit Servings"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal" />
     <TextView
         android:id="@+id/servingDescription"
         android:layout_width="wrap_content"
@@ -23,26 +24,37 @@
         android:layout_marginTop="0dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="0dp"
         android:textAppearance="@android:style/TextAppearance.Theme.Dialog"
         android:textColor="@color/Text.Primary"
         android:text="Number of Servings:"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal" />
     <EditText
         android:id="@+id/servingEntry"
         android:inputType="numberDecimal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="0dp"
+        android:layout_marginBottom="3dp"
         android:textAppearance="@android:style/TextAppearance.Theme.Dialog"
         android:textColor="@color/Text.Primary"
         android:text=""
         android:layout_gravity="center_horizontal"
         android:singleLine="true"
         android:hint="N/A"
+        android:gravity="center_horizontal" />
+    <TextView
+        android:id="@+id/food_serving"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="0dp"
+        android:textAppearance="@android:style/TextAppearance.Small"
+        android:textColor="@color/Text.Primary"
+        android:text="Size: 1 taco"
+        android:layout_gravity="center_horizontal"
         android:gravity="center_horizontal" />
 
 </LinearLayout>

@@ -85,7 +85,7 @@ public class FoodArrayAdapter extends ArrayAdapter<FoodItem> {
             buttonDel.setVisibility(View.GONE);
             buttonWarn.setVisibility(View.GONE);
         } else {
-            if((food.usesMass() || food.usesVolume()) && food.getVolume() == 0.0){
+            if((food.usesMass() || food.usesVolume()) && food.getVolume() == 0.0 && food.getNumServings() == 0.0){
                 buttonWarn.setVisibility(View.VISIBLE);
             }
             else{
