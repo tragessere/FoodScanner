@@ -19,9 +19,13 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import senior_project.foodscanner.ColorBall;
 import senior_project.foodscanner.R;
@@ -31,20 +35,23 @@ import senior_project.foodscanner.activities.PaintingActivity;
  */
 public class DrawView extends View
 {
+    public final double CREDIT_CARD_HEIGHT  = 2.125;
+    public final double CREDIT_CARD_WIDTH   = 3.375;
+
+
+    private boolean top;
+
     private Point point1, point3;
     private Point point2, point4;
     private Point point5; //center point
     private float radius;
     private int screenW, screenH;
-
     private Bitmap background;
     private BitmapFactory.Options options;
-
     private File imageDirectory;
     private static RectF currentRectangle;
-
     private boolean moving = false;
-
+    private boolean secondPerspective;
     private ArrayList<ColorBall> colorballs = new ArrayList < ColorBall > ();
 
     int groupId = -1;
@@ -60,6 +67,9 @@ public class DrawView extends View
     {
         super(context);
 
+        top = true;
+        secondPerspective = false;
+
         DisplayMetrics d = new DisplayMetrics();
         WindowManager manager = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
         manager.getDefaultDisplay().getMetrics(d);
@@ -72,7 +82,7 @@ public class DrawView extends View
 
         res = getResources();
         imageDirectory = ((PaintingActivity)getContext()).getImageDirectory();
-        background = PaintingView.decodeFile(new File(imageDirectory.getPath() + "/Side.png"));
+        background = PaintingView.decodeFile(new File(imageDirectory.getPath() + "/Top.png"));
 
         int[] params = getPhotoParams(background);
 
@@ -88,11 +98,12 @@ public class DrawView extends View
     public DrawView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-
+        top = true;
+        secondPerspective = false;
         options = new BitmapFactory.Options();
         options.inSampleSize = 8;
         imageDirectory = ((PaintingActivity)getContext()).getImageDirectory();
-        background = PaintingView.decodeFile(new File(imageDirectory.getPath() + "/Side.png"));
+        background = PaintingView.decodeFile(new File(imageDirectory.getPath() + "/Top.png"));
 
         DisplayMetrics d = new DisplayMetrics();
         WindowManager manager = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
@@ -117,14 +128,18 @@ public class DrawView extends View
     @Override
     protected void onDraw(Canvas canvas)
     {
-        //canvas.drawColor(Color.TRANSPARENT);
         int[] params = getPhotoParams(background);
         background = Bitmap.createScaledBitmap(background, params[0], params[1], false);
-        canvas.drawBitmap(background, new Rect(0,0,background.getWidth(), background.getHeight()), new Rect(0,0,background.getWidth(), background.getHeight()), new Paint());
+        canvas.drawBitmap(background, new Rect(0, 0, background.getWidth(), background.getHeight()), new Rect(0, 0, background.getWidth(), background.getHeight()), new Paint());
+
+        if(secondPerspective)
+            ((TextView)((PaintingActivity)getContext()).findViewById(R.id.pictureLabel)).setText(((PaintingActivity)getContext()).getString(R.string.side_label));
+        else
+            ((TextView)((PaintingActivity)getContext()).findViewById(R.id.pictureLabel)).setText(((PaintingActivity) getContext()).getString(R.string.top_label));
 
         rectPaint.setAntiAlias(true);
         rectPaint.setDither(true);
-        rectPaint.setColor(Color.GREEN);
+        rectPaint.setColor(Color.parseColor("#ff8f4f"));
         rectPaint.setStyle(Paint.Style.STROKE);
         rectPaint.setStrokeJoin(Paint.Join.ROUND);
         rectPaint.setStrokeWidth(5);
@@ -162,7 +177,8 @@ public class DrawView extends View
 
         int X = (int) event.getX();
         int Y = (int) event.getY();
-
+/*1 0
+* 2 3*/
         switch (eventaction)
         {
             case MotionEvent.ACTION_DOWN:
@@ -171,20 +187,19 @@ public class DrawView extends View
                 balID = -1;
                 groupId = -1;
 
-
                 for (ColorBall ball: colorballs)
                 {
                     // check if inside the bounds of the ball (circle)
                     // get the center for the ball
                     int centerX = ball.getX() + ball.getWidthOfBall();
                     int centerY = ball.getY() + ball.getHeightOfBall();
+
                     // calculate the radius from the touch to the center of the ball
                     double radCircle = Math.sqrt((double)(((centerX - X) * (centerX - X)) + (centerY - Y) * (centerY - Y)));
 
                     if (radCircle < ball.getWidthOfBall()*2)
                     {
                         balID = ball.getID();
-
                         if (balID == 1 || balID == 3)
                         {
                             groupId = 2;
@@ -194,9 +209,7 @@ public class DrawView extends View
 
                         //we are moving the 4 balls surrounding the center ball
                         else if(balID == 4)
-                        {
                             moving = true;
-                        }
 
                         else
                         {
@@ -216,6 +229,8 @@ public class DrawView extends View
             case MotionEvent.ACTION_MOVE:
 
                 //if we have a proper balid and we are not moving the center ball
+                //for(ColorBall c : colorballs)
+                    //Log.d("test", "ID: " + c.getID() + " X: " + c.getX() + " Y: " + c.getY());
                 if (balID > -1 && !moving)
                 {
                     //checks to see if you are trying to drag the balls off the window
@@ -231,32 +246,19 @@ public class DrawView extends View
                     if(Y > getH())
                         Y = getH() - colorballs.get(0).getWidthOfBall();
 
-                    colorballs.get(balID).setX(X);
-                    colorballs.get(balID).setY(Y);
-
                     paint.setColor(Color.CYAN);
 
-                    if (groupId == 1) {
-                        colorballs.get(1).setX(colorballs.get(2).getX());
-                        colorballs.get(1).setY(colorballs.get(0).getY());
-                        colorballs.get(3).setX(colorballs.get(0).getX());
-                        colorballs.get(3).setY(colorballs.get(2).getY());
-                        colorballs.get(4).setX(Math.max(colorballs.get(0).getX(), colorballs.get(1).getX()) - Math.abs(colorballs.get(0).getX() - colorballs.get(1).getX())/2);
-                        colorballs.get(4).setY(Math.max(colorballs.get(0).getY(), colorballs.get(3).getY()) - Math.abs(colorballs.get(0).getY() - colorballs.get(3).getY())/2);
-                        canvas.drawRect(point1.x, point3.y, point3.x, point1.y,
-                                paint);
-                    }
+                    setupBalls(X, Y);
+                    colorballs.get(4).setX(Math.max(colorballs.get(0).getX(), colorballs.get(1).getX()) - Math.abs(colorballs.get(0).getX() - colorballs.get(1).getX()) / 2);
+                    colorballs.get(4).setY(Math.max(colorballs.get(0).getY(), colorballs.get(3).getY()) - Math.abs(colorballs.get(0).getY() - colorballs.get(3).getY()) / 2);
 
-                    else {
-                        colorballs.get(0).setX(colorballs.get(3).getX());
-                        colorballs.get(0).setY(colorballs.get(1).getY());
-                        colorballs.get(2).setX(colorballs.get(1).getX());
-                        colorballs.get(2).setY(colorballs.get(3).getY());
-                        colorballs.get(4).setX(Math.max(colorballs.get(0).getX(), colorballs.get(1).getX()) - Math.abs(colorballs.get(0).getX() - colorballs.get(1).getX())/2);
-                        colorballs.get(4).setY(Math.max(colorballs.get(0).getY(), colorballs.get(3).getY()) - Math.abs(colorballs.get(0).getY() - colorballs.get(3).getY())/2);
-                        canvas.drawRect(point2.x, point4.y, point4.x, point2.y,
-                                paint);
-                    }
+                    //canvas.save();
+                    //canvas.rotate(45);
+
+                    canvas.drawRect(point1.x, point2.y, point2.x, point3.y,
+                            paint);
+
+                    //canvas.restore();
                     invalidate();
                 }
 
@@ -266,6 +268,8 @@ public class DrawView extends View
                  *  2   3
                 */
                 //TODO: fix moving the box fast and moving box into white zone,  keep black dots from moving outside the borders
+
+                //This is when we are moving the entire set of balls using ball 4
                 else if (balID > -1 && moving)
                 {
                     int horzGap = colorballs.get(1).getX() - colorballs.get(0).getX();
@@ -336,10 +340,8 @@ public class DrawView extends View
                         break;
                     }
 
-
-
-                    colorballs.get(4).setX(X);
-                    colorballs.get(4).setY(Y);
+                    colorballs.get(balID).setX(X);
+                    colorballs.get(balID).setY(Y);
                     colorballs.get(0).setX(colorballs.get(4).getX() - horzGap / 2);
                     colorballs.get(0).setY(colorballs.get(4).getY() + vertGap / 2);
                     colorballs.get(1).setX(colorballs.get(4).getX() + horzGap / 2);
@@ -362,16 +364,133 @@ public class DrawView extends View
 
     }
 
+    private void sortBalls() {
+        int maxX, maxY, minX, minY;
+        maxX = minX = 0;
+        maxY = minY = 0;
+        Point p1, p2, p3, p4, p5;
+        p1 = new Point();
+        p2 = new Point();
+        p3 = new Point();
+        p4 = new Point();
+        p5 = new Point();
+
+        for(ColorBall c : colorballs) {
+            if(c.getX() > maxX)
+                maxX = c.getX();
+            if(c.getY() > maxY)
+                maxY = c.getY();
+            if(c.getX() < minX)
+                minX = c.getX();
+            if(c.getY() < minY)
+                minY = c.getY();
+        }
+
+        for(ColorBall c : colorballs) {
+            if(c.getX() == maxX) {
+                if(c.getY() == minY)
+                    p2 = c.point;
+
+                if(c.getY() == maxY)
+                    p4 = c.point;
+            }
+            else if(c.getY() == maxY) {
+                if(c.getX() == minX)
+                    p3 = c.point;
+            }
+            else if(c.getX() == minX) {
+                if (c.getY() == minY)
+                    p1 = c.point;
+            }
+
+            else
+                p5 = c.point;
+        }
+
+        colorballs.get(0).point = p1;
+        colorballs.get(1).point = p2;
+        colorballs.get(2).point = p3;
+        colorballs.get(3).point = p4;
+        colorballs.get(4).point = p5;
+
+        colorballs.get(0).id = 1;
+        colorballs.get(1).id = 2;
+        colorballs.get(2).id = 3;
+        colorballs.get(3).id = 4;
+        colorballs.get(4).id = 0;
+    }
+
+    /*
+     *  0   1
+     *    4
+     *  2   3
+    */
+    //TODO: THIS is what is causing issues
+    private void setupBalls(int x, int y) {
+        //Log.d("drawing", "Ball ID: " + balID);
+
+        Log.d("drawing", "BalID: " + balID);
+        for(ColorBall c : colorballs)
+            Log.d("drawing", "setup START : balID: " + c.getID() + " X: " + c.getX() + " Y: " + c.getY() + "\n");
+
+        colorballs.get(balID).setX(x);
+
+        if (balID == 0) {
+            colorballs.get(balID).setY(colorballs.get(4).getY() - ((colorballs.get(4).getX() - x) * (-CREDIT_CARD_HEIGHT / CREDIT_CARD_WIDTH)));
+            colorballs.get(1).setX(colorballs.get(4).getX() + colorballs.get(4).getX() - colorballs.get(0).getX());
+            colorballs.get(1).setY(colorballs.get(0).getY());
+            colorballs.get(2).setX(colorballs.get(0).getX());
+            colorballs.get(2).setY(colorballs.get(4).getY() + (colorballs.get(4).getY() - colorballs.get(0).getY()));
+            colorballs.get(3).setX(colorballs.get(1).getX());
+            colorballs.get(3).setY(colorballs.get(2).getY());
+        }
+
+        else if(balID == 3) {
+            colorballs.get(balID).setY(colorballs.get(4).getY() + ((x - colorballs.get(4).getX()) * (-CREDIT_CARD_HEIGHT / CREDIT_CARD_WIDTH)));
+            colorballs.get(1).setX(colorballs.get(3).getX());
+            colorballs.get(1).setY(colorballs.get(4).getY() - (colorballs.get(3).getY() - colorballs.get(4).getY()));
+            colorballs.get(2).setX(colorballs.get(4).getX() - (colorballs.get(3).getX() - colorballs.get(4).getX()));
+            colorballs.get(2).setY(colorballs.get(3).getY());
+            colorballs.get(0).setX(colorballs.get(2).getX());
+            colorballs.get(0).setY(colorballs.get(1).getY());
+        }
+
+        else if(balID == 1) {
+            colorballs.get(balID).setY(colorballs.get(4).getY() - ((x - colorballs.get(4).getX()) * (CREDIT_CARD_HEIGHT / CREDIT_CARD_WIDTH)));
+            colorballs.get(0).setX(colorballs.get(4).getX() - (colorballs.get(1).getX() - colorballs.get(4).getX()));
+            colorballs.get(0).setY(colorballs.get(1).getY());
+            colorballs.get(2).setX(colorballs.get(0).getX());
+            colorballs.get(2).setY(colorballs.get(4).getY() + (colorballs.get(4).getY() - colorballs.get(0).getY()));
+            colorballs.get(3).setX(colorballs.get(1).getX());
+            colorballs.get(3).setY(colorballs.get(2).getY());
+        }
+
+        else if(balID == 2) {
+            colorballs.get(balID).setY(colorballs.get(4).getY() +  ((colorballs.get(4).getX() - x) * CREDIT_CARD_HEIGHT / CREDIT_CARD_WIDTH));
+            colorballs.get(1).setX(colorballs.get(4).getX() + colorballs.get(4).getX() - colorballs.get(2).getX());
+            colorballs.get(1).setY(colorballs.get(4).getY() - (colorballs.get(2).getY() - colorballs.get(4).getY()));
+            colorballs.get(3).setX(colorballs.get(1).getX());
+            colorballs.get(3).setY(colorballs.get(2).getY());
+            colorballs.get(0).setX(colorballs.get(2).getX());
+            colorballs.get(0).setY(colorballs.get(1).getY());
+        }
+
+        for(ColorBall c : colorballs)
+            Log.d("drawing", "setup FINISH balID2: " + c.getID() + " X2: " + c.getX() + " Y2: " + c.getY() + "\n");
+    }
+
     public void nextPerspective()
     {
         previousBackground = background.copy(Bitmap.Config.ARGB_8888, true);
+        secondPerspective = true;
         background.recycle();
-        background = PaintingView.decodeFile(new File(imageDirectory.getPath() + "/Top.png"));
+        background = PaintingView.decodeFile(new File(imageDirectory.getPath() + "/Side.png"));
         resetRectangle(getContext());
     }
 
     public boolean lastPerspective()
     {
+        secondPerspective = false;
         if(previousBackground != null) {
             background.recycle();
             background = previousBackground.copy(Bitmap.Config.ARGB_8888, true);
@@ -402,37 +521,45 @@ public class DrawView extends View
     private void setupRectangle(Context context)
     {
         //TODO: in the future maybe include white space
-
         //(h-s) is the size of the view minus the status bar.  I am currently not including the whitespace in this calculation
         int w = getW()/2;
         int h = getH()/2;
         int s = getStatusBarHeight();
 
         point1 = new Point();
-        point1.x = w - 75;
-        point1.y = h/2 - 75 + s;
+        point1.x = (int)(w - 75);
+        point1.y = (int)(h/2 + s + ((75) * (CREDIT_CARD_HEIGHT/CREDIT_CARD_WIDTH)));
 
         point2 = new Point();
-        point2.x = w + 75;
-        point2.y = h/2 - 75 + s;
+        point2.x = (int)(w + 75);
+        point2.y = (int)(h/2 + s + ((75) * CREDIT_CARD_HEIGHT/CREDIT_CARD_WIDTH));
 
         point3 = new Point();
-        point3.x = w - 75;
-        point3.y = h/2 + 75 + s;
+        point3.x = (int)(w - 75);
+        point3.y = (int)(h/2 + s - ((75) * CREDIT_CARD_HEIGHT/CREDIT_CARD_WIDTH));
 
         point4 = new Point();
-        point4.x = w + 75;
-        point4.y = h/2 + 75 + s;
+        point4.x = (int)(w + 75);
+        point4.y = (int)(h/2 + s - ((75) * (CREDIT_CARD_HEIGHT/CREDIT_CARD_WIDTH)));
 
         point5 = new Point();
-        point5.x = w;
-        point5.y = h/2 + s;
+        point5.x = (w);
+        point5.y = (h/2 + s);
 
         colorballs.add(new ColorBall(context, R.drawable.circle, point1));
         colorballs.add(new ColorBall(context, R.drawable.circle, point2));
         colorballs.add(new ColorBall(context, R.drawable.circle, point3));
         colorballs.add(new ColorBall(context, R.drawable.circle, point4));
         colorballs.add(new ColorBall(context, R.drawable.circle, point5));
+
+        colorballs.get(0).id = 0;
+        colorballs.get(1).id = 1;
+        colorballs.get(2).id = 2;
+        colorballs.get(3).id = 3;
+        colorballs.get(4).id = 4;
+
+        for(ColorBall c : colorballs)
+            Log.d("drawing", "rectangle START : balID: " + c.getID() + " X: " + c.getX() + " Y: " + c.getY() + "\n");
     }
 
     private void resetRectangle(Context context)
@@ -468,9 +595,12 @@ public class DrawView extends View
 
         return new int[] {w, h};
     }
-    public static RectF getRectangle()
+    public RectF getRectangle()
     {
-        return currentRectangle;
+        return new RectF(Math.min(Math.min(colorballs.get(0).getX(), colorballs.get(1).getX()), colorballs.get(2).getX()),
+                Math.min(Math.min(colorballs.get(0).getY(), colorballs.get(1).getY()), colorballs.get(2).getY()),
+                         Math.max(Math.max(colorballs.get(0).getX(), colorballs.get(1).getX()), colorballs.get(2).getX()),
+                         Math.max(Math.max(colorballs.get(0).getY(), colorballs.get(1).getY()), colorballs.get(2).getY()));
     }
 
     public int getW()
@@ -481,6 +611,14 @@ public class DrawView extends View
     public int getH()
     {
         return screenH;
+    }
+
+    public boolean onTop() {
+        return top;
+    }
+
+    public void setOnTop(Boolean b) {
+        top = b;
     }
 
     //http://stackoverflow.com/questions/3355367/height-of-statusbar/3356263#3356263
