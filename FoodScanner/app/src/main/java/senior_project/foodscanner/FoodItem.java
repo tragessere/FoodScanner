@@ -233,6 +233,15 @@ public class FoodItem extends Nutritious implements Serializable {
 
     public void setNumServings(double numServings) {
         this.numServings = numServings;
+        if (usesVol || usesMass) {
+            // Servings were overridden, clear fields.
+            needCalculateServings = false;
+            needConvertVol = false;
+            volume = 0.0;
+            cubicVolume = 0.0;
+            mass = 0.0;
+        }
+        calculateNutrition();
     }
 
     public boolean isNeedCalculateServings() {
