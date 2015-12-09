@@ -118,7 +118,7 @@ public class FoodInfoFragment extends DialogFragment {
             info.append("<br><b>Volume:</b> ");
             info.append(formatterTwo.format(food.getVolume()) + " ml");
             info.append("<br><b>Mass:</b> ");
-            info.append(formatter.format(food.getMass()) + " " + food.getActualServingSizeUnit());
+            info.append(formatterTwo.format(food.getMass()) + " " + food.getActualServingSizeUnit());
         } else if ((food.usesMass() || food.usesVolume()) && isSaved) {
             // Food has not yet been scanned, add message
             info.append("<br><b><i>This needs to be scanned</b></i>");

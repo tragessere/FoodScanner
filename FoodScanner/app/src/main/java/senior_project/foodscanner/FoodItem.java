@@ -66,7 +66,8 @@ public class FoodItem extends Nutritious implements Serializable {
         volUnits = new HashSet<>(Arrays.asList(vol_values));
 
         //Create list of mass units, and find max length
-        String[] mass_values = new String[]{"oz", "ounce",  "g", "gram", "mg", "milligram"};
+        String[] mass_values = new String[]{"oz", "ounce",  "g", "gram", "mg", "milligram", "lb",
+                "pound"};
         maxMassLen = Integer.MIN_VALUE;
         for(String s : mass_values) {
             if(s.length() > maxMassLen) {
@@ -421,6 +422,10 @@ public class FoodItem extends Nutritious implements Serializable {
 
     public static Map<String, Double> getAllDensities() {
         return densities;
+    }
+
+    public static void clearAllDensities() {
+        densities = new HashMap<>();
     }
 
 
