@@ -13,6 +13,7 @@ import com.example.backend.foodScannerBackendAPI.model.BackendFoodItem;
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
 import com.example.backend.foodScannerBackendAPI.model.JsonMap;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
+
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.util.DateTime;
 
@@ -369,7 +370,8 @@ public class EndpointsHelper
 					Thread.sleep(7000);
 				}
 				else{
-					savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();
+					savedBackendMeal = mAPI.insertBackendMeal(backendMealToSave).execute();
+					//savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();
 					meal.setServerId(savedBackendMeal.getId());
 				}
 				success = true;
@@ -428,7 +430,8 @@ public class EndpointsHelper
 					Thread.sleep(7000);
 				}
 				else{
-					mAPI.deleteMeal(backendMeal.getId()).execute();
+					//mAPI.deleteMeal(backendMeal.getId()).execute();
+					mAPI.removeBackendMeal(backendMeal.getId()).execute();
 				}
 				success = true;
 				return meals[0];
@@ -540,8 +543,7 @@ public class EndpointsHelper
 	public BackendMeal convertToBackendMeal(Meal meal)
 	{
 		BackendMeal backendMeal = new BackendMeal();
-		//backendMeal.setId(new Long(meal.getServerId()));
-		//backendMeal.setId(new Long(610));
+		backendMeal.setId(new Long(meal.getServerId()));
 		backendMeal.setClientDBId(new Long(meal.getId()));
 		backendMeal.setDate(new Long(meal.getDate()));
 		backendMeal.setType(meal.getType().getName());

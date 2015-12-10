@@ -2,8 +2,6 @@ package com.example.backend.model;
 
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 
 import java.util.List;
 
@@ -13,7 +11,6 @@ import java.util.List;
 @Entity
 public class BackendMeal {
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
     private Long clientDBId; // ID used by the client DB
     private Long date;
@@ -40,4 +37,15 @@ public class BackendMeal {
     public void setIsNew(boolean isNew) { this.isNew = isNew; }
     public void setIsChanged(int isChanged) { this.isChanged = isChanged; }
 
+//    public BackendMeal() {};
+//
+//    public BackendMeal(Long id, Long clientDBId, Long date, String type, boolean isNew, int isChanged)
+//    {
+//        this.id = id;
+//        this.clientDBId = clientDBId;
+//        this.date = date;
+//        this.type = type;
+//        this.isNew = isNew;
+//        this.isChanged = isChanged;
+//    }
 }

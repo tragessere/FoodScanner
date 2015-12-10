@@ -7,9 +7,6 @@ import com.googlecode.objectify.annotation.Index;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-
 /**
  * Created by mlenarto on 11/3/15.
  */
@@ -17,7 +14,6 @@ import javax.persistence.GenerationType;
 public class BackendFoodItem {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     @Index
     private String name;
@@ -59,7 +55,7 @@ public class BackendFoodItem {
 
 
     // Setters
-    //public void setId(Long id) { this.id = id; }
+    public void setId(Long id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setDensity(Double density) { this.density = density; }
     public void setBrand(String brand) { this.brand = brand; }

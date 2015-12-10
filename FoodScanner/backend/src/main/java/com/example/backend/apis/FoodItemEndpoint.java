@@ -39,8 +39,8 @@ public class FoodItemEndpoint {
      * @param name
      * @return food item with name equal to the specified name.
      */
-    @ApiMethod(name = "getFoodItem")
-    public BackendFoodItem getFoodItem(@Named("name") String name) {
+    @ApiMethod(name = "getSingleFoodItem")
+    public BackendFoodItem getSingleFoodItem(@Named("name") String name) {
         return ofy().load().type(BackendFoodItem.class).filter("name", name).list().get(0);
     }
 

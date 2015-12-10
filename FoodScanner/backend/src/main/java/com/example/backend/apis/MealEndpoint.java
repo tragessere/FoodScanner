@@ -45,11 +45,11 @@ public class MealEndpoint {
 
     @ApiMethod(name = "saveMeal")
     public BackendMeal saveMeal(BackendMeal meal, User user) throws ServiceException {
-        AuthUtil.throwIfNotAuthenticated(user);
+        //AuthUtil.throwIfNotAuthenticated(user);
 
         if (findBackendMeal(meal.getId()) != null) throw new ConflictException("Meal already exists.");
 
-        //meal.setId(null);   //for testing
+        meal.setId(null);
 
         ofy().save().entity(meal).now();    //A synchronous save() will populate the generated id value on the entity instance
         return meal;
