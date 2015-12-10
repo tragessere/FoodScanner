@@ -1,7 +1,6 @@
 package com.example.backend.apis;
 
 import com.example.backend.Constants;
-import com.example.backend.model.BackendFoodItem;
 import com.example.backend.model.BackendMeal;
 import com.google.api.server.spi.ServiceException;
 import com.google.api.server.spi.config.Api;
@@ -88,16 +87,6 @@ public class BackendMealEndpoint {
         //validate that backendMeal.id has not been set.
         if (backendMeal.getId().longValue() == 0) backendMeal.setId(null);
 
-        List<BackendFoodItem> newList = new ArrayList<BackendFoodItem>();
-        for (BackendFoodItem item : backendMeal.getFoodItems())
-        {
-            ofy().save().entity(item).now();
-            newList.add(ofy().load().entity(item).now());
-
-        }
-
-        backendMeal.setFoodItems(newList);
-        
         ofy().save().entity(backendMeal).now();
         logger.info("Created BackendMeal with ID: " + backendMeal.getId());
 
