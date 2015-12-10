@@ -76,8 +76,9 @@ public class PaintingActivity extends AppCompatActivity
         File ppiCache = new File(ImageDirectoryManager.
                 getPixelsDirectory(this).getPath() + "/ppi.txt");
         if (ppiCache.exists()) {
+            BufferedReader br = null;
             try {
-                BufferedReader br = new BufferedReader(new FileReader(ppiCache));
+                br = new BufferedReader(new FileReader(ppiCache));
                 String ppi1_str = br.readLine();
                 String ppi2_str = br.readLine();
                 if (ppi1_str == null || ppi2_str == null) {
@@ -109,6 +110,12 @@ public class PaintingActivity extends AppCompatActivity
                 Toast butteredToast = Toast.makeText(getApplicationContext(),
                         "Error: Failed to retrieve cached ppi.", Toast.LENGTH_SHORT);
                 butteredToast.show();
+            } finally {
+                try {
+                    br.close();
+                } catch (Exception e) {
+                    // Ignore
+                }
             }
         }
 
