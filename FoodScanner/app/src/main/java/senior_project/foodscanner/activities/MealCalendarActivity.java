@@ -546,7 +546,6 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
                     // save meals locally and add them to ui
                     ArrayList<Meal> mealsList = (ArrayList<Meal>) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET);
                     if(mealsList != null) {
-                        Log.d("MealCalendarActivity", "LOADING BACKEND: RETURNED Meal Count = "+mealsList.size());
                         Object[] meals = mealsList.toArray();
                         Arrays.sort(meals);
                         for(Object obj : meals) {
@@ -638,7 +637,6 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
                 if(meal.isChanged()){
                     final int currentIndex = unsyncedMeals.indexOf(meal);
                     if(meal.isDeleted()) {// delete meal from backend
-                        //TODO java.lang.IllegalArgumentException: DELETE with non-zero content length is not supported - delete nonuploaded meal
                         Log.d("MealCalendarActivity", "SYNC DELETE " + meal);
                         syncTasks.add(EndpointsHelper.mEndpoints.new DeleteMealTask(new EndpointsHelper.TaskCompletionListener() {
                             @Override
