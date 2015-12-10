@@ -28,7 +28,7 @@ public class SQLQueryHelper {
 			SQLHelper.COLUMN_ID, SQLHelper.COLUMN_MEAL_TYPE,
 			SQLHelper.COLUMN_TIME, SQLHelper.COLUMN_FOOD_LIST,
 			SQLHelper.COLUMN_NEW, SQLHelper.COLUMN_CHANGED,
-			SQLHelper.COLUMN_DELETED};
+			SQLHelper.COLUMN_DELETED, SQLHelper.COLUMN_SERVER_ID};
 
 	/**
 	 * Insert a meal object into the database
@@ -109,7 +109,7 @@ public class SQLQueryHelper {
 				null, null, null);
 
 		if(c != null && c.moveToFirst()) {
-			Meal meal = new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1);
+			Meal meal = new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1, c.getLong(7));
 
 			c.close();
 
@@ -155,7 +155,7 @@ public class SQLQueryHelper {
 
 		if(c != null && c.moveToFirst()) {
 			while(!c.isAfterLast()) {
-				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
+				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1, c.getLong(7)));
 				c.moveToNext();
 			}
 			c.close();
@@ -196,7 +196,7 @@ public class SQLQueryHelper {
 
 		if(c != null && c.moveToFirst()) {
 			while(!c.isAfterLast()) {
-				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
+				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1, c.getLong(7)));
 				c.moveToNext();
 			}
 			c.close();
@@ -224,7 +224,7 @@ public class SQLQueryHelper {
 
 		if(c != null && c.moveToFirst()) {
 			while(!c.isAfterLast()) {
-				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
+				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1, c.getLong(7)));
 				c.moveToNext();
 			}
 			c.close();
@@ -251,7 +251,7 @@ public class SQLQueryHelper {
 
         if(c != null && c.moveToFirst()) {
             while(!c.isAfterLast()) {
-                mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
+                mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1, c.getLong(7)));
                 c.moveToNext();
             }
             c.close();
