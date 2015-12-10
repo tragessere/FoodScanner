@@ -90,6 +90,13 @@ public class TutorialSequence implements SpringListener {
 		allPages.add(newPage);
 	}
 
+	public void removeCard(int position) {
+		allPages.remove(position);
+	}
+
+	public void clearCards() {
+		allPages.clear();
+	}
 
 	/**
 	 * Begin the tutorial process
