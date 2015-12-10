@@ -49,10 +49,12 @@ public class DrawView extends View
     private Bitmap background;
     private BitmapFactory.Options options;
     private File imageDirectory;
-    private static RectF currentRectangle;
+    private static RectF currentRectangle = new RectF();
     private boolean moving = false;
     private boolean secondPerspective;
     private ArrayList<ColorBall> colorballs = new ArrayList < ColorBall > ();
+
+    int[] params = null;
 
     int groupId = -1;
     private int balID = 0;
@@ -125,12 +127,23 @@ public class DrawView extends View
         super(context, attrs, defStyle);
     }
 
+    Rect rect1 = new Rect();
+    Rect rect2 = new Rect();
+    Paint bitmapPaint = new Paint();
+    Paint greenPaint = new Paint();
+
+
     @Override
     protected void onDraw(Canvas canvas)
     {
-        int[] params = getPhotoParams(background);
-        background = Bitmap.createScaledBitmap(background, params[0], params[1], false);
-        canvas.drawBitmap(background, new Rect(0, 0, background.getWidth(), background.getHeight()), new Rect(0, 0, background.getWidth(), background.getHeight()), new Paint());
+        if(params == null) {
+            params = getPhotoParams(background);
+            background = Bitmap.createScaledBitmap(background, params[0], params[1], false);
+        }
+
+        rect1.set(0, 0, background.getWidth(), background.getHeight());
+        rect2.set(rect1);
+        canvas.drawBitmap(background, rect1, rect2, bitmapPaint);
 
         if(secondPerspective)
             ((TextView)((PaintingActivity)getContext()).findViewById(R.id.pictureLabel)).setText(((PaintingActivity)getContext()).getString(R.string.side_label));
@@ -156,7 +169,7 @@ public class DrawView extends View
 
 
         //draw the rectangle before the colored balls
-        currentRectangle = new RectF(Math.min(colorballs.get(0).getX(), colorballs.get(1).getX()) + radius,
+        currentRectangle.set(Math.min(colorballs.get(0).getX(), colorballs.get(1).getX()) + radius,
                 Math.min(colorballs.get(0).getY(), colorballs.get(3).getY()) + radius,
                 Math.max(colorballs.get(0).getX(), colorballs.get(1).getX()) + radius,
                 Math.max(colorballs.get(0).getY(), colorballs.get(3).getY()) + radius);
@@ -164,8 +177,9 @@ public class DrawView extends View
         canvas.drawRect(currentRectangle, rectPaint);
 
         // draw the balls on the canvas
+        greenPaint.setColor(Color.GREEN);
         for (ColorBall ball: colorballs)
-            canvas.drawBitmap(ball.getBitmap(), ball.getX(), ball.getY(), new Paint(Color.GREEN));
+            canvas.drawBitmap(ball.getBitmap(), ball.getX(), ball.getY(), greenPaint);
 
         radius = (float)colorballs.get(0).getWidthOfBall()/2;
     }
@@ -485,6 +499,7 @@ public class DrawView extends View
         secondPerspective = true;
         background.recycle();
         background = PaintingView.decodeFile(new File(imageDirectory.getPath() + "/Side.png"));
+        params = null;
         resetRectangle(getContext());
     }
 
@@ -494,6 +509,7 @@ public class DrawView extends View
         if(previousBackground != null) {
             background.recycle();
             background = previousBackground.copy(Bitmap.Config.ARGB_8888, true);
+            params = null;
             resetRectangle(getContext());
             return true;
         }
