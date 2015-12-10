@@ -4,13 +4,21 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.R;
@@ -24,10 +32,12 @@ public class FoodServingFragment extends DialogFragment {
 
     public FoodItem food;
     private View view;
+    private boolean isSaved;  // if the food has been saved yet
 
-    public static FoodServingFragment newInstance(FoodItem food) {
+    public static FoodServingFragment newInstance(FoodItem food, boolean isSaved) {
         FoodServingFragment frag = new FoodServingFragment();
         frag.food = food;
+        frag.isSaved = isSaved;
         return frag;
     }
 
@@ -65,14 +75,16 @@ public class FoodServingFragment extends DialogFragment {
         // Pass null as the parent view because its going in the dialog layout
         view = inflater.inflate(R.layout.food_serving_dialog, null);
 
+        // Set up servings edit text
         final TextView servingEntry = (TextView) view.findViewById(R.id.servingEntry);
-
         if (food.getNumServings() == 0.0) {
             servingEntry.setHint("N/A");
         } else {
-            servingEntry.setText("" + food.getNumServings());
+            NumberFormat formatter = new DecimalFormat("#0.00");
+            servingEntry.setText(formatter.format(food.getNumServings()));
         }
 
+        // Set up buttons
         builder.setView(view)
                 // Add Serving buttons
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
@@ -92,9 +104,6 @@ public class FoodServingFragment extends DialogFragment {
 
                         food.setNumServings(numServings);
                         mListener.onServingDialogPositiveClick(FoodServingFragment.this);
-//                        Toast butteredToast = Toast.makeText(getActivity(),
-//                                "Saved servings.", Toast.LENGTH_SHORT);
-//                        butteredToast.show();
                     }
                 })
                 .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
@@ -103,11 +112,36 @@ public class FoodServingFragment extends DialogFragment {
                     }
                 });
 
+        // Set up title
         TextView servingTitle = (TextView) view.findViewById(R.id.servingTitle);
-        servingTitle.setText(Html.fromHtml("<b>Serving Info</b>"));
+        if (isSaved) {
+            servingTitle.setText(Html.fromHtml("<b>Edit Servings</b>"));
+        } else {
+            servingTitle.setText(Html.fromHtml("<b>Enter Servings</b>"));
+        }
 
-        return builder.create();
+        // Set up subtitle
+        TextView subtitle = (TextView) view.findViewById(R.id.servingDescription);
+        subtitle.setText(Html.fromHtml("<i>Number of Servings:</i>"));
+
+        // Set up serving size reminder
+        TextView servingSize = (TextView) view.findViewById(R.id.food_serving);
+        if (food.usesMass() || food.usesVolume()) {
+            NumberFormat formatter = new DecimalFormat("#0.00");
+            servingSize.setText(Html.fromHtml("<b>Size:</b> " + formatter.format(food.getServingSize())
+                    + " " + food.getServingSizeUnit()));
+        } else {
+            servingSize.setText(Html.fromHtml("<b>Size:</b> " + Math.round(food.getServingSize())
+                    + " " + food.getServingSizeUnit()));
+        }
+
+        // Open keyboard automatically
+        EditText editServings = (EditText) view.findViewById(R.id.servingEntry);
+        editServings.requestFocus();
+        Dialog retDialog = builder.create();
+        retDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+        return retDialog;
     }
-
 
 }

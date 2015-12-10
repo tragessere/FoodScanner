@@ -10,10 +10,23 @@
         android:layout_marginTop="16dp"
         android:layout_marginLeft="6dp"
         android:layout_marginRight="6dp"
+        android:layout_marginBottom="0dp"
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        android:textColor="@color/Text.Primary"
+        android:text="Pick the closest match to"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center_horizontal" />
+    <TextView
+        android:id="@+id/food_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="6dp"
         android:layout_marginBottom="14dp"
         android:textAppearance="@android:style/TextAppearance.Medium"
         android:textColor="@color/Text.Primary"
-        android:text="Pick the closest match"
+        android:text="Name of food item"
         android:gravity="center_horizontal"
         android:layout_gravity="center_horizontal" />
 
