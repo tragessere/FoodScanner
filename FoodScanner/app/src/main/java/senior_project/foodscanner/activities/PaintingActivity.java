@@ -66,9 +66,9 @@ public class PaintingActivity extends TutorialBaseActivity
 
     @Override
     public void setupTutorial() {
-        TutorialCard page1 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_card)).setHighlightPadding(-20);
-        TutorialCard page2 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_food)).setHighlightPadding(-20);
-        TutorialCard page3 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_second_picture)).setHighlightPadding(-20);
+        TutorialCard page1 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_card)).useHighlight(false);
+        TutorialCard page2 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_food)).useHighlight(false);
+        TutorialCard page3 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_second_picture)).useHighlight(false);
 
         sequence.addCard(page1);
         sequence.addCard(page2);
