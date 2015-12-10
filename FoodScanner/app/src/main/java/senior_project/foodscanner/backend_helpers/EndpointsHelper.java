@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -374,7 +375,7 @@ public class EndpointsHelper
 				BackendMeal backendMealToSave = convertToBackendMeal(meal);
 				BackendMeal savedBackendMeal = null;
 				if(fakeQuery) {
-					Thread.sleep(7000);
+					Thread.sleep(5000);
 				}
 				else{
 					savedBackendMeal = mAPI.insertBackendMeal(backendMealToSave).execute();
@@ -434,7 +435,7 @@ public class EndpointsHelper
 			try {
 				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
 				if(fakeQuery) {
-					Thread.sleep(7000);
+					Thread.sleep(3000);
 				}
 				else{
 					//mAPI.deleteMeal(backendMeal.getId()).execute();
@@ -495,14 +496,20 @@ public class EndpointsHelper
 			try {
 				Date startDate = dates[0];
 				Date endDate = dates[1];
+				Log.d("EndpointsHelper", "Start Date: " + startDate);
+				Log.d("EndpointsHelper", "End Date: " + endDate);
 				List<BackendMeal> backendMeals = null;
 				if(fakeQuery){
-					Thread.sleep(7000);
+					Thread.sleep(1000);
 				}
 				else {
 					backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+					if(backendMeals != null) {
+						Log.d("EndpointsHelper", "GetMeals Meal Count:" + backendMeals.size());
+					}
 				}
 				if(backendMeals == null) {
+					Log.d("EndpointsHelper", "GetMeals Meal Count: NULL");
 					backendMeals = new ArrayList<>();
 				}
 				return convertToFrontEndMeals(backendMeals);
@@ -613,7 +620,8 @@ public class EndpointsHelper
 		Iterator itForCalc = calcNutritionMap.entrySet().iterator();
 		while (itForCalc.hasNext()) {
 			JsonMap.Entry pair = (JsonMap.Entry)itForCalc.next();
-			foodItem.setField((String)pair.getKey(), (Double)pair.getValue());
+			BigDecimal value = (BigDecimal)pair.getValue();
+			foodItem.setField((String)pair.getKey(), value.doubleValue());
 			itForCalc.remove();
 		}
 
@@ -622,7 +630,8 @@ public class EndpointsHelper
 		Iterator itForUncalc = uncalcNutritionMap.entrySet().iterator();
 		while (itForUncalc.hasNext()) {
 			JsonMap.Entry pair = (JsonMap.Entry)itForUncalc.next();
-			foodItem.setField((String)pair.getKey(), (Double)pair.getValue());
+			BigDecimal value = (BigDecimal)pair.getValue();
+			foodItem.setField((String)pair.getKey(), value.doubleValue());
 			itForUncalc.remove();
 		}
 

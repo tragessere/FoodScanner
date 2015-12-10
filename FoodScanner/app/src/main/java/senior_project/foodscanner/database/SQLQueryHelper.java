@@ -12,8 +12,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
+import senior_project.foodscanner.DateUtils;
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
 
@@ -134,16 +136,15 @@ public class SQLQueryHelper {
 	 */
 	public static List<Meal> getMeals(Calendar startDay, Calendar endDay, boolean useFullDay) {
 		if(useFullDay) {
-			startDay.set(Calendar.HOUR_OF_DAY, 0);
-			startDay.set(Calendar.MINUTE, 0);
-			startDay.set(Calendar.SECOND, 0);
-			startDay.set(Calendar.MILLISECOND, 0);
+			GregorianCalendar cal = new GregorianCalendar();
+			cal.setTimeInMillis(startDay.getTimeInMillis());
+			startDay = cal;
+			DateUtils.toStartOfDay(startDay);
 
-			endDay.add(Calendar.DATE, 1);
-			endDay.set(Calendar.HOUR_OF_DAY, 0);
-			endDay.set(Calendar.MINUTE, 0);
-			endDay.set(Calendar.SECOND, 0);
-			endDay.set(Calendar.MILLISECOND, 0);
+			cal = new GregorianCalendar();
+			cal.setTimeInMillis(endDay.getTimeInMillis());
+			endDay = cal;
+			DateUtils.toEndOfDay(endDay);
 		}
 
 		List<Meal> mealList = new ArrayList<>();
