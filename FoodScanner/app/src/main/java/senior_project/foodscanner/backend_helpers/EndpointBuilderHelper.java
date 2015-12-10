@@ -9,6 +9,8 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
  * Created by mlenarto on 9/24/15.
  */
 public final class EndpointBuilderHelper {
+    private static final String serverURL = "https://foodscannerwebapp.appspot.com/_ah/api/";
+    private static final String localHost = "http://localhost:8080/";
 
     /**
      * Default constructor, never called.
@@ -22,7 +24,7 @@ public final class EndpointBuilderHelper {
     public static FoodScannerBackendAPI getEndpoints(GoogleAccountCredential credential) {
 
         FoodScannerBackendAPI.Builder builder = new FoodScannerBackendAPI.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), credential)
-                .setRootUrl("https://foodscannerwebapp.appspot.com/_ah/api/");
+                .setRootUrl(localHost);
 
         return builder.build();
     }
