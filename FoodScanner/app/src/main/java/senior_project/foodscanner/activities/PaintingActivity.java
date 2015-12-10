@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -18,16 +20,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Serializable;
 
 import senior_project.foodscanner.DrawView;
 import senior_project.foodscanner.PaintingView;
 import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.ui.components.tutorial.TutorialBaseActivity;
 import senior_project.foodscanner.ui.components.tutorial.TutorialCard;
+import senior_project.foodscanner.ui.components.tutorial.TutorialSequence;
 
-public class PaintingActivity extends TutorialBaseActivity
+public class PaintingActivity extends AppCompatActivity
 {
     public final double CREDIT_CARD_HEIGHT  = 2.125;
     public final double CREDIT_CARD_WIDTH   = 3.370;
@@ -43,6 +44,8 @@ public class PaintingActivity extends TutorialBaseActivity
     private double a, b, c, volume;
     private TextView pictureLabel;
     //endregion
+
+    private TutorialSequence sequence;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -64,6 +67,10 @@ public class PaintingActivity extends TutorialBaseActivity
         p = (PaintingView)findViewById(R.id.paintingView);
         metrics = getApplicationContext().getResources().getDisplayMetrics();
         p.setBitmap(metrics.widthPixels, metrics.heightPixels);
+
+		sequence = new TutorialSequence(this);
+		sequence.clearCards();
+		sequence.addCard(new TutorialCard(p, getString(R.string.tutorial_painting_card_title), getString(R.string.tutorial_painting_card)).useHighlight(false));
 
         setupPixelsButton(false);
         setupUndoButton();
@@ -93,6 +100,9 @@ public class PaintingActivity extends TutorialBaseActivity
                     findViewById(R.id.rectangleView).setVisibility(View.INVISIBLE);
                     findViewById(R.id.paintingView).setVisibility(View.VISIBLE);
 
+					sequence.clearCards();
+					sequence.addCard(new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_food)).useHighlight(false).setImageResource(R.drawable.ellipsoid_top));
+
                     if(getActionBar() != null)
                         getActionBar().setTitle("Draw Lines A & B");
 
@@ -119,18 +129,37 @@ public class PaintingActivity extends TutorialBaseActivity
         setupRectangleButton();
     }
 
-    @Override
-    public void setupTutorial() {
-        TutorialCard page1 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_card)).useHighlight(false);
-        TutorialCard page2 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_food)).useHighlight(false);
-        TutorialCard page3 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_second_picture)).useHighlight(false);
+//    @Override
+//    public void setupTutorial() {
+//        TutorialCard page1 = new TutorialCard(p, getString(R.string.tutorial_painting_card_title), getString(R.string.tutorial_painting_card)).useHighlight(false);
+//        TutorialCard page2 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_food)).useHighlight(false).setImageResource(R.drawable.ellipsoid_top);
+//        TutorialCard page3 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_second_picture)).useHighlight(false).setImageResource(R.drawable.ellipsoid_side);
+//
+//        sequence.addCard(page1);
+//        sequence.addCard(page2);
+//        sequence.addCard(page3);
+//    }
 
-        sequence.addCard(page1);
-        sequence.addCard(page2);
-        sequence.addCard(page3);
+    @Override
+    public void onBackPressed() {
+        if(sequence.isActive())
+            sequence.previousPosition();
+        else
+            super.onBackPressed();
     }
 
-    private void setupRectangleButton()
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if(item.getItemId() == R.id.action_tutorial) {
+			if (!sequence.isActive())
+				sequence.Start();
+			else
+				sequence.exitTutorial();
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	private void setupRectangleButton()
    {
        rectangleButton.setOnClickListener(new View.OnClickListener() {
            public void onClick(View v) {
@@ -176,7 +205,10 @@ public class PaintingActivity extends TutorialBaseActivity
                    findViewById(R.id.rectangleView).setVisibility(View.INVISIBLE);
                    findViewById(R.id.paintingView).setVisibility(View.VISIBLE);
 
-                   if(getActionBar() != null)
+				   sequence.clearCards();
+				   sequence.addCard(new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_food)).useHighlight(false).setImageResource(R.drawable.ellipsoid_top));
+
+				   if(getActionBar() != null)
                     getActionBar().setTitle("Draw Lines A & B");
 
                    if(getSupportActionBar() != null)
@@ -207,6 +239,10 @@ public class PaintingActivity extends TutorialBaseActivity
                 //have not finished drawing lines,  go to the next view
                 if (p.getLine3().getLength() == 0) {
                     p.nextPerspective();
+
+					sequence.clearCards();
+					sequence.addCard(new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_second_picture)).useHighlight(false).setImageResource(R.drawable.ellipsoid_side));
+
                     if(getActionBar() != null)
                         getActionBar().setTitle("Draw Line C");
                     getPixelsButton.setVisibility(View.INVISIBLE);
