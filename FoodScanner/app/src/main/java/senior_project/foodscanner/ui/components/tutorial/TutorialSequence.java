@@ -256,10 +256,15 @@ public class TutorialSequence implements SpringListener {
 		cardAlpha.setFillAfter(true);
 		tutorialCard.startAnimation(cardAlpha);
 
-		float radius = (float) Math.sqrt(
-				viewHalfWidth * viewHalfWidth +
-				viewHalfHeight * viewHalfHeight);
-		radius += currentPage.getHighlightPaddingPx();
+		float radius;
+		if(currentPage.isUsingHighlight()) {
+			radius = (float) Math.sqrt(
+					viewHalfWidth * viewHalfWidth +
+							viewHalfHeight * viewHalfHeight);
+			radius += currentPage.getHighlightPaddingPx();
+		} else {
+			radius = 0;
+		}
 
 		viewCenter[1] -= parentTop;
 		background.enter(viewCenter, radius);
@@ -374,10 +379,15 @@ public class TutorialSequence implements SpringListener {
 				cardAlpha.setFillAfter(true);
 				cardContents.startAnimation(cardAlpha);
 
-				float radius = (float) Math.sqrt(
-						viewHalfWidth * viewHalfWidth +
-								viewHalfHeight * viewHalfHeight);
-				radius += currentPage.getHighlightPaddingPx();
+				float radius;
+				if(currentPage.isUsingHighlight()) {
+					radius = (float) Math.sqrt(
+							viewHalfWidth * viewHalfWidth +
+									viewHalfHeight * viewHalfHeight);
+					radius += currentPage.getHighlightPaddingPx();
+				} else {
+					radius = 0;
+				}
 
 				viewCenter[1] -= parentTop;
 				background.move(viewCenter, radius);

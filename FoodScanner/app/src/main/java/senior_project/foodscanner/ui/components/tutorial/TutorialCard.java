@@ -21,6 +21,7 @@ public class TutorialCard {
 	public static final int HIGHLIGHT_RECTANGLE = 1;
 	private int highlightShape = HIGHLIGHT_CIRCLE;
 	private int highlightPadding = DEFAULT_HIGHLIGHT_PADDING_DP;
+	private boolean useHighlight;
 
 
 	private View highlightView;
@@ -112,6 +113,15 @@ public class TutorialCard {
 	public int getHighlightPaddingPx() {
 		DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
 		return (int) (highlightPadding * (metrics.densityDpi / 160f));
+	}
+
+	public TutorialCard useHighlight(boolean useHighlight) {
+		this.useHighlight = useHighlight;
+		return this;
+	}
+
+	public boolean isUsingHighlight() {
+		return useHighlight;
 	}
 
 	public TutorialCard setPosition(int position) {
