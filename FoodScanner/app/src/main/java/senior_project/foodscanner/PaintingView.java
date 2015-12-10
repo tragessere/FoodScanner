@@ -71,6 +71,7 @@ public class PaintingView extends View
     private double                  radius;
     private int                     currentPoint;
     private int                     temp;
+    private int[]                   params = null;
 
 
     private int screenW, screenH;
@@ -271,9 +272,12 @@ public class PaintingView extends View
         else
             p.setPictureLabel(p.getString(R.string.top_label));
 
-        int[] params = getPhotoParams(background);
-        background = Bitmap.createScaledBitmap(background, params[0], params[1], false);
-        canvas.drawBitmap(background, new Rect(0,0,background.getWidth(), background.getHeight()), new Rect(0,0,background.getWidth(), background.getHeight()), new Paint());
+        if(params == null) {
+            params = getPhotoParams(background);
+            background = Bitmap.createScaledBitmap(background, params[0], params[1], false);
+        }
+
+        canvas.drawBitmap(background, new Rect(0, 0, background.getWidth(), background.getHeight()), new Rect(0, 0, background.getWidth(), background.getHeight()), new Paint());
 
         //draw each of the lines
         for(int i = 0; i+1 < getCurrentEndpoints().size(); i += 2)
