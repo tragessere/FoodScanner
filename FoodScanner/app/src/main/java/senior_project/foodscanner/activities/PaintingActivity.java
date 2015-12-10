@@ -17,7 +17,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.Serializable;
 
 import senior_project.foodscanner.DrawView;
@@ -65,8 +70,50 @@ public class PaintingActivity extends AppCompatActivity
         p.setBitmap(metrics.widthPixels, metrics.heightPixels);
 
         setupPixelsButton(false);
-        setupRectangleButton();
         setupUndoButton();
+
+        // Check if ppi cache exists. If so, skip card outlining.
+        File ppiCache = new File(ImageDirectoryManager.
+                getPixelsDirectory(this).getPath() + "/ppi.txt");
+        if (ppiCache.exists()) {
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(ppiCache));
+                String ppi1_str = br.readLine();
+                String ppi2_str = br.readLine();
+                if (ppi1_str == null || ppi2_str == null) {
+                    Toast butteredToast = Toast.makeText(getApplicationContext(),
+                            "Error: Failed to retrieve cached ppi.", Toast.LENGTH_SHORT);
+                    butteredToast.show();
+                } else {
+                    pixelsPerInch1 = Double.parseDouble(ppi1_str);
+                    pixelsPerInch2 = Double.parseDouble(ppi2_str);
+
+                    // Successfully retrieved cached ppi
+
+                    // Skip card outlining, go straight to drawing A & B lines
+                    rectangleButton.setVisibility(View.INVISIBLE);
+                    undoButton.setVisibility(View.VISIBLE);
+                    findViewById(R.id.rectangleView).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.paintingView).setVisibility(View.VISIBLE);
+
+                    if(getActionBar() != null)
+                        getActionBar().setTitle("Draw Lines A & B");
+
+                    if(getSupportActionBar() != null)
+                        getSupportActionBar().setTitle("Draw Lines A & B");
+
+                    return;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast butteredToast = Toast.makeText(getApplicationContext(),
+                        "Error: Failed to retrieve cached ppi.", Toast.LENGTH_SHORT);
+                butteredToast.show();
+            }
+        }
+
+        // ppi cache failed, start card outlining
+        setupRectangleButton();
     }
 
 
@@ -86,6 +133,31 @@ public class PaintingActivity extends AppCompatActivity
                }
 
                else {
+                   pixelsPerInch2 = rectangle.height() / CREDIT_CARD_HEIGHT;
+                   //Toast.makeText(PaintingActivity.this, "Rectangle Height: " + rectangle.height() + " Rectangle Width: " + rectangle.width() + "\nPixels Per Inch: " + Math.min(rectangle.height(), rectangle.width()) / 2.125, Toast.LENGTH_LONG).show();
+
+                   // Save ppi to cache
+                   File ppiCache = new File(ImageDirectoryManager.
+                           getPixelsDirectory(PaintingActivity.this).getPath() + "/ppi.txt");
+                   try {
+                       BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(ppiCache));
+                       stream.write((pixelsPerInch1 + "\n").getBytes());
+                       stream.write((pixelsPerInch2 + "\n").getBytes());
+                       stream.close();
+                   } catch (IOException e) {
+                       e.printStackTrace();
+                       Toast butteredToast = Toast.makeText(getApplicationContext(),
+                               "Error: Failed to cache ppi.", Toast.LENGTH_SHORT);
+                       butteredToast.show();
+
+                       if (ppiCache.exists()) {
+                           // Delete file, in case it was created
+                           ppiCache.delete();
+                       }
+                   }
+
+                   // Switch from card outlining to line drawing
+
                    rectangleButton.setVisibility(View.INVISIBLE);
                    undoButton.setVisibility(View.VISIBLE);
                    findViewById(R.id.rectangleView).setVisibility(View.INVISIBLE);
@@ -96,9 +168,6 @@ public class PaintingActivity extends AppCompatActivity
 
                    if(getSupportActionBar() != null)
                     getSupportActionBar().setTitle("Draw Lines A & B");
-
-                   pixelsPerInch2 = rectangle.height() / CREDIT_CARD_HEIGHT;
-                   //Toast.makeText(PaintingActivity.this, "Rectangle Height: " + rectangle.height() + " Rectangle Width: " + rectangle.width() + "\nPixels Per Inch: " + Math.min(rectangle.height(), rectangle.width()) / 2.125, Toast.LENGTH_LONG).show();
                }
            }
        });
