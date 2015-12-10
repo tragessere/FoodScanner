@@ -186,6 +186,7 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         cv.put(SQLHelper.COLUMN_NEW, isNew);
         cv.put(SQLHelper.COLUMN_CHANGED, isChanged);
         cv.put(SQLHelper.COLUMN_DELETED, isDeleted);
+        cv.put(SQLHelper.COLUMN_SERVER_ID, serverId);
         return cv;
     }
 
