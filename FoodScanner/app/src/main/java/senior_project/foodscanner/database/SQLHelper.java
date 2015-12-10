@@ -15,7 +15,7 @@ public class SQLHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "foodScanner.db";
 	//Update database version whenever changing tables or columns
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 5;
 	private static final String DROP = "DROP TABLE IF EXISTS ";
 
 	public static final String TABLE_MEALS = "table_meals";
@@ -25,13 +25,13 @@ public class SQLHelper extends SQLiteOpenHelper {
 	//Needs this exact name for some classes (e.g. CursorAdapter)
 	public static final String COLUMN_ID = "_id";
 
-
 	public static final String COLUMN_MEAL_TYPE = "meal_type";
 	public static final String COLUMN_TIME = "time";
 	public static final String COLUMN_FOOD_LIST = "food_list";
 	public static final String COLUMN_NEW = "new";
 	public static final String COLUMN_CHANGED = "finished";
 	public static final String COLUMN_DELETED = "deleted";
+	public static final String COLUMN_SERVER_ID = "server_id";
 
 	private static final String TABLE_MEALS_CREATE = "CREATE TABLE IF NOT EXISTS "
 			+ TABLE_MEALS + "("
@@ -41,7 +41,8 @@ public class SQLHelper extends SQLiteOpenHelper {
 			+ COLUMN_FOOD_LIST + " BLOB, "
 			+ COLUMN_NEW + " INT, "
 			+ COLUMN_CHANGED + " INT, "
-			+ COLUMN_DELETED + " INT);";
+			+ COLUMN_DELETED + " INT, "
+			+ COLUMN_SERVER_ID + " INT);";
 
 
 	public static final String COLUMN_MEAL_ID = "meal_id";

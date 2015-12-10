@@ -533,10 +533,9 @@ public class EndpointsHelper
 				convertToFrontEndFoodItems(backendMeal.getFoodItems()),
 				backendMeal.getIsNew(),
 				backendMeal.getIsChanged(),
-				false
+				false,
+				backendMeal.getId()
 		);
-
-		meal.setServerId(backendMeal.getId().longValue());
 
 		return meal;
 	}

@@ -63,8 +63,9 @@ public class Meal extends Nutritious implements Serializable, Comparable<Meal> {
         setIsNew(true);
     }
 
-    public Meal(long id, long date, String type, ArrayList<FoodItem> foodItems,  boolean isNew, int isChanged, boolean isDeleted) {
+    public Meal(long id, long date, String type, ArrayList<FoodItem> foodItems,  boolean isNew, int isChanged, boolean isDeleted, long serverId) {
         this.id = id;
+        this.serverId = serverId;
         this.date = date;
         this.type = MealType.valueOf(type);
         food = foodItems;
