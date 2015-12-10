@@ -384,7 +384,8 @@ public class EndpointsHelper
 				}
 				success = true;
 				return meal;
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				if(!isCancelled()) {
 					Log.e("EndpointsHelper", "SaveMealTask", e);
 					exception = e;
@@ -443,7 +444,12 @@ public class EndpointsHelper
 				}
 				success = true;
 				return meals[0];
-			} catch (Exception e) {
+			}
+			catch(IllegalArgumentException e){
+				// no meal to delete on server
+				return meals[0];
+			}
+			catch (Exception e) {
 				if(!isCancelled()) {
 					Log.e("EndpointsHelper", "DeleteMealTask", e);
 					exception = e;
@@ -496,24 +502,23 @@ public class EndpointsHelper
 			try {
 				Date startDate = dates[0];
 				Date endDate = dates[1];
-				Log.d("EndpointsHelper", "Start Date: " + startDate);
-				Log.d("EndpointsHelper", "End Date: " + endDate);
 				List<BackendMeal> backendMeals = null;
 				if(fakeQuery){
 					Thread.sleep(1000);
 				}
 				else {
 					backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
-					if(backendMeals != null) {
-						Log.d("EndpointsHelper", "GetMeals Meal Count:" + backendMeals.size());
-					}
 				}
 				if(backendMeals == null) {
 					Log.d("EndpointsHelper", "GetMeals Meal Count: NULL");
-					backendMeals = new ArrayList<>();
+					//backendMeals = new ArrayList<>();
+				}
+				else{
+					Log.d("EndpointsHelper", "GetMeals Meal Count:" + backendMeals.size());
 				}
 				return convertToFrontEndMeals(backendMeals);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				if(!isCancelled()) {
 					Log.e("EndpointsHelper", "GetMealsWithinDatesTask", e);
 					exception = e;
