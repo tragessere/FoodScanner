@@ -536,6 +536,7 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
             Log.d("MealCalendarActivity","LOADING BACKEND");
             DateUtils.toStartOfDay(day1);
             DateUtils.toEndOfDay(day2);
+            Log.d("MealCalendarActivity", "LOADING BETWEEN: "+day1.getTimeInMillis()+" to "+day2.getTimeInMillis());
             loadingIndicator.setVisibility(View.VISIBLE);
             loadTask_Calendar = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
                 @Override

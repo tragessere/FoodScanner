@@ -536,7 +536,7 @@ public class EndpointsHelper
 				}
 				if(backendMeals == null) {
 					Log.d("EndpointsHelper", "GetMeals Meal Count: NULL");
-					//backendMeals = new ArrayList<>();
+					backendMeals = new ArrayList<>();
 				}
 				else{
 					Log.d("EndpointsHelper", "GetMeals Meal Count:" + backendMeals.size());
