@@ -6,14 +6,10 @@ import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,8 +18,6 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
 
 import senior_project.foodscanner.Constants;
 import senior_project.foodscanner.FoodItem;
@@ -34,20 +28,19 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import senior_project.foodscanner.Nutritious;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
 import senior_project.foodscanner.backend_helpers.EndpointsHelper;
 import senior_project.foodscanner.database.SQLQueryHelper;
-import senior_project.foodscanner.fragments.FoodDensityFragment;
 import senior_project.foodscanner.fragments.FoodInfoFragment;
 import senior_project.foodscanner.fragments.FoodServingFragment;
-import senior_project.foodscanner.fragments.FoodVolumeFragment;
 import senior_project.foodscanner.fragments.MessageDialogFragment;
 import senior_project.foodscanner.fragments.PreviousPhotoFragment;
 import senior_project.foodscanner.ui.components.fooditem.FoodArrayAdapter;
+import senior_project.foodscanner.ui.components.tutorial.TutorialBaseActivity;
+import senior_project.foodscanner.ui.components.tutorial.TutorialCard;
 
 /**
  * Shows details of the meal and allows editing.
@@ -69,7 +62,7 @@ import senior_project.foodscanner.ui.components.fooditem.FoodArrayAdapter;
  * Delete Meal
  * Back Button - return to Meal Calendar
  */
-public class MealDetailsActivity extends AppCompatActivity implements View.OnClickListener,
+public class MealDetailsActivity extends TutorialBaseActivity implements View.OnClickListener,
         FoodInfoFragment.FoodInfoDialogListener, FoodServingFragment.FoodServingDialogListener,
         PreviousPhotoFragment.PreviousPhotoDialogListener, FoodArrayAdapter.FoodArrayAdapterListener {
 
@@ -84,8 +77,10 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
     private String[] meals;
     private Spinner mealSpinner;
+    private ListView mealList;
     private FoodItem removedFood;
     private FoodItem lastClickedFood;
+    private Button total_button;
 
     ProgressDialog dialog;
 
@@ -100,7 +95,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_meal_details);
 
         // Set up Total Nutrition button
-        Button total_button = (Button) findViewById(R.id.button_total_meal);
+        total_button = (Button) findViewById(R.id.button_total_meal);
         total_button.setOnClickListener(this);
 
         // Set up Finish button
@@ -123,6 +118,8 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         mealAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mealSpinner.setAdapter(mealAdapter);
         mealSpinner.setSelection(mealAdapter.getPosition(meal.getType().getName()));
+
+        mealList = (ListView) findViewById(R.id.food_list);
 
         // Doesn't do anything now, left in just in case.
         if (meal.isNew()) {
@@ -148,9 +145,34 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
+    public void setupTutorial() {
+        TutorialCard mealTypePage = new TutorialCard(mealSpinner, getString(R.string.tutorial_meal_details_type_title), getString(R.string.tutorial_meal_details_type));
+        TutorialCard page1 = new TutorialCard(mealList, getString(R.string.tutorial_meal_details_title), getString(R.string.tutorial_meal_details_list))
+                .setHighlightPadding(-15)
+                .setPosition(TutorialCard.POSITION_BOTTOM);
+        TutorialCard page2 = new TutorialCard(mealList, getString(R.string.tutorial_meal_details_scan_title), getString(R.string.tutorial_meal_details_scan))
+                .setHighlightPadding(-15)
+                .setPosition(TutorialCard.POSITION_BOTTOM);
+        TutorialCard page3 = new TutorialCard(mealList, getString(R.string.tutorial_meal_details_servings_title), getString(R.string.tutorial_meal_details_servings))
+                .setHighlightPadding(-15)
+                .setPosition(TutorialCard.POSITION_BOTTOM);
+        TutorialCard page4 = new TutorialCard(mealList, getString(R.string.tutorial_meal_details_replace_title), getString(R.string.tutorial_meal_details_replace))
+                .setHighlightPadding(-15)
+                .setPosition(TutorialCard.POSITION_BOTTOM);
+        TutorialCard totalPage = new TutorialCard(total_button, getString(R.string.tutorial_meal_details_total_title), getString(R.string.tutorial_meal_details_total));
+
+        sequence.addCard(mealTypePage);
+        sequence.addCard(page1);
+        sequence.addCard(page2);
+        sequence.addCard(page3);
+        sequence.addCard(page4);
+        sequence.addCard(totalPage);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_meal_details, menu);
+        getMenuInflater().inflate(R.menu.menu_tutorial, menu);
         return true;
     }
 
@@ -179,21 +201,20 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         }
 
         // Set up list of food items
-        ListView lv = (ListView) findViewById(R.id.food_list);
         List<FoodItem> tempFood = new ArrayList<>(meal.getFood());
         FoodArrayAdapter adapter = new FoodArrayAdapter(MealDetailsActivity.this, tempFood);
         adapter.setOnDeleteListener(this);
-        lv.setAdapter(adapter);
+        mealList.setAdapter(adapter);
 
         // Set up background
         if (meal.getFood().size() == 0) {
-            lv.setBackgroundResource(R.drawable.background_add_food);
+            mealList.setBackgroundResource(R.drawable.background_add_food);
         } else {
-            lv.setBackgroundResource(0);
+            mealList.setBackgroundResource(0);
         }
 
         // Set up what happens when you click a list item
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mealList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Check if null, i.e. the "+" was pressed
                 if (position >= meal.getFood().size() || meal.getFoodItem(position) == null) {
@@ -213,16 +234,17 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
             }
         });
 
-//        // Set up what happens when you long click a list item
-//        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-//            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-//                //View nutrition info & give option to replace or delete
-//                FoodItem food = meal.getFoodItem(position);
-//                DialogFragment dialog = FoodInfoFragment.newInstance(food, true);
-//                dialog.show(getFragmentManager(), "FoodInfoFragment");
-//                return true;
-//            }
-//        });
+        // Set up what happens when you long click a list item
+        mealList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                // Bring up servings dialog, regardless if usesMass or usesVolume
+                lastClickedFood = meal.getFoodItem(position);
+                FoodItem food = meal.getFoodItem(position);
+                DialogFragment servingsDialog = FoodServingFragment.newInstance(food, true);
+                servingsDialog.show(getFragmentManager(), "FoodServingFragment");
+                return true;
+            }
+        });
 
     }
 
@@ -234,27 +256,12 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
 
     @Override
-    public void onBackPressed() {
+    public boolean backButtonPressed() {
         Intent resultIntent = new Intent();
         resultIntent.putExtra("meal", meal);
         setResult(Activity.RESULT_OK, resultIntent);
 
-        super.onBackPressed();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if(id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        return false;
     }
 
     @Override
@@ -272,7 +279,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
             if (foodList.size() == 1) {
                 FoodItem onlyFood = foodList.get(0);
-                if ((onlyFood.usesVolume() || onlyFood.usesMass()) && onlyFood.getVolume() == 0.0) {
+                if ((onlyFood.usesVolume() || onlyFood.usesMass()) && onlyFood.getVolume() == 0.0 && onlyFood.getNumServings() == 0.0) {
                     Toast butteredToast = Toast.makeText(this,
                             "Scan food item first.", Toast.LENGTH_SHORT);
                     butteredToast.setGravity(Gravity.CENTER, 0, 0);
@@ -348,6 +355,19 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
                 // No previous images, go straight to photo taker
                 Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
                 intent.putExtra("pic_names", new String[]{"Top", "Side"});
+
+                // Delete previous ppi cache, if it exists
+                File ppiCache = new File(ImageDirectoryManager.
+                        getPixelsDirectory(this).getPath() + "/ppi.txt");
+                if (ppiCache.exists()) {
+                    boolean result = ppiCache.delete();
+                    if (!result) {
+                        Toast butteredToast = Toast.makeText(getApplicationContext(),
+                                "Error: Couldn't delete cached ppi.", Toast.LENGTH_SHORT);
+                        butteredToast.show();
+                    }
+                }
+
                 startActivityForResult(intent, REQUEST_FOODSCANNER);
             } else {
                 // Ask user if they want to use previous images before proceeding
@@ -357,7 +377,7 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
         } else {
             // User touched "Servings" -> open servings dialog
-            DialogFragment servingsDialog = FoodServingFragment.newInstance(foodFrag.food);
+            DialogFragment servingsDialog = FoodServingFragment.newInstance(foodFrag.food, true);
             servingsDialog.show(getFragmentManager(), "FoodServingFragment");
         }
     }
@@ -417,6 +437,19 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
         // Open photo taker activity
         Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
         intent.putExtra("pic_names", new String[]{"Top", "Side"});
+
+        // Delete previous ppi cache, if it exists
+        File ppiCache = new File(ImageDirectoryManager.
+                getPixelsDirectory(this).getPath() + "/ppi.txt");
+        if (ppiCache.exists()) {
+            boolean result = ppiCache.delete();
+            if (!result) {
+                Toast butteredToast = Toast.makeText(getApplicationContext(),
+                        "Error: Couldn't delete cached ppi.", Toast.LENGTH_SHORT);
+                butteredToast.show();
+            }
+        }
+
         startActivityForResult(intent, REQUEST_FOODSCANNER);
     }
 
@@ -440,8 +473,9 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
 
         // Create confirmation dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Are you sure you want to delete \"" + removedFood.getName() + " (" +
-                removedFood.getBrand() + ")\"?")
+        String messageStr = "Are you sure you want to delete <b>" + removedFood.getName() + " (" +
+                removedFood.getBrand() + ")</b>?";
+        builder.setMessage(Html.fromHtml(messageStr))
                 .setTitle("Confirm Food Deletion");
         builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -495,6 +529,19 @@ public class MealDetailsActivity extends AppCompatActivity implements View.OnCli
             // No previous images, go straight to photo taker
             Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
             intent.putExtra("pic_names", new String[]{"Top", "Side"});
+
+            // Delete previous ppi cache, if it exists
+            File ppiCache = new File(ImageDirectoryManager.
+                    getPixelsDirectory(this).getPath() + "/ppi.txt");
+            if (ppiCache.exists()) {
+                boolean result = ppiCache.delete();
+                if (!result) {
+                    Toast butteredToast = Toast.makeText(getApplicationContext(),
+                            "Error: Couldn't delete cached ppi.", Toast.LENGTH_SHORT);
+                    butteredToast.show();
+                }
+            }
+
             startActivityForResult(intent, REQUEST_FOODSCANNER);
         } else {
             // Ask user if they want to use previous images before proceeding

@@ -177,7 +177,7 @@ public class PhotoTakerActivity extends AppCompatActivity implements ErrorDialog
         intent.putExtra(CameraActivity.EXTRA_FILENAME, picBrowser.getCurrentImageName());
         intent.putExtra(CameraActivity.EXTRA_IMAGE_NAME, picBrowser.getCurrentImageName());
         intent.putExtra(CameraActivity.EXTRA_IMAGE_DESCRIPTION, (picBrowser.getCurrentIndex() + 1) + "/" + picBrowser.getNumImages());
-        //TODO Evan: put Extra CameraActivity.CameraActivity_HelpActor
+        intent.putExtra(CameraActivity.EXTRA_HELP_ACTOR, CameraActivity.TUTORIAL_SCAN);
         startActivityForResult(intent, RESULT_CAMERA);
     }
 

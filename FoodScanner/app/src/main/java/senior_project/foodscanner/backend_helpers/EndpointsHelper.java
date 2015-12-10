@@ -192,8 +192,9 @@ public class EndpointsHelper
             if (localDensities.exists()) {
                 // Read from file and save to density map
                 downloadDensities = false;
+				BufferedReader br = null;
                 try {
-                    BufferedReader br = new BufferedReader(new FileReader(localDensities));
+                    br = new BufferedReader(new FileReader(localDensities));
                     String line;
                     String name = null;
                     boolean isName = true;
@@ -222,7 +223,13 @@ public class EndpointsHelper
                     downloadDensities = true;
                     // Clear density list to avoid errors
                     senior_project.foodscanner.FoodItem.clearAllDensities();
-                }
+                } finally {
+					try {
+						br.close();
+					} catch (Exception e) {
+						// Ignore
+					}
+				}
             }
 
             if (!downloadDensities) {

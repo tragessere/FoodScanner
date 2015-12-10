@@ -73,13 +73,18 @@ public class FoodInfoFragment extends DialogFragment {
         }
 
         info.append("<br><b>Serving Size:</b>  ");
-        info.append(food.getServingSize());
+        if (food.usesMass() || food.usesVolume()) {
+            info.append(food.getServingSize());
+        } else {
+            // Round for manual serving sizes, e.g. "1 taco" instead of "1.0 taco"
+            info.append(Math.round(food.getServingSize()));
+        }
         info.append(" ");
         info.append(food.getServingSizeUnit());
 
         NumberFormat formatter = new DecimalFormat("#0.0");
 
-        if (!isSaved || ((food.usesMass() || food.usesVolume()) && food.getVolume() == 0.0)) {
+        if (!isSaved || ((food.usesMass() || food.usesVolume()) && food.getVolume() == 0.0 && food.getNumServings() == 0.0)) {
             // Display uncalculated nutrition info
             for (Map.Entry<String, Double> field : food.getSet()) {
                 info.append("<br><b>");
@@ -119,7 +124,7 @@ public class FoodInfoFragment extends DialogFragment {
             info.append(formatterTwo.format(food.getVolume()) + " ml");
             info.append("<br><b>Mass:</b> ");
             info.append(formatterTwo.format(food.getMass()) + " " + food.getActualServingSizeUnit());
-        } else if ((food.usesMass() || food.usesVolume()) && isSaved) {
+        } else if ((food.usesMass() || food.usesVolume()) && isSaved && food.getNumServings() == 0.0) {
             // Food has not yet been scanned, add message
             info.append("<br><b><i>This needs to be scanned</b></i>");
         }
