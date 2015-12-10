@@ -673,9 +673,11 @@ public class EndpointsHelper
 	public ArrayList<Meal> convertToFrontEndMeals(List<BackendMeal> backendMeals)
 	{
 		ArrayList<Meal> meals = new ArrayList<Meal>();
-
-		for (BackendMeal backendMeal : backendMeals) {
-			meals.add(convertToFrontEndMeal(backendMeal));
+		if (backendMeals != null)
+		{
+			for (BackendMeal backendMeal : backendMeals) {
+				meals.add(convertToFrontEndMeal(backendMeal));
+			}
 		}
 
 		return meals;
