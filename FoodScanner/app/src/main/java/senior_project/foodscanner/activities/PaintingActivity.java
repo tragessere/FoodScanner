@@ -1,17 +1,12 @@
 
 package senior_project.foodscanner.activities;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.RectF;
-import android.provider.ContactsContract;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -29,9 +24,10 @@ import senior_project.foodscanner.DrawView;
 import senior_project.foodscanner.PaintingView;
 import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
-import senior_project.foodscanner.ui.components.ImageBrowser;
+import senior_project.foodscanner.ui.components.tutorial.TutorialBaseActivity;
+import senior_project.foodscanner.ui.components.tutorial.TutorialCard;
 
-public class PaintingActivity extends AppCompatActivity
+public class PaintingActivity extends TutorialBaseActivity
 {
     public final double CREDIT_CARD_HEIGHT  = 2.125;
     public final double CREDIT_CARD_WIDTH   = 3.370;
@@ -123,6 +119,16 @@ public class PaintingActivity extends AppCompatActivity
         setupRectangleButton();
     }
 
+    @Override
+    public void setupTutorial() {
+        TutorialCard page1 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_card)).useHighlight(false);
+        TutorialCard page2 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_food)).useHighlight(false);
+        TutorialCard page3 = new TutorialCard(p, getString(R.string.tutorial_painting_title), getString(R.string.tutorial_painting_second_picture)).useHighlight(false);
+
+        sequence.addCard(page1);
+        sequence.addCard(page2);
+        sequence.addCard(page3);
+    }
 
     private void setupRectangleButton()
    {
@@ -191,6 +197,7 @@ public class PaintingActivity extends AppCompatActivity
         });
     }
 
+    //TODO: make sure to not allow user to press this button before they place 2 lines
     private void setupPixelsButton(boolean first)
     {
         getPixelsButton.setOnClickListener(new View.OnClickListener() {
@@ -230,25 +237,8 @@ public class PaintingActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu)
     {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_painting, menu);
+        getMenuInflater().inflate(R.menu.menu_tutorial, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
-        {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public Point setupDrawing()

@@ -21,4 +21,6 @@
 
     <color name="black_overlay">#66000000</color>
 
+    <color name="Borderless.Button.Text">#009688</color>
+
 </resources>
