@@ -32,6 +32,8 @@ import senior_project.foodscanner.ImageDirectoryManager;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.fragments.ErrorDialogFragment;
 import senior_project.foodscanner.ui.components.camera.CameraView;
+import senior_project.foodscanner.ui.components.tutorial.TutorialCard;
+import senior_project.foodscanner.ui.components.tutorial.TutorialSequence;
 
 /**
  * Activity to take a single picture.
@@ -46,6 +48,8 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     public static final String EXTRA_IMAGE_DESCRIPTION = "image_desc"; //optional String
     public static final String EXTRA_HELP_ACTOR = "help_actor"; //optional CameraActivity_HelpActor
     public static final String RESULT_IMAGE_FILE = "image_file";
+
+    public static final int TUTORIAL_SCAN = 0;
 
     // Image file format
     public static final String IMAGE_FORMAT_EXTENSION = ".png";
@@ -68,7 +72,7 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
     private int shutterOrientation;
     private MediaActionSound sound;
 
-
+    private TutorialSequence sequence;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +99,8 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         button_help.setOnClickListener(this);
         cameraContainer.setOnClickListener(this);
 
+        sequence = new TutorialSequence(this);
+
         if(getIntent().hasExtra(EXTRA_IMAGE_NAME)) {
             textView_Image_Title.setText(getIntent().getCharSequenceExtra(EXTRA_IMAGE_NAME));
         }
@@ -110,7 +116,15 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
         }
 
         if(getIntent().hasExtra(EXTRA_HELP_ACTOR)) {
-            help_actor = (CameraActivity_HelpActor)getIntent().getSerializableExtra(EXTRA_HELP_ACTOR);
+//            help_actor = (CameraActivity_HelpActor)getIntent().getSerializableExtra(EXTRA_HELP_ACTOR);
+            int tutorialType = getIntent().getIntExtra(EXTRA_HELP_ACTOR, -1);
+
+            if(tutorialType == TUTORIAL_SCAN) {
+                sequence.addCard(new TutorialCard(cameraContainer, getString(R.string.tutorial_camera_title), getString(R.string.tutorial_camera_overview)).useHighlight(false));
+                sequence.addCard(new TutorialCard(cameraContainer, getString(R.string.tutorial_camera_title), getString(R.string.tutorial_camera_card)).useHighlight(false));
+                sequence.addCard(new TutorialCard(cameraContainer, getString(R.string.tutorial_camera_title), getString(R.string.tutorial_camera_closeup)).useHighlight(false));
+            }
+
         }
         else {
             button_help.setVisibility(View.GONE);
@@ -153,7 +167,8 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
                 takePicture();
                 break;
             case R.id.imageButton_help:
-                help_actor.doHelpAction(this);
+//                help_actor.doHelpAction(this);
+                sequence.Start();
                 break;
             case R.id.container_camera:
                 startFocus();
@@ -162,6 +177,14 @@ public class CameraActivity extends AppCompatActivity implements ErrorDialogFrag
                 ErrorDialogFragment.showErrorDialog(this, "Unhandled click action!");
                 break;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(sequence.isActive())
+            sequence.previousPosition();
+        else
+            super.onBackPressed();
     }
 
     private void takePicture() {

@@ -120,13 +120,6 @@ public class PaintingActivity extends TutorialBaseActivity
         });
     }
 
-    @Override
-    public void onBackPressed()
-    {
-        PaintingView p = (PaintingView)findViewById(R.id.paintingView);
-        p.undoLast();
-    }
-
     //TODO: make sure to not allow user to press this button before they place 2 lines
     private void setupPixelsButton(boolean first)
     {

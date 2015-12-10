@@ -235,7 +235,7 @@ public class MealDetailsActivity extends TutorialBaseActivity implements View.On
         });
 
         // Set up what happens when you long click a list item
-        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        mealList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 // Bring up servings dialog, regardless if usesMass or usesVolume
                 lastClickedFood = meal.getFoodItem(position);
