@@ -15,6 +15,7 @@ import java.io.File;
 public class ImageDirectoryManager {
     public static final String IMAGE_DIR_NAME = "CameraImages";
     public static final String DENSITY_DIR_NAME = "DensityEntries";
+    public static final String PPI_DIR_NAME = "PixelsPerInch";
 
     /**
      * Deletes all image files in the image directory.
@@ -56,5 +57,18 @@ public class ImageDirectoryManager {
             densityDir.mkdir();
         }
         return densityDir;
+    }
+
+    /**
+     * Returns a File object representing the ppi directory.
+     * @param context - context
+     * @return
+     */
+    public static File getPixelsDirectory(Context context) {
+        File ppiDir = new File(context.getCacheDir(), PPI_DIR_NAME);
+        if(!ppiDir.exists()) {
+            ppiDir.mkdir();
+        }
+        return ppiDir;
     }
 }
