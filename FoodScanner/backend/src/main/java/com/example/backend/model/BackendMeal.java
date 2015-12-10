@@ -1,8 +1,9 @@
 package com.example.backend.model;
 
-import com.example.backend.Constants.MealType;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 
 import java.util.List;
 
@@ -12,10 +13,11 @@ import java.util.List;
 @Entity
 public class BackendMeal {
     @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
     private Long clientDBId; // ID used by the client DB
     private Long date;
-    private MealType type;
+    private String type;
     private List<BackendFoodItem> foodItems;
     private boolean isNew;
     private int isChanged;
@@ -24,7 +26,7 @@ public class BackendMeal {
     public Long getId() { return id; }
     public Long getClientDBId() { return clientDBId; }
     public Long getDate() { return date; }
-    public MealType getType() { return type; }
+    public String getType() { return type; }
     public List<BackendFoodItem> getFoodItems() { return foodItems; }
     public boolean getIsNew() { return isNew; }
     public int getIsChanged() { return isChanged; }
@@ -33,7 +35,7 @@ public class BackendMeal {
     public void setId(Long id) { this.id = id; }
     public void setClientDBId(Long id) { this.clientDBId = id; }
     public void setDate(Long date) {this.date = date; }
-    public void setMealType(MealType type) { this.type = type; }
+    public void setType(String type) { this.type = type; }
     public void setFoodItems(List<BackendFoodItem> foodItems) { this.foodItems = foodItems; }
     public void setIsNew(boolean isNew) { this.isNew = isNew; }
     public void setIsChanged(int isChanged) { this.isChanged = isChanged; }

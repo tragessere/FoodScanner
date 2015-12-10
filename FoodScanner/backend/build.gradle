@@ -27,6 +27,7 @@ dependencies {
     compile 'com.google.appengine:appengine-endpoints-deps:1.9.18'
     compile 'javax.servlet:servlet-api:2.5'
     compile 'com.googlecode.objectify:objectify:5.0.3'
+    compile group: 'javax.persistence', name: 'persistence-api', version: '1.0'
 }
 
 appengine {

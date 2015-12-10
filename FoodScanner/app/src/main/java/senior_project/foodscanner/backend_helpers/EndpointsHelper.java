@@ -428,7 +428,7 @@ public class EndpointsHelper
 					Thread.sleep(7000);
 				}
 				else{
-					mAPI.deleteMeal(backendMeal).execute();
+					mAPI.deleteMeal(backendMeal.getId()).execute();
 				}
 				success = true;
 				return meals[0];
@@ -533,20 +533,21 @@ public class EndpointsHelper
 				false
 		);
 
-		meal.setServerId(backendMeal.getId());
+		meal.setServerId(backendMeal.getId().longValue());
 
 		return meal;
 	}
 
 	public BackendMeal convertToBackendMeal(Meal meal)
 	{
-		assert(meal.getServerId() != 0) : "Bad developer, cannot make convert to BackendMeal without a valid ID from the server ";
-
 		BackendMeal backendMeal = new BackendMeal();
-		backendMeal.setId(meal.getServerId());
-		backendMeal.setClientDBId(meal.getId());
-		backendMeal.setDate(meal.getDate());
-		backendMeal.setMealType(meal.getType().getName());
+		//backendMeal.setId(new Long(meal.getServerId()));
+		//backendMeal.setId(new Long(610));
+		backendMeal.setClientDBId(new Long(meal.getId()));
+		backendMeal.setDate(new Long(meal.getDate()));
+		backendMeal.setType(meal.getType().getName());
+		backendMeal.setIsNew(meal.isNew());
+		backendMeal.setIsChanged(meal.isChangedCount());
 		backendMeal.setFoodItems(convertToBackendFoodItems(meal.getFood()));
 
 		return backendMeal;

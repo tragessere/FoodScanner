@@ -10,7 +10,7 @@ import java.util.List;
  * Enable and disable testing modes for this application. A warning will be logged when modes are enabled.
  */
 public class TestingModeService {
-    public static final boolean TESTMODE_CALENDAR_FAKE_SERVER = true;// Disable server queries in MealCalendarActivity. Simulate them with sleeping threads.
+    public static final boolean TESTMODE_CALENDAR_FAKE_SERVER = false;// Disable server queries in MealCalendarActivity. Simulate them with sleeping threads.
 
     public static TestingModeService service;
 
