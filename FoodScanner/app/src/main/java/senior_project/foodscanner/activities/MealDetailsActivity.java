@@ -355,6 +355,19 @@ public class MealDetailsActivity extends TutorialBaseActivity implements View.On
                 // No previous images, go straight to photo taker
                 Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
                 intent.putExtra("pic_names", new String[]{"Top", "Side"});
+
+                // Delete previous ppi cache, if it exists
+                File ppiCache = new File(ImageDirectoryManager.
+                        getPixelsDirectory(this).getPath() + "/ppi.txt");
+                if (ppiCache.exists()) {
+                    boolean result = ppiCache.delete();
+                    if (!result) {
+                        Toast butteredToast = Toast.makeText(getApplicationContext(),
+                                "Error: Couldn't delete cached ppi.", Toast.LENGTH_SHORT);
+                        butteredToast.show();
+                    }
+                }
+
                 startActivityForResult(intent, REQUEST_FOODSCANNER);
             } else {
                 // Ask user if they want to use previous images before proceeding
@@ -424,6 +437,19 @@ public class MealDetailsActivity extends TutorialBaseActivity implements View.On
         // Open photo taker activity
         Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
         intent.putExtra("pic_names", new String[]{"Top", "Side"});
+
+        // Delete previous ppi cache, if it exists
+        File ppiCache = new File(ImageDirectoryManager.
+                getPixelsDirectory(this).getPath() + "/ppi.txt");
+        if (ppiCache.exists()) {
+            boolean result = ppiCache.delete();
+            if (!result) {
+                Toast butteredToast = Toast.makeText(getApplicationContext(),
+                        "Error: Couldn't delete cached ppi.", Toast.LENGTH_SHORT);
+                butteredToast.show();
+            }
+        }
+
         startActivityForResult(intent, REQUEST_FOODSCANNER);
     }
 
@@ -503,6 +529,19 @@ public class MealDetailsActivity extends TutorialBaseActivity implements View.On
             // No previous images, go straight to photo taker
             Intent intent = new Intent(MealDetailsActivity.this, PhotoTakerActivity.class);
             intent.putExtra("pic_names", new String[]{"Top", "Side"});
+
+            // Delete previous ppi cache, if it exists
+            File ppiCache = new File(ImageDirectoryManager.
+                    getPixelsDirectory(this).getPath() + "/ppi.txt");
+            if (ppiCache.exists()) {
+                boolean result = ppiCache.delete();
+                if (!result) {
+                    Toast butteredToast = Toast.makeText(getApplicationContext(),
+                            "Error: Couldn't delete cached ppi.", Toast.LENGTH_SHORT);
+                    butteredToast.show();
+                }
+            }
+
             startActivityForResult(intent, REQUEST_FOODSCANNER);
         } else {
             // Ask user if they want to use previous images before proceeding
