@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
 import com.example.backend.foodScannerBackendAPI.model.BackendMeal;
 import com.example.backend.foodScannerBackendAPI.model.BackendFoodItem;
+import com.example.backend.foodScannerBackendAPI.model.CollectionResponseBackendMeal;
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
 import com.example.backend.foodScannerBackendAPI.model.JsonMap;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
@@ -527,7 +528,11 @@ public class EndpointsHelper
 					}
 				}
 				else {
-					backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+					//backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+					backendMeals = mAPI.getBackendMealsBetweenDates(startDate.getTime(), endDate.getTime()).execute().getItems();
+					if (backendMeals != null) {
+						Log.d("EndpointsHelper", "GetMeals Meal Count:" + backendMeals.size());
+					}
 				}
 				if(backendMeals == null) {
 					Log.d("EndpointsHelper", "GetMeals Meal Count: NULL");
@@ -688,9 +693,11 @@ public class EndpointsHelper
 	public ArrayList<Meal> convertToFrontEndMeals(List<BackendMeal> backendMeals)
 	{
 		ArrayList<Meal> meals = new ArrayList<Meal>();
-
-		for (BackendMeal backendMeal : backendMeals) {
-			meals.add(convertToFrontEndMeal(backendMeal));
+		if (backendMeals != null)
+		{
+			for (BackendMeal backendMeal : backendMeals) {
+				meals.add(convertToFrontEndMeal(backendMeal));
+			}
 		}
 
 		return meals;

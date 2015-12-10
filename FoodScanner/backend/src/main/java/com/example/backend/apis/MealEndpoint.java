@@ -82,6 +82,7 @@ public class MealEndpoint {
     @ApiMethod(name = "getMealsWithinDates")
     public CollectionResponse<BackendMeal> getMealsWithinDates (@Named("startDate")Date startDate, @Named("endDate")Date endDate, User user) throws ServiceException {
         Query<BackendMeal> query = ofy().load().type(BackendMeal.class).filter("date >=", startDate.getTime()).filter("date <=", endDate.getTime());
+
         List<BackendMeal> results = new ArrayList<BackendMeal>();
         QueryResultIterator<BackendMeal> iterator = query.iterator();
 
