@@ -177,6 +177,30 @@ public class BackendMealEndpoint {
         return CollectionResponse.<BackendMeal>builder().setItems(backendMealList).setNextPageToken(queryIterator.getCursor().toWebSafeString()).build();
     }
 
+    @ApiMethod(
+            name = "getBackendMealsBetweenDates",
+            path = "backendMeal/dates",
+            httpMethod = ApiMethod.HttpMethod.GET)
+    public CollectionResponse<BackendMeal> getBackendMealsBetweenDates(@Nullable @Named("cursor") String cursor, @Nullable @Named("limit") Integer limit, @Named("startDate") long startDate, @Named("endDate") long endDate, User user) throws ServiceException
+    {
+        AuthUtil.throwIfNotAuthenticated(user);
+
+        limit = limit == null ? DEFAULT_LIST_LIMIT : limit;
+
+        Query<BackendMeal> query = ofy().load().type(BackendMeal.class).limit(limit).filter("date >=", startDate).filter("date <=", endDate);
+        if (cursor != null) {
+            query = query.startAt(Cursor.fromWebSafeString(cursor));
+        }
+
+        QueryResultIterator<BackendMeal> queryIterator = query.iterator();
+        List<BackendMeal> backendMealList = new ArrayList<BackendMeal>(limit);
+
+        while (queryIterator.hasNext()) {
+            backendMealList.add(queryIterator.next());
+        }
+        return CollectionResponse.<BackendMeal>builder().setItems(backendMealList).setNextPageToken(queryIterator.getCursor().toWebSafeString()).build();
+    }
+
     private void checkExists(Long id) throws NotFoundException
     {
         try {
