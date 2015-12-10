@@ -340,14 +340,16 @@ public class EndpointsHelper
 		private boolean success = false;
 		private Exception exception;
 		private boolean fakeQuery = false;
+		private boolean withConnection = true;
 
 		public SaveMealTask(TaskCompletionListener listener) {
 			mListener = listener;
 		}
 
-		public SaveMealTask(TaskCompletionListener listener, boolean fakeQuery) {
+		public SaveMealTask(TaskCompletionListener listener, boolean fakeQuery, boolean withConnection) {
 			mListener = listener;
 			this.fakeQuery = fakeQuery;
+			this.withConnection = withConnection;
 		}
 
 		@Override
@@ -376,6 +378,10 @@ public class EndpointsHelper
 				BackendMeal savedBackendMeal = null;
 				if(fakeQuery) {
 					Thread.sleep(5000);
+					if(!withConnection){
+						success = false;
+						return meal;
+					}
 				}
 				else{
 					savedBackendMeal = mAPI.insertBackendMeal(backendMealToSave).execute();
@@ -403,14 +409,16 @@ public class EndpointsHelper
 		private boolean success = false;
 		private Exception exception;
 		private boolean fakeQuery = false;
+		private boolean withConnection = true;
 
 		public DeleteMealTask(TaskCompletionListener listener) {
 			mListener = listener;
 		}
 
-		public DeleteMealTask(TaskCompletionListener listener, boolean fakeQuery) {
+		public DeleteMealTask(TaskCompletionListener listener, boolean fakeQuery, boolean withConnection) {
 			mListener = listener;
 			this.fakeQuery = fakeQuery;
+			this.withConnection = withConnection;
 		}
 
 		@Override
@@ -437,6 +445,10 @@ public class EndpointsHelper
 				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
 				if(fakeQuery) {
 					Thread.sleep(3000);
+					if(!withConnection){
+						success = false;
+						return meals[0];
+					}
 				}
 				else{
 					//mAPI.deleteMeal(backendMeal.getId()).execute();
@@ -466,14 +478,16 @@ public class EndpointsHelper
 		private TaskCompletionListener mListener;
 		private Exception exception;
 		private boolean fakeQuery = false;
+		private boolean withConnection = true;
 
 		public GetMealsWithinDatesTask(TaskCompletionListener listener) {
 			mListener = listener;
 		}
 
-		public GetMealsWithinDatesTask(TaskCompletionListener listener, boolean fakeQuery) {
+		public GetMealsWithinDatesTask(TaskCompletionListener listener, boolean fakeQuery, boolean withConnection) {
 			mListener = listener;
 			this.fakeQuery = fakeQuery;
+			this.withConnection = withConnection;
 		}
 
 		@Override
@@ -505,6 +519,12 @@ public class EndpointsHelper
 				List<BackendMeal> backendMeals = null;
 				if(fakeQuery){
 					Thread.sleep(1000);
+					if(!withConnection){
+						return null;
+					}
+					else{
+						backendMeals = new ArrayList<>();
+					}
 				}
 				else {
 					backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
