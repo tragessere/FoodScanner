@@ -16,6 +16,7 @@ import com.example.backend.foodScannerBackendAPI.model.JsonMap;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.util.DateTime;
 
 import java.io.BufferedOutputStream;
@@ -458,7 +459,7 @@ public class EndpointsHelper
 				success = true;
 				return meals[0];
 			}
-			catch(IllegalArgumentException e){
+			catch(GoogleJsonResponseException e){
 				// no meal to delete on server
 				return meals[0];
 			}

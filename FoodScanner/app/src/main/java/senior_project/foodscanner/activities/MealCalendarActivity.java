@@ -631,7 +631,6 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
         for(Meal meal : unsyncedMeals) {
             if(meal != null) {
                 if(meal.isChanged()){
-                    final int currentIndex = unsyncedMeals.indexOf(meal);
                     if(meal.isDeleted()) {// delete meal from backend
                         Log.d("MealCalendarActivity", "SYNC DELETE " + meal);
                         syncTasks.add(EndpointsHelper.mEndpoints.new DeleteMealTask(new EndpointsHelper.TaskCompletionListener() {
