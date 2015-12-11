@@ -15,5 +15,6 @@ public class DateUtils {
         day.set(Calendar.MINUTE, 0);
         day.set(Calendar.SECOND, 0);
         day.set(Calendar.MILLISECOND, 0);
+        day.add(Calendar.MILLISECOND, -1);
     }
 }
