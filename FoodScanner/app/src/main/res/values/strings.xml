@@ -102,9 +102,10 @@
     <string name="tutorial_camera_overview">To scan each piece of food you need to take two pictures in portrait view, one from the top and one from the front. Try to take the pictures as close to directly above or the side as you can.</string>
     <string name="tutorial_camera_card">For each photo, place some type of card horizontally next to your food in the picture. This card should be the same size as a standard banking card (eg. credit card, driver\'s license, etc.)</string>
     <string name="tutorial_camera_closeup">Take the photo as close to the food and card as possible to get the most accurate estimate.</string>
+    <string name="tutorial_painting_card_title">Marking Card Location</string>
+    <string name="tutorial_painting_card">Drag and resize the orange rectangle to outline the card you put next to your food.</string>
     <string name="tutorial_painting_title">Marking Food Location</string>
-    <string name="tutorial_painting_card">First drag and resize the orange rectangle to outline the card you put next to your food.</string>
-    <string name="tutorial_painting_food">Next draw a \"+\" across your food. Draw the lines so that they intersect in a right angle over the center of mass.</string>
-    <string name="tutorial_painting_second_picture">For the second picture, repeat the step for marking the card. Then draw a single vertical line across the center of the food.</string>
+    <string name="tutorial_painting_food">Now draw a \"+\" across your food. Draw the lines so that they intersect in a right angle over the center of mass.</string>
+    <string name="tutorial_painting_second_picture">For the side picture, draw a single line vertically across the center of your food.</string>
 
 </resources>
