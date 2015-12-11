@@ -24,7 +24,7 @@ public final class EndpointBuilderHelper {
     public static FoodScannerBackendAPI getEndpoints(GoogleAccountCredential credential) {
 
         FoodScannerBackendAPI.Builder builder = new FoodScannerBackendAPI.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), credential)
-                .setRootUrl(localHost);
+                .setRootUrl(serverURL);
 
         return builder.build();
     }
