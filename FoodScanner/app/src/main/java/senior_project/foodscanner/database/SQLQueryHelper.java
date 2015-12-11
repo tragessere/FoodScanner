@@ -12,8 +12,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
+import senior_project.foodscanner.DateUtils;
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
 
@@ -28,7 +30,7 @@ public class SQLQueryHelper {
 			SQLHelper.COLUMN_ID, SQLHelper.COLUMN_MEAL_TYPE,
 			SQLHelper.COLUMN_TIME, SQLHelper.COLUMN_FOOD_LIST,
 			SQLHelper.COLUMN_NEW, SQLHelper.COLUMN_CHANGED,
-			SQLHelper.COLUMN_DELETED};
+			SQLHelper.COLUMN_DELETED, SQLHelper.COLUMN_SERVER_ID};
 
 	/**
 	 * Insert a meal object into the database
@@ -109,7 +111,7 @@ public class SQLQueryHelper {
 				null, null, null);
 
 		if(c != null && c.moveToFirst()) {
-			Meal meal = new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1);
+			Meal meal = new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1, c.getLong(7));
 
 			c.close();
 
@@ -134,16 +136,15 @@ public class SQLQueryHelper {
 	 */
 	public static List<Meal> getMeals(Calendar startDay, Calendar endDay, boolean useFullDay) {
 		if(useFullDay) {
-			startDay.set(Calendar.HOUR_OF_DAY, 0);
-			startDay.set(Calendar.MINUTE, 0);
-			startDay.set(Calendar.SECOND, 0);
-			startDay.set(Calendar.MILLISECOND, 0);
+			GregorianCalendar cal = new GregorianCalendar();
+			cal.setTimeInMillis(startDay.getTimeInMillis());
+			startDay = cal;
+			DateUtils.toStartOfDay(startDay);
 
-			endDay.add(Calendar.DATE, 1);
-			endDay.set(Calendar.HOUR_OF_DAY, 0);
-			endDay.set(Calendar.MINUTE, 0);
-			endDay.set(Calendar.SECOND, 0);
-			endDay.set(Calendar.MILLISECOND, 0);
+			cal = new GregorianCalendar();
+			cal.setTimeInMillis(endDay.getTimeInMillis());
+			endDay = cal;
+			DateUtils.toEndOfDay(endDay);
 		}
 
 		List<Meal> mealList = new ArrayList<>();
@@ -155,7 +156,7 @@ public class SQLQueryHelper {
 
 		if(c != null && c.moveToFirst()) {
 			while(!c.isAfterLast()) {
-				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
+				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1, c.getLong(7)));
 				c.moveToNext();
 			}
 			c.close();
@@ -196,7 +197,7 @@ public class SQLQueryHelper {
 
 		if(c != null && c.moveToFirst()) {
 			while(!c.isAfterLast()) {
-				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
+				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1, c.getLong(7)));
 				c.moveToNext();
 			}
 			c.close();
@@ -224,7 +225,7 @@ public class SQLQueryHelper {
 
 		if(c != null && c.moveToFirst()) {
 			while(!c.isAfterLast()) {
-				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
+				mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1, c.getLong(7)));
 				c.moveToNext();
 			}
 			c.close();
@@ -251,7 +252,7 @@ public class SQLQueryHelper {
 
         if(c != null && c.moveToFirst()) {
             while(!c.isAfterLast()) {
-                mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1));
+                mealList.add(new Meal(c.getLong(0), c.getLong(2), c.getString(1), (ArrayList<FoodItem>) bytesToFoodList(c.getBlob(3)), c.getInt(4) == 1, c.getInt(5), c.getInt(6) == 1, c.getLong(7)));
                 c.moveToNext();
             }
             c.close();

@@ -10,10 +10,13 @@ import android.widget.Toast;
 import com.example.backend.foodScannerBackendAPI.FoodScannerBackendAPI;
 import com.example.backend.foodScannerBackendAPI.model.BackendMeal;
 import com.example.backend.foodScannerBackendAPI.model.BackendFoodItem;
+import com.example.backend.foodScannerBackendAPI.model.CollectionResponseBackendMeal;
 import com.example.backend.foodScannerBackendAPI.model.DensityEntry;
 import com.example.backend.foodScannerBackendAPI.model.JsonMap;
 import com.example.backend.foodScannerBackendAPI.model.MyBean;
+
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.util.DateTime;
 
 import java.io.BufferedOutputStream;
@@ -23,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -338,14 +342,16 @@ public class EndpointsHelper
 		private boolean success = false;
 		private Exception exception;
 		private boolean fakeQuery = false;
+		private boolean withConnection = true;
 
 		public SaveMealTask(TaskCompletionListener listener) {
 			mListener = listener;
 		}
 
-		public SaveMealTask(TaskCompletionListener listener, boolean fakeQuery) {
+		public SaveMealTask(TaskCompletionListener listener, boolean fakeQuery, boolean withConnection) {
 			mListener = listener;
 			this.fakeQuery = fakeQuery;
+			this.withConnection = withConnection;
 		}
 
 		@Override
@@ -373,15 +379,21 @@ public class EndpointsHelper
 				BackendMeal backendMealToSave = convertToBackendMeal(meal);
 				BackendMeal savedBackendMeal = null;
 				if(fakeQuery) {
-					Thread.sleep(7000);
+					Thread.sleep(5000);
+					if(!withConnection){
+						success = false;
+						return meal;
+					}
 				}
 				else{
-					savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();
+					savedBackendMeal = mAPI.insertBackendMeal(backendMealToSave).execute();
+					//savedBackendMeal = mAPI.saveMeal(backendMealToSave).execute();
 					meal.setServerId(savedBackendMeal.getId());
 				}
 				success = true;
 				return meal;
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				if(!isCancelled()) {
 					Log.e("EndpointsHelper", "SaveMealTask", e);
 					exception = e;
@@ -399,14 +411,16 @@ public class EndpointsHelper
 		private boolean success = false;
 		private Exception exception;
 		private boolean fakeQuery = false;
+		private boolean withConnection = true;
 
 		public DeleteMealTask(TaskCompletionListener listener) {
 			mListener = listener;
 		}
 
-		public DeleteMealTask(TaskCompletionListener listener, boolean fakeQuery) {
+		public DeleteMealTask(TaskCompletionListener listener, boolean fakeQuery, boolean withConnection) {
 			mListener = listener;
 			this.fakeQuery = fakeQuery;
+			this.withConnection = withConnection;
 		}
 
 		@Override
@@ -432,14 +446,24 @@ public class EndpointsHelper
 			try {
 				BackendMeal backendMeal = convertToBackendMeal(meals[0]);
 				if(fakeQuery) {
-					Thread.sleep(7000);
+					Thread.sleep(3000);
+					if(!withConnection){
+						success = false;
+						return meals[0];
+					}
 				}
 				else{
-					mAPI.deleteMeal(backendMeal).execute();
+					//mAPI.deleteMeal(backendMeal.getId()).execute();
+					mAPI.removeBackendMeal(backendMeal.getId()).execute();
 				}
 				success = true;
 				return meals[0];
-			} catch (Exception e) {
+			}
+			catch(GoogleJsonResponseException e){
+				// no meal to delete on server
+				return meals[0];
+			}
+			catch (Exception e) {
 				if(!isCancelled()) {
 					Log.e("EndpointsHelper", "DeleteMealTask", e);
 					exception = e;
@@ -456,14 +480,16 @@ public class EndpointsHelper
 		private TaskCompletionListener mListener;
 		private Exception exception;
 		private boolean fakeQuery = false;
+		private boolean withConnection = true;
 
 		public GetMealsWithinDatesTask(TaskCompletionListener listener) {
 			mListener = listener;
 		}
 
-		public GetMealsWithinDatesTask(TaskCompletionListener listener, boolean fakeQuery) {
+		public GetMealsWithinDatesTask(TaskCompletionListener listener, boolean fakeQuery, boolean withConnection) {
 			mListener = listener;
 			this.fakeQuery = fakeQuery;
+			this.withConnection = withConnection;
 		}
 
 		@Override
@@ -494,16 +520,32 @@ public class EndpointsHelper
 				Date endDate = dates[1];
 				List<BackendMeal> backendMeals = null;
 				if(fakeQuery){
-					Thread.sleep(7000);
+					Thread.sleep(1000);
+					if(!withConnection){
+						return null;
+					}
+					else{
+						backendMeals = new ArrayList<>();
+					}
 				}
 				else {
-					backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+					//backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+					backendMeals = mAPI.getBackendMealsBetweenDates(Long.valueOf(startDate.getTime()), Long.valueOf(endDate.getTime())).execute().getItems();
+					//backendMeals = mAPI.listBackendMeals().execute().getItems();
+					if (backendMeals != null) {
+						Log.d("EndpointsHelper", "GetMeals Meal Count:" + backendMeals.size());
+					}
 				}
 				if(backendMeals == null) {
+					Log.d("EndpointsHelper", "GetMeals Meal Count: NULL");
 					backendMeals = new ArrayList<>();
 				}
+				else{
+					Log.d("EndpointsHelper", "GetMeals Meal Count:" + backendMeals.size());
+				}
 				return convertToFrontEndMeals(backendMeals);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				if(!isCancelled()) {
 					Log.e("EndpointsHelper", "GetMealsWithinDatesTask", e);
 					exception = e;
@@ -533,27 +575,30 @@ public class EndpointsHelper
 		Meal meal = new Meal(
 				backendMeal.getClientDBId(),
 				backendMeal.getDate(),
-				backendMeal.getType(),
+				backendMeal.getType().toUpperCase(),
 				convertToFrontEndFoodItems(backendMeal.getFoodItems()),
 				backendMeal.getIsNew(),
 				backendMeal.getIsChanged(),
-				false
+				false,
+				backendMeal.getId()
 		);
-
-		meal.setServerId(backendMeal.getId());
 
 		return meal;
 	}
 
 	public BackendMeal convertToBackendMeal(Meal meal)
 	{
-		assert(meal.getServerId() != 0) : "Bad developer, cannot make convert to BackendMeal without a valid ID from the server ";
+		if (meal == null) {
+			return null;
+		}
 
 		BackendMeal backendMeal = new BackendMeal();
-		backendMeal.setId(meal.getServerId());
-		backendMeal.setClientDBId(meal.getId());
-		backendMeal.setDate(meal.getDate());
-		backendMeal.setMealType(meal.getType().getName());
+		backendMeal.setId(new Long(meal.getServerId()));
+		backendMeal.setClientDBId(new Long(meal.getId()));
+		backendMeal.setDate(new Long(meal.getDate()));
+		backendMeal.setType(meal.getType().getName());
+		backendMeal.setIsNew(meal.isNew());
+		backendMeal.setIsChanged(meal.isChangedCount());
 		backendMeal.setFoodItems(convertToBackendFoodItems(meal.getFood()));
 
 		return backendMeal;
@@ -561,21 +606,27 @@ public class EndpointsHelper
 
 	public BackendFoodItem convertToBackendFoodItem(FoodItem foodItem)
 	{
+		if (foodItem == null) {
+			return null;
+		}
+
 		BackendFoodItem backendFoodItem = new BackendFoodItem();
-		backendFoodItem.setName(foodItem.getName());
-		backendFoodItem.setBrand(foodItem.getBrand());
-		backendFoodItem.setDensity(foodItem.getDensity());
-		backendFoodItem.setServingSize(foodItem.getServingSize());
-		backendFoodItem.setServingSizeUnit(foodItem.getServingSizeUnit());
-		backendFoodItem.setActualServingSizeUnit(foodItem.getActualServingSizeUnit());
+		backendFoodItem.setName(new String(foodItem.getName()));
+		backendFoodItem.setBrand(new String(foodItem.getBrand()));
+		backendFoodItem.setDensity(new Double(foodItem.getDensity()));
+		backendFoodItem.setServingSize(new Double(foodItem.getServingSize()));
+		if (foodItem.getServingSizeUnit() != null)
+			backendFoodItem.setServingSizeUnit(new String(foodItem.getServingSizeUnit()));
+		if (foodItem.getActualServingSizeUnit() != null)
+			backendFoodItem.setActualServingSizeUnit(new String(foodItem.getActualServingSizeUnit()));
 		backendFoodItem.setUsesVol(foodItem.usesVolume());
 		backendFoodItem.setUsesMass(foodItem.usesMass());
 		backendFoodItem.setNeedConvertVol(foodItem.needConvertVol());
 		backendFoodItem.setNeedCalculateServings(foodItem.isNeedCalculateServings());
-		backendFoodItem.setNumServings(foodItem.getNumServings());
-		backendFoodItem.setVolume(foodItem.getVolume());
-		backendFoodItem.setCubicVolume(foodItem.getCubicVolume());
-		backendFoodItem.setMass(foodItem.getMass());
+		backendFoodItem.setNumServings(new Double(foodItem.getNumServings()));
+		backendFoodItem.setVolume(new Double(foodItem.getVolume()));
+		backendFoodItem.setCubicVolume(new Double(foodItem.getCubicVolume()));
+		backendFoodItem.setMass(new Double(foodItem.getMass()));
 
 		JsonMap nutritionMap = new JsonMap();
 		nutritionMap.putAll(foodItem.getNutrition());
@@ -590,38 +641,58 @@ public class EndpointsHelper
 
 	public FoodItem convertToFrontEndFoodItem(BackendFoodItem backendFoodItem)
 	{
+		if (backendFoodItem == null) {
+			return null;
+		}
+
 		FoodItem foodItem = new FoodItem();
 		foodItem.setName(backendFoodItem.getName());
 		foodItem.setBrand(backendFoodItem.getBrand());
-		foodItem.setDensity(backendFoodItem.getDensity());
-		foodItem.setServingSize(backendFoodItem.getServingSize());
-		foodItem.setServingSizeUnit(backendFoodItem.getServingSizeUnit());
-		foodItem.setActualServingSizeUnit(backendFoodItem.getActualServingSizeUnit());
+		if (backendFoodItem.getDensity() != null)
+			foodItem.setDensity(new Double(backendFoodItem.getDensity()));
+		if (backendFoodItem.getServingSize() != null)
+			foodItem.setServingSize(backendFoodItem.getServingSize());
+		if (backendFoodItem.getServingSizeUnit() != null)
+			foodItem.setServingSizeUnit(backendFoodItem.getServingSizeUnit());
+		if (backendFoodItem.getActualServingSizeUnit() != null)
+			foodItem.setActualServingSizeUnit(backendFoodItem.getActualServingSizeUnit());
 		foodItem.setUsesMass(backendFoodItem.getUsesMass());
 		foodItem.setUsesVol(backendFoodItem.getUsesVol());
 		foodItem.setNeedConvertVol(backendFoodItem.getNeedConvertVol());
 		foodItem.setNeedCalculateServings(backendFoodItem.getNeedCalculateServings());
-		foodItem.setNumServings(backendFoodItem.getNumServings());
-		foodItem.setVolume(backendFoodItem.getVolume());
-		foodItem.setCubicVolume(backendFoodItem.getCubicVolume());
-		foodItem.setMass(backendFoodItem.getMass());
+		if (backendFoodItem.getNumServings() != null)
+			foodItem.setNumServings(backendFoodItem.getNumServings());
+		if (backendFoodItem.getVolume() != null)
+			foodItem.setVolume(backendFoodItem.getVolume());
+		if (backendFoodItem.getCubicVolume() != null)
+			foodItem.setCubicVolume(backendFoodItem.getCubicVolume());
+		if (backendFoodItem.getMass() != null)
+			foodItem.setMass(backendFoodItem.getMass());
 
 		JsonMap calcNutritionMap = backendFoodItem.getCalculatedNutrition();
 
-		Iterator itForCalc = calcNutritionMap.entrySet().iterator();
-		while (itForCalc.hasNext()) {
-			JsonMap.Entry pair = (JsonMap.Entry)itForCalc.next();
-			foodItem.setField((String)pair.getKey(), (Double)pair.getValue());
-			itForCalc.remove();
+		if (calcNutritionMap != null)
+		{
+			Iterator itForCalc = calcNutritionMap.entrySet().iterator();
+			while (itForCalc.hasNext()) {
+				JsonMap.Entry pair = (JsonMap.Entry)itForCalc.next();
+				BigDecimal value = (BigDecimal)pair.getValue();
+				foodItem.setField((String)pair.getKey(), value.doubleValue());
+//			itForCalc.remove();
+			}
 		}
 
 		JsonMap uncalcNutritionMap = backendFoodItem.getUncalculatedNutrition();
 
-		Iterator itForUncalc = uncalcNutritionMap.entrySet().iterator();
-		while (itForUncalc.hasNext()) {
-			JsonMap.Entry pair = (JsonMap.Entry)itForUncalc.next();
-			foodItem.setField((String)pair.getKey(), (Double)pair.getValue());
-			itForUncalc.remove();
+		if (uncalcNutritionMap != null)
+		{
+			Iterator itForUncalc = uncalcNutritionMap.entrySet().iterator();
+			while (itForUncalc.hasNext()) {
+				JsonMap.Entry pair = (JsonMap.Entry)itForUncalc.next();
+				BigDecimal value = (BigDecimal)pair.getValue();
+				foodItem.setField((String)pair.getKey(), value.doubleValue());
+				//itForUncalc.remove();
+			}
 		}
 
 		return foodItem;
@@ -631,8 +702,11 @@ public class EndpointsHelper
 	{
 		ArrayList<FoodItem> foodItems = new ArrayList<FoodItem>();
 
-		for (BackendFoodItem backendFoodItem : backendFoodItems) {
-			foodItems.add(convertToFrontEndFoodItem(backendFoodItem));
+		if (backendFoodItems != null)
+		{
+			for (BackendFoodItem backendFoodItem : backendFoodItems) {
+				foodItems.add(convertToFrontEndFoodItem(backendFoodItem));
+			}
 		}
 
 		return foodItems;
@@ -642,8 +716,11 @@ public class EndpointsHelper
 	{
 		List<BackendFoodItem> backendFoodItems = new ArrayList<BackendFoodItem>();
 
-		for (FoodItem foodItem : foodItems) {
-			backendFoodItems.add(convertToBackendFoodItem(foodItem));
+		if (foodItems != null)
+		{
+			for (FoodItem foodItem : foodItems) {
+				backendFoodItems.add(convertToBackendFoodItem(foodItem));
+			}
 		}
 
 		return backendFoodItems;
@@ -652,9 +729,11 @@ public class EndpointsHelper
 	public ArrayList<Meal> convertToFrontEndMeals(List<BackendMeal> backendMeals)
 	{
 		ArrayList<Meal> meals = new ArrayList<Meal>();
-
-		for (BackendMeal backendMeal : backendMeals) {
-			meals.add(convertToFrontEndMeal(backendMeal));
+		if (backendMeals != null)
+		{
+			for (BackendMeal backendMeal : backendMeals) {
+				meals.add(convertToFrontEndMeal(backendMeal));
+			}
 		}
 
 		return meals;

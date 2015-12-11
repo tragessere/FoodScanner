@@ -31,8 +31,10 @@ import java.util.List;
 import java.util.Map;
 
 import senior_project.foodscanner.Constants;
+import senior_project.foodscanner.DateUtils;
 import senior_project.foodscanner.FoodItem;
 import senior_project.foodscanner.Meal;
+import senior_project.foodscanner.NetworkUtils;
 import senior_project.foodscanner.Nutritious;
 import senior_project.foodscanner.R;
 import senior_project.foodscanner.Settings;
@@ -398,7 +400,7 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
         }
     }
 
-    private void loadMeals_Total_Start(final int days){//TODO test correctness: server pull
+    private void loadMeals_Total_Start(final int days){
         cancelLoadingTask_Total();
 
         final GregorianCalendar day1 = new GregorianCalendar();
@@ -428,6 +430,8 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
         dialog_total_loading.show(getFragmentManager(), "Loading Dialog");
 
         // download meals
+        DateUtils.toStartOfDay(day1);
+        DateUtils.toEndOfDay(day2);
         loadTask_Total = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
             @Override
             public void onTaskCompleted(AsyncTask task, Bundle b) {
@@ -471,13 +475,14 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
                         }
                     }
                 }
+                dialog_total_loading.dismiss();
                 if(error) {
                     String message = "Unknown Reason";
                     String title = "Error: Loading meals from server failed";
                     int icon = R.drawable.ic_error_outline_black;
                     Exception e = (Exception) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET_EXCEPTION);
                     if(e != null) {
-                        if(isConnectedToInternet()) {
+                        if(NetworkUtils.isConnectedToInternet(MealCalendarActivity.this)) {
                             message = "Network error.";
                         } else {
                             message = "You are not connected to the internet.";
@@ -486,12 +491,11 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
                     MessageDialogFragment.newInstance(message, title, icon).show(getFragmentManager(), "Server Load Fail");
                 }
                 else {
-                    dialog_total_loading.dismiss();
                     MessageDialogFragment dialog = MessageDialogFragment.newInstance(Nutritious.nutritionText(Nutritious.calculateTotalNutrition(meals)), title, 0);
                     dialog.show(getFragmentManager(), "Total");
                 }
             }
-        }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER).execute(new Date(day1.getTimeInMillis()), new Date(day2.getTimeInMillis()));
+        }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER, NetworkUtils.isConnectedToInternet(MealCalendarActivity.this)).execute(new Date(day1.getTimeInMillis()), new Date(day2.getTimeInMillis()));
     }
 
     private void loadMeals_Calendar_Finish(){
@@ -530,6 +534,9 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
         }
         else{// no meals found locally, check the server
             Log.d("MealCalendarActivity","LOADING BACKEND");
+            DateUtils.toStartOfDay(day1);
+            DateUtils.toEndOfDay(day2);
+            Log.d("MealCalendarActivity", "LOADING BETWEEN: "+day1.getTimeInMillis()+" to "+day2.getTimeInMillis());
             loadingIndicator.setVisibility(View.VISIBLE);
             loadTask_Calendar = EndpointsHelper.mEndpoints.new GetMealsWithinDatesTask(new EndpointsHelper.TaskCompletionListener(){
                 @Override
@@ -538,7 +545,6 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
                         Log.d("MealCalendarActivity","LOADING BACKEND: CANCELLED");
                         return;
                     }
-                    Log.d("MealCalendarActivity", "LOADING BACKEND: RETURNED");
                     // save meals locally and add them to ui
                     ArrayList<Meal> mealsList = (ArrayList<Meal>) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET);
                     if(mealsList != null) {
@@ -548,6 +554,7 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
                             Meal meal = (Meal) obj;
                             meal.setId(SQLQueryHelper.insertMeal(meal));
                             adapter.add(meal);
+                            Log.d("MealCalendarActivity", "LOADING BACKEND: Meal: "+meal);
                         }
                     } else {
                         String message = "Unknown Reason";
@@ -555,7 +562,7 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
                         int icon = R.drawable.ic_error_outline_black;
                         Exception e = (Exception) b.getSerializable(EndpointsHelper.TASKID_MEALS_GET_EXCEPTION);
                         if(e != null) {
-                            if(isConnectedToInternet()) {
+                            if(NetworkUtils.isConnectedToInternet(MealCalendarActivity.this)) {
                                 message = "Network error.";
                             } else {
                                 message = "You are not connected to the internet.";
@@ -565,15 +572,9 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
                     }
                     loadMeals_Calendar_Finish();
                 }
-            }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER).execute(new Date(date), new Date(date));
+            }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER, NetworkUtils.isConnectedToInternet(MealCalendarActivity.this)).execute(new Date(day1.getTimeInMillis()), new Date(day2.getTimeInMillis()));
         }
         updateUI();
-    }
-
-    private boolean isConnectedToInternet(){
-        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnected();
     }
 
     private boolean isSyncing(){
@@ -622,7 +623,6 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
      * Uploads changed meals, and deletes changed meals to be deleted.
      */
     private void syncMeals_Start(){
-        // TODO test deleting a nonuploaded meal
         Log.d("MealCalendarActivity", "SYNC START");
         cancelSyncingTasks();
 
@@ -631,9 +631,7 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
         for(Meal meal : unsyncedMeals) {
             if(meal != null) {
                 if(meal.isChanged()){
-                    final int currentIndex = unsyncedMeals.indexOf(meal);
                     if(meal.isDeleted()) {// delete meal from backend
-                        //TODO java.lang.IllegalArgumentException: DELETE with non-zero content length is not supported
                         Log.d("MealCalendarActivity", "SYNC DELETE " + meal);
                         syncTasks.add(EndpointsHelper.mEndpoints.new DeleteMealTask(new EndpointsHelper.TaskCompletionListener() {
                             @Override
@@ -659,9 +657,8 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
                                 }
                                 syncMeals_End();
                             }
-                        }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER).execute(meal));
+                        }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER, NetworkUtils.isConnectedToInternet(MealCalendarActivity.this)).execute(meal));
                     } else {// save/update meal in backend
-                        //TODO 400 Bad Request
                         Log.d("MealCalendarActivity", "SYNC SAVE " + meal);
                         final int changed = meal.isChangedCount();
                         meal.setUnchanged();
@@ -692,7 +689,7 @@ public class MealCalendarActivity extends TutorialBaseActivity implements View.O
                                 }
                                 syncMeals_End();
                             }
-                        }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER).execute(meal));
+                        }, TestingModeService.TESTMODE_CALENDAR_FAKE_SERVER, NetworkUtils.isConnectedToInternet(MealCalendarActivity.this)).execute(meal));
                     }
                 }
             }
