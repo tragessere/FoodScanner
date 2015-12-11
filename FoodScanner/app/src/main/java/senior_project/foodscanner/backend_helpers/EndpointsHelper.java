@@ -528,11 +528,7 @@ public class EndpointsHelper
 					}
 				}
 				else {
-					//backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
 					backendMeals = mAPI.getBackendMealsBetweenDates(startDate.getTime(), endDate.getTime()).execute().getItems();
-					if (backendMeals != null) {
-						Log.d("EndpointsHelper", "GetMeals Meal Count:" + backendMeals.size());
-					}
 				}
 				if(backendMeals == null) {
 					Log.d("EndpointsHelper", "GetMeals Meal Count: NULL");
