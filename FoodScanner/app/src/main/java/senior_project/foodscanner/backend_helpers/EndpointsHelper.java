@@ -529,7 +529,12 @@ public class EndpointsHelper
 					}
 				}
 				else {
-					backendMeals = mAPI.getBackendMealsBetweenDates(startDate.getTime(), endDate.getTime()).execute().getItems();
+					//backendMeals = mAPI.getMealsWithinDates(new DateTime(startDate), new DateTime(endDate)).execute().getItems();
+					backendMeals = mAPI.getBackendMealsBetweenDates(Long.valueOf(startDate.getTime()), Long.valueOf(endDate.getTime())).execute().getItems();
+					//backendMeals = mAPI.listBackendMeals().execute().getItems();
+					if (backendMeals != null) {
+						Log.d("EndpointsHelper", "GetMeals Meal Count:" + backendMeals.size());
+					}
 				}
 				if(backendMeals == null) {
 					Log.d("EndpointsHelper", "GetMeals Meal Count: NULL");
@@ -570,7 +575,7 @@ public class EndpointsHelper
 		Meal meal = new Meal(
 				backendMeal.getClientDBId(),
 				backendMeal.getDate(),
-				backendMeal.getType(),
+				backendMeal.getType().toUpperCase(),
 				convertToFrontEndFoodItems(backendMeal.getFoodItems()),
 				backendMeal.getIsNew(),
 				backendMeal.getIsChanged(),
@@ -583,6 +588,10 @@ public class EndpointsHelper
 
 	public BackendMeal convertToBackendMeal(Meal meal)
 	{
+		if (meal == null) {
+			return null;
+		}
+
 		BackendMeal backendMeal = new BackendMeal();
 		backendMeal.setId(new Long(meal.getServerId()));
 		backendMeal.setClientDBId(new Long(meal.getId()));
@@ -597,21 +606,27 @@ public class EndpointsHelper
 
 	public BackendFoodItem convertToBackendFoodItem(FoodItem foodItem)
 	{
+		if (foodItem == null) {
+			return null;
+		}
+
 		BackendFoodItem backendFoodItem = new BackendFoodItem();
-		backendFoodItem.setName(foodItem.getName());
-		backendFoodItem.setBrand(foodItem.getBrand());
-		backendFoodItem.setDensity(foodItem.getDensity());
-		backendFoodItem.setServingSize(foodItem.getServingSize());
-		backendFoodItem.setServingSizeUnit(foodItem.getServingSizeUnit());
-		backendFoodItem.setActualServingSizeUnit(foodItem.getActualServingSizeUnit());
+		backendFoodItem.setName(new String(foodItem.getName()));
+		backendFoodItem.setBrand(new String(foodItem.getBrand()));
+		backendFoodItem.setDensity(new Double(foodItem.getDensity()));
+		backendFoodItem.setServingSize(new Double(foodItem.getServingSize()));
+		if (foodItem.getServingSizeUnit() != null)
+			backendFoodItem.setServingSizeUnit(new String(foodItem.getServingSizeUnit()));
+		if (foodItem.getActualServingSizeUnit() != null)
+			backendFoodItem.setActualServingSizeUnit(new String(foodItem.getActualServingSizeUnit()));
 		backendFoodItem.setUsesVol(foodItem.usesVolume());
 		backendFoodItem.setUsesMass(foodItem.usesMass());
 		backendFoodItem.setNeedConvertVol(foodItem.needConvertVol());
 		backendFoodItem.setNeedCalculateServings(foodItem.isNeedCalculateServings());
-		backendFoodItem.setNumServings(foodItem.getNumServings());
-		backendFoodItem.setVolume(foodItem.getVolume());
-		backendFoodItem.setCubicVolume(foodItem.getCubicVolume());
-		backendFoodItem.setMass(foodItem.getMass());
+		backendFoodItem.setNumServings(new Double(foodItem.getNumServings()));
+		backendFoodItem.setVolume(new Double(foodItem.getVolume()));
+		backendFoodItem.setCubicVolume(new Double(foodItem.getCubicVolume()));
+		backendFoodItem.setMass(new Double(foodItem.getMass()));
 
 		JsonMap nutritionMap = new JsonMap();
 		nutritionMap.putAll(foodItem.getNutrition());
@@ -626,40 +641,58 @@ public class EndpointsHelper
 
 	public FoodItem convertToFrontEndFoodItem(BackendFoodItem backendFoodItem)
 	{
+		if (backendFoodItem == null) {
+			return null;
+		}
+
 		FoodItem foodItem = new FoodItem();
 		foodItem.setName(backendFoodItem.getName());
 		foodItem.setBrand(backendFoodItem.getBrand());
-		foodItem.setDensity(backendFoodItem.getDensity());
-		foodItem.setServingSize(backendFoodItem.getServingSize());
-		foodItem.setServingSizeUnit(backendFoodItem.getServingSizeUnit());
-		foodItem.setActualServingSizeUnit(backendFoodItem.getActualServingSizeUnit());
+		if (backendFoodItem.getDensity() != null)
+			foodItem.setDensity(new Double(backendFoodItem.getDensity()));
+		if (backendFoodItem.getServingSize() != null)
+			foodItem.setServingSize(backendFoodItem.getServingSize());
+		if (backendFoodItem.getServingSizeUnit() != null)
+			foodItem.setServingSizeUnit(backendFoodItem.getServingSizeUnit());
+		if (backendFoodItem.getActualServingSizeUnit() != null)
+			foodItem.setActualServingSizeUnit(backendFoodItem.getActualServingSizeUnit());
 		foodItem.setUsesMass(backendFoodItem.getUsesMass());
 		foodItem.setUsesVol(backendFoodItem.getUsesVol());
 		foodItem.setNeedConvertVol(backendFoodItem.getNeedConvertVol());
 		foodItem.setNeedCalculateServings(backendFoodItem.getNeedCalculateServings());
-		foodItem.setNumServings(backendFoodItem.getNumServings());
-		foodItem.setVolume(backendFoodItem.getVolume());
-		foodItem.setCubicVolume(backendFoodItem.getCubicVolume());
-		foodItem.setMass(backendFoodItem.getMass());
+		if (backendFoodItem.getNumServings() != null)
+			foodItem.setNumServings(backendFoodItem.getNumServings());
+		if (backendFoodItem.getVolume() != null)
+			foodItem.setVolume(backendFoodItem.getVolume());
+		if (backendFoodItem.getCubicVolume() != null)
+			foodItem.setCubicVolume(backendFoodItem.getCubicVolume());
+		if (backendFoodItem.getMass() != null)
+			foodItem.setMass(backendFoodItem.getMass());
 
 		JsonMap calcNutritionMap = backendFoodItem.getCalculatedNutrition();
 
-		Iterator itForCalc = calcNutritionMap.entrySet().iterator();
-		while (itForCalc.hasNext()) {
-			JsonMap.Entry pair = (JsonMap.Entry)itForCalc.next();
-			BigDecimal value = (BigDecimal)pair.getValue();
-			foodItem.setField((String)pair.getKey(), value.doubleValue());
-			itForCalc.remove();
+		if (calcNutritionMap != null)
+		{
+			Iterator itForCalc = calcNutritionMap.entrySet().iterator();
+			while (itForCalc.hasNext()) {
+				JsonMap.Entry pair = (JsonMap.Entry)itForCalc.next();
+				BigDecimal value = (BigDecimal)pair.getValue();
+				foodItem.setField((String)pair.getKey(), value.doubleValue());
+//			itForCalc.remove();
+			}
 		}
 
 		JsonMap uncalcNutritionMap = backendFoodItem.getUncalculatedNutrition();
 
-		Iterator itForUncalc = uncalcNutritionMap.entrySet().iterator();
-		while (itForUncalc.hasNext()) {
-			JsonMap.Entry pair = (JsonMap.Entry)itForUncalc.next();
-			BigDecimal value = (BigDecimal)pair.getValue();
-			foodItem.setField((String)pair.getKey(), value.doubleValue());
-			itForUncalc.remove();
+		if (uncalcNutritionMap != null)
+		{
+			Iterator itForUncalc = uncalcNutritionMap.entrySet().iterator();
+			while (itForUncalc.hasNext()) {
+				JsonMap.Entry pair = (JsonMap.Entry)itForUncalc.next();
+				BigDecimal value = (BigDecimal)pair.getValue();
+				foodItem.setField((String)pair.getKey(), value.doubleValue());
+				//itForUncalc.remove();
+			}
 		}
 
 		return foodItem;
@@ -669,8 +702,11 @@ public class EndpointsHelper
 	{
 		ArrayList<FoodItem> foodItems = new ArrayList<FoodItem>();
 
-		for (BackendFoodItem backendFoodItem : backendFoodItems) {
-			foodItems.add(convertToFrontEndFoodItem(backendFoodItem));
+		if (backendFoodItems != null)
+		{
+			for (BackendFoodItem backendFoodItem : backendFoodItems) {
+				foodItems.add(convertToFrontEndFoodItem(backendFoodItem));
+			}
 		}
 
 		return foodItems;
@@ -680,8 +716,11 @@ public class EndpointsHelper
 	{
 		List<BackendFoodItem> backendFoodItems = new ArrayList<BackendFoodItem>();
 
-		for (FoodItem foodItem : foodItems) {
-			backendFoodItems.add(convertToBackendFoodItem(foodItem));
+		if (foodItems != null)
+		{
+			for (FoodItem foodItem : foodItems) {
+				backendFoodItems.add(convertToBackendFoodItem(foodItem));
+			}
 		}
 
 		return backendFoodItems;

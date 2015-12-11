@@ -142,6 +142,18 @@ public class BackendMealEndpoint {
         AuthUtil.throwIfNotAuthenticated(user);
 
         checkExists(id);
+
+        BackendMeal backendMeal = ofy().load().type(BackendMeal.class).id(id).now();
+        List<BackendFoodItem> foodItems = backendMeal.getFoodItems();
+        if (foodItems != null)
+        {
+            for (BackendFoodItem item : foodItems)
+            {
+                logger.info("Deleting BackendFoodItem with ID: " + item.getId());
+                ofy().delete().type(BackendFoodItem.class).id(item.getId()).now();
+            }
+        }
+
         ofy().delete().type(BackendMeal.class).id(id).now();
         logger.info("Deleted BackendMeal with ID: " + id);
     }
@@ -181,13 +193,16 @@ public class BackendMealEndpoint {
             name = "getBackendMealsBetweenDates",
             path = "backendMeal/dates",
             httpMethod = ApiMethod.HttpMethod.GET)
-    public CollectionResponse<BackendMeal> getBackendMealsBetweenDates(@Nullable @Named("cursor") String cursor, @Nullable @Named("limit") Integer limit, @Named("startDate") long startDate, @Named("endDate") long endDate, User user) throws ServiceException
+    public CollectionResponse<BackendMeal> getBackendMealsBetweenDates(@Nullable @Named("cursor") String cursor, @Nullable @Named("limit") Integer limit, @Named("startDate") Long startDate, @Named("endDate") Long endDate, User user) throws ServiceException
     {
         AuthUtil.throwIfNotAuthenticated(user);
 
         limit = limit == null ? DEFAULT_LIST_LIMIT : limit;
 
-        Query<BackendMeal> query = ofy().load().type(BackendMeal.class).limit(limit).filter("date >=", startDate).filter("date <=", endDate);
+        //Query<BackendMeal> query = ofy().load().type(BackendMeal.class).limit(limit).filter("date >=", startDate.longValue()).filter("date <=", endDate.longValue());
+        //Query<BackendMeal> query = ofy().load().type(BackendMeal.class).limit(limit).filter("date >", startDate.longValue()).filter("date <", endDate.longValue());
+        Query<BackendMeal> query = ofy().load().type(BackendMeal.class).limit(limit).filter("date >", startDate.longValue());
+
         if (cursor != null) {
             query = query.startAt(Cursor.fromWebSafeString(cursor));
         }
@@ -195,8 +210,11 @@ public class BackendMealEndpoint {
         QueryResultIterator<BackendMeal> queryIterator = query.iterator();
         List<BackendMeal> backendMealList = new ArrayList<BackendMeal>(limit);
 
+        BackendMeal meal = null;
         while (queryIterator.hasNext()) {
-            backendMealList.add(queryIterator.next());
+            meal = queryIterator.next();
+            if (meal.getDate().longValue() < endDate.longValue())
+                backendMealList.add(queryIterator.next());
         }
         return CollectionResponse.<BackendMeal>builder().setItems(backendMealList).setNextPageToken(queryIterator.getCursor().toWebSafeString()).build();
     }

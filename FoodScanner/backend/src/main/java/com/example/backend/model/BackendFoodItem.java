@@ -29,7 +29,6 @@ public class BackendFoodItem {
     private boolean usesVol;
     private boolean usesMass;
     private boolean needConvertVol;
-
     private boolean needCalculateServings;
     private Map<String, Double> calculatedNutrition;
     private Map<String, Double> uncalculatedNutrition;
